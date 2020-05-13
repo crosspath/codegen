@@ -1,0 +1,13 @@
+ru:
+  activerecord:
+    errors:
+      models:
+        user:
+          attributes:
+            email:
+              invalid: |
+                Значение поля "Email" не соответствует формату адреса email
+            password:
+              blank: "Необходимая длина пароля: от 6 до 30 символов"
+              too_short: "Необходимая длина пароля: от 6 до 30 символов"
+              too_long: "Необходимая длина пароля: от 6 до 30 символов"

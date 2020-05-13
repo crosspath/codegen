@@ -1,0 +1,27 @@
+default: &default
+  adapter: postgresql
+  encoding: unicode
+  # For details on connection pooling, see Rails configuration guide
+  # https://guides.rubyonrails.org/configuring.html#database-pooling
+  pool: <%%= ENV.fetch("RAILS_MAX_THREADS") { 5 } %>
+
+development:
+  <<: *default
+  url: <%%= ENV['DATABASE_URL'] %>
+
+# Warning: The database defined as "test" will be erased and
+# re-generated from your development database when you run "rake".
+# Do not set this db to the same as development or production.
+test:
+  <<: *default
+  url: <%%= ENV['DATABASE_URL'] %>
+
+production:
+  <<: *default
+<%- if use_url %>
+  url: <%%= ENV['DATABASE_URL'] %>
+<%- else %>
+  database: <%= db_name %>
+  username: deploy
+  password: <%%= ENV['<%= db_name.upcase %>_DATABASE_PASSWORD'] %>
+<%- end %>

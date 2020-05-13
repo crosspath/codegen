@@ -1,0 +1,9 @@
+<% flash.each do |type, msg| %>
+  <% if msg.is_a?(Array) %>
+    <% msg.each do |elem| %>
+      <%= content_tag(:div, elem, class: ['alert', "alert--#{type}"]) %>
+    <% end %>
+  <% else %>
+    <%= content_tag(:div, msg, class: ['alert', "alert--#{type}"]) %>
+  <% end %>
+<% end %>

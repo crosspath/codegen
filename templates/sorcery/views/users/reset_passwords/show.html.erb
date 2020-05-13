@@ -1,0 +1,11 @@
+<%# render partial: 'common/flash' %>
+<%= form_tag reset_password_path, method: :post do %>
+  <p>Чтобы сбросить пароль, введите email в форму и нажмите «Отправить».</p>
+  <div>
+    <%= label_tag :email, 'Email' %>
+    <%= email_field_tag :email, @email %>
+  </div>
+  <div>
+    <button type="submit">Отправить</button>
+  </div>
+<% end %>

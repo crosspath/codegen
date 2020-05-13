@@ -1,0 +1,65 @@
+<%
+  file = File.read(Rails.root.join('app/assets/stylesheets/colors.scss'))
+
+  colors = file.split("\n").map do |line|
+    line = line.split(':')
+    if line[1]
+      line[1].gsub!(/;.*/, '')
+      line
+    else
+      nil
+    end
+  end.compact
+
+  td = -> (color, fg, bg) do
+    content_tag(
+      :td,
+      content_tag(
+        :div,
+        color,
+        class: 'color',
+        style: "color: #{fg}; background-color: #{bg};"
+      )
+    )
+  end
+%>
+
+<style>
+  .colors {
+    border-collapse: collapse;
+  }
+  .colors td {
+    padding: 3em;
+  }
+  .colors td div {
+    padding: 1em;
+    width: 100%;
+  }
+</style>
+
+<table class="colors">
+  <% colors.each do |name, color| %>
+    <tr>
+      <td><%= name %></td>
+      <%= td.call(color, color, 'white') %>
+      <%= td.call(color, color, 'black') %>
+      <%= td.call(color, 'white', color) %>
+      <%= td.call(color, 'black', color) %>
+    </tr>
+  <% end %>
+</table>
+
+<script>
+  (function() {
+    let cells = document.querySelectorAll('.color');
+    for (let cell of cells) {
+      cell.addEventListener('mouseover', function(event) {
+        let bg = event.currentTarget.style.backgroundColor;
+        document.body.style.backgroundColor = bg;
+      });
+      cell.addEventListener('mouseout', function(event) {
+        document.body.style.backgroundColor = '';
+      });
+    }
+  })();
+</script>
