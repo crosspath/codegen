@@ -1,8 +1,20 @@
+puts '      reset required gem versions'
+%w[pg puma sass-rails webpacker turbolinks].each do |name|
+  $main.gsub_file('Gemfile', /^#[^\n]*\ngem '#{name}'.*$/, "gem '#{name}'")
+end
+
+puts '      remove    jbuilder, byebug, web-console'
+%w[jbuilder byebug web-console].each do |name|
+  $main.gsub_file('Gemfile', /\n\s*#[^\n]*\n\s*gem '#{name}'.*$/, '')
+end
+
+$main.gsub_file('Gemfile', /\ngroup :development, :test do\nend\n/, '')
+
 $main.gem_group :development, :test do
   $main.gem 'dotenv-rails'
 end
 
-$main.append_to_file('.gitignore', "*.local\n.DS_Store\n.directory\n")
+$main.append_to_file('.gitignore', "\n*.local\n.DS_Store\n.directory\n")
 
 if $main.yes?('Использовать ENV[DATABASE_URL] для production? (y/n)')
   production_db_url  = true
@@ -44,15 +56,26 @@ d('app/forms', 'base-files/forms')
 d('app/presenters', 'base-files/presenters')
 d('app/queries', 'base-files/queries')
 
-$main.run 'yarn add webpack-bundle-analyzer --dev'
-
-$main.rails_command 'webpacker:install'
-
 $main.inject_into_file(
-  'config/webpack/production.js',
-  before: 'module.exports = environment.toWebpackConfig()'
+  'app/views/layouts/application.html.erb',
+  before: '    <%= csrf_meta_tags %>'
 ) do
   <<-END
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+  END
+end
+
+$main.run 'yarn add webpack-bundle-analyzer --dev'
+
+$main.send(:after_bundle) do
+  $main.rails_command 'webpacker:install'
+
+  $main.inject_into_file(
+    'config/webpack/production.js',
+    before: 'module.exports = environment.toWebpackConfig()'
+  ) do
+    <<-END
 // Run `NODE_ENV=production DIAGRAM=1 bin/webpack`
 // when you want to see volumes of JS packs.
 if (process.env.DIAGRAM) {
@@ -60,5 +83,6 @@ if (process.env.DIAGRAM) {
   environment.plugins.append('BundleAnalyzer', new BundleAnalyzerPlugin());
 }
 
-  END
+    END
+  end
 end

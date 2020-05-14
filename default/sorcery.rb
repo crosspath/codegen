@@ -1,6 +1,6 @@
 $main.gem 'sorcery'
 
-$main.after_bundle do
+$main.send(:after_bundle) do
   $main.generate('sorcery:install', 'reset_password', 'brute_force_protection')
 
   d('app/controllers/users', 'sorcery/controllers')
@@ -22,4 +22,6 @@ $main.after_bundle do
   END
 
   d('config/locales', 'sorcery/locales')
+
+  puts 'Sorcery installed'
 end

@@ -43,8 +43,13 @@ end
 
 mailer_constants = "MAILER_HOST=localhost:3000\nMAILER_SENDER=admin@localhost\n"
 
-$main.append_to_file('.env.development', mailer_constants)
-$main.append_to_file('.env.test', mailer_constants)
+%w[
+  .env.development .env.development.local
+  .env.test .env.test.local
+].each do |env_name|
+  $main.append_to_file(env_name, mailer_constants)
+end
+
 $main.append_to_file(
   '.env.production',
   mailer_constants + <<-END
