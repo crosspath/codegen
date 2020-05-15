@@ -1,16 +1,16 @@
-@import "variables/colors";
-@import "bootstrap/scss/_functions";
-@import "bootstrap/scss/_mixins";
-@import "bootstrap/scss/_variables";
-@import "bootstrap/scss/_alert";
+@import "../colors";
+<% if use_bootstrap %>
+@import "../bootstrap-variables";
 
 // @see https://getbootstrap.com/docs/4.4/components/alerts/
+<%- end %>
 
 .alert {
-  //background-color: white;
-  border: 1px solid $rzd-light-grey;
+  background-color: white;
+  border: 1px solid red;
   border-radius: 4px;
-  //color: #333;
+  color: #333;
+<% if use_bootstrap %>
 
   &.alert--alert {
     @extend .alert-danger;
@@ -24,4 +24,5 @@
   &.alert--notice {
     @extend .alert-info;
   }
+<%- end %>
 }

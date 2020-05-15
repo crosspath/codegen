@@ -12,7 +12,7 @@ class Users::SessionsController < ApplicationController
     end
 
     if current_user
-      redirect_to admin_path
+      redirect_to root_path
     else
       flash.now[:alert] = t("users/session.#{reason}") if reason
       render :show
@@ -28,6 +28,6 @@ class Users::SessionsController < ApplicationController
   protected
 
   def redirect_if_logged
-    redirect_to admin_path if logged_in?
+    redirect_to root_path if logged_in?
   end
 end

@@ -24,6 +24,6 @@ class Users::ResetPasswordsController < ApplicationController
   protected
 
   def redirect_if_logged
-    redirect_to admin_path if logged_in?
+    redirect_to root_path if logged_in?
   end
 end

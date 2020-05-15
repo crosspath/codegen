@@ -10,15 +10,19 @@ def f(save_to, from)
   cf(save_to, File.join(__dir__, 'templates', from))
 end
 
-def d(as, from)
+def d(as, from, recursive: false)
   directory = File.join(__dir__, 'templates', from, '*')
   Dir.glob(directory, File::FNM_DOTMATCH).each do |path|
-    next if Dir.exists?(path)
-
     base_name = File.basename(path)
-    save_to   = as.empty? ? base_name : File.join(as, base_name)
+    next if ['.', '..'].include?(base_name)
 
-    cf(save_to, path)
+    save_to = as.empty? ? base_name : File.join(as, base_name)
+
+    if Dir.exists?(path)
+      d(save_to, File.join(from, base_name), recursive: true) if recursive
+    else
+      cf(save_to, path)
+    end
   end
 end
 
