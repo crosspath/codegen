@@ -1,0 +1,37 @@
+scss:
+  .colors {
+    border-collapse: collapse;
+
+    td {
+      padding: 3em;
+
+      div {
+        padding: 1em;
+        width: 100%;
+      }
+    }
+  }
+
+table class="colors"
+  - ColorsPresenter.colors.each do |name, color|
+    tr
+      td = name
+      = ColorsPresenter.cell(color, color, 'white')
+      = ColorsPresenter.cell(color, color, 'black')
+      = ColorsPresenter.cell(color, 'white', color)
+      = ColorsPresenter.cell(color, 'black', color)
+
+javascript:
+  (function() {
+    let cells = document.querySelectorAll('.color');
+    let page_style = document.querySelector('.page').style;
+    for (let cell of cells) {
+      cell.addEventListener('mouseover', function(event) {
+        let bg = event.currentTarget.style.backgroundColor;
+        page_style.backgroundColor = bg;
+      });
+      cell.addEventListener('mouseout', function(event) {
+        page_style.backgroundColor = '';
+      });
+    }
+  })();

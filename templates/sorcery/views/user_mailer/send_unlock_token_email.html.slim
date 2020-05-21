@@ -1,0 +1,14 @@
+h1 Добрый день, #{@user.email}
+p Используйте эту ссылку, чтобы разблокировать учётную запись:
+p
+  = link_to(
+      'Разблокировать',
+      unlock_url(token: @user.unlock_token)
+    )
+
+- if @user.lock_expires_at
+  p
+    ' Блокировка будет автоматически снята
+    = @user.lock_expires_at
+
+p Письмо отправлено #{Time.now}

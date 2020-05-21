@@ -1,0 +1,8 @@
+= render partial: 'common/flash'
+- if logged_in?
+  p = current_user.email
+  = form_tag session_path, method: :delete do
+    = submit_tag 'log out'
+
+- else
+  p = link_to '/auth', session_path

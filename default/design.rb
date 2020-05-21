@@ -24,4 +24,5 @@ erb(
 )
 
 d('app/controllers', 'design/controllers')
+d('app/presenters', 'design/presenters')
 d('app/views', 'design/views', recursive: true)

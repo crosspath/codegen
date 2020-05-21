@@ -1,29 +1,3 @@
-<%
-  file = File.read(Rails.root.join('app/assets/stylesheets/colors.scss'))
-
-  colors = file.split("\n").map do |line|
-    line = line.split(':')
-    if line[1]
-      line[1].gsub!(/;.*/, '')
-      line
-    else
-      nil
-    end
-  end.compact
-
-  td = -> (color, fg, bg) do
-    content_tag(
-      :td,
-      content_tag(
-        :div,
-        color,
-        class: 'color',
-        style: "color: #{fg}; background-color: #{bg};"
-      )
-    )
-  end
-%>
-
 <style>
   .colors {
     border-collapse: collapse;
@@ -38,13 +12,13 @@
 </style>
 
 <table class="colors">
-  <% colors.each do |name, color| %>
+  <% ColorsPresenter.colors.each do |name, color| %>
     <tr>
       <td><%= name %></td>
-      <%= td.call(color, color, 'white') %>
-      <%= td.call(color, color, 'black') %>
-      <%= td.call(color, 'white', color) %>
-      <%= td.call(color, 'black', color) %>
+      <%= ColorsPresenter.cell(color, color, 'white') %>
+      <%= ColorsPresenter.cell(color, color, 'black') %>
+      <%= ColorsPresenter.cell(color, 'white', color) %>
+      <%= ColorsPresenter.cell(color, 'black', color) %>
     </tr>
   <% end %>
 </table>
