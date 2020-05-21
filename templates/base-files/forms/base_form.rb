@@ -1,5 +1,5 @@
 # Без валидаций в формах, поскольку валидации выполняются на уровне моделей.
-# Поддерживаются только два действия: `create` и `update`.
+# Поддерживаемые действия: `create`, `update`, `destroy`.
 #
 # Пример формы:
 #     class ArticleForm < BaseForm
@@ -27,12 +27,15 @@
 #       render :show
 #     end
 #
-# Можно сделать недоступным метод `create` и `update`, если добавить такую
-# строку в класс формы:
+# Можно сделать недоступными методы `create`, `update` или `destroy`,
+# если добавить такую строку в класс формы:
 #     class << self; private :create; end
 #
-# Можно переопределить методы `create` или `update`, если нужно добавить
-# в них аргументы или дополнительные действия, например, отправку писем.
+# Можно переопределить методы `create`, `update` и `destroy`, если нужно
+# добавить в них аргументы или дополнительные действия, например, отправку
+# писем.
+# Например, в методе `destroy` можно удалить связанные объекты в транзакции,
+# обновить счётчики и отправить электронное письмо.
 #
 class BaseForm
   class << self
@@ -59,6 +62,10 @@ class BaseForm
       object.attributes = update_attributes(params)
 
       self.new(object.save, object)
+    end
+
+    def destroy(object)
+      self.new(object.destroy, object)
     end
 
     private

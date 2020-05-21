@@ -1,7 +1,6 @@
 --database=postgresql
 --skip-action-mailbox
 --skip-action-cable
---skip-test
 --skip-system-test
 --webpacker
 --no-skip-webpack-install
