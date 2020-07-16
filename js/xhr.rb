@@ -11,7 +11,7 @@ JsRoutes.setup do |config|
 end
 LINE
 
-$main.send(:after_bundle) do
+after_bundle_install do
   $main.rails_command 'webpacker:install:erb'
 end
 

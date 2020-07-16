@@ -49,3 +49,20 @@ def yaml(save_to, read_from)
   # puts "      create    #{save_to}"
   $main.create_file(save_to, result.slice(3, result.length))
 end
+
+$_bundle_commands = []
+
+def after_bundle_install(&block)
+  if ARGV[0] == 'app:template'
+    $_bundle_commands << block
+  else
+    $main.send(:after_bundle, &block)
+  end
+end
+
+unless $_bundle_commands.empty?
+  at_exit do
+    $main.send(:bundle_command, 'install', 'BUNDLE_IGNORE_MESSAGES' => '1')
+    $_bundle_commands.each { |block| block.call }
+  end
+end

@@ -1,6 +1,6 @@
 $main.gem 'sorcery'
 
-$main.send(:after_bundle) do
+after_bundle_install do
   $main.generate('sorcery:install', 'reset_password', 'brute_force_protection')
 
   d('app/controllers', 'sorcery/controllers', recursive: true)
