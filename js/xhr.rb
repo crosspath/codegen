@@ -1,8 +1,21 @@
 $main.gem 'blueprinter'
+$main.gem 'js-routes'
 
-$main.run 'yarn add axios axios-rest-client'
+$main.run 'yarn add axios'
 
-f('app/javascript/lib/api.js', 'js/api.js')
+$main.initializer 'js_routes.rb', <<-LINE
+JsRoutes.setup do |config|
+  config.exclude = [/^sidekiq/, /^rails/, /^update_rails/]
+  config.include = [//]
+  config.compact = true
+end
+LINE
+
+$main.send(:after_bundle) do
+  $main.rails_command 'webpacker:install:erb'
+end
+
+f('app/javascript/lib/xhr.js', 'js/xhr.js')
 f('app/javascript/lib/dom.js', 'js/dom.js')
 
 $main.inject_into_file(

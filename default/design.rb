@@ -5,16 +5,13 @@ $main.route <<-END
 END
 
 $main.create_file('app/assets/stylesheets/pages/.keep', '')
-$main.create_file('app/assets/stylesheets/colors.scss', "$azure: azure;\n")
+$main.create_file('app/assets/stylesheets/_colors.scss', "$azure: azure;\n")
 
 use_bootstrap = $main.yes?('Использовать библиотеку Bootstrap? (y/n)')
 if use_bootstrap
   $main.run 'yarn add bootstrap'
 
-  f(
-    'app/assets/stylesheets/bootstrap-variables.scss',
-    'design/stylesheets/bootstrap-variables.scss'
-  )
+  d('app/assets/stylesheets', 'design/stylesheets/bootstrap')
 end
 
 erb(

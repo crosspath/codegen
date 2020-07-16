@@ -10,16 +10,33 @@ end
 
 $main.gsub_file('Gemfile', /\ngroup :development, :test do\nend\n/, '')
 
+$main.gem 'slim-rails'
+
 $main.gem_group :development, :test do
   $main.gem 'dotenv-rails'
 end
 
-$main.append_to_file('.gitignore', "\n*.local\n.DS_Store\n.directory\n")
+$main.append_to_file(
+  '.gitignore',
+  <<-LINE
+
+*.local
+.DS_Store
+.directory
+Thumbs.db
+[Dd]esktop.ini
+~$*
+
+  LINE
+)
 
 if $main.yes?('Использовать ENV[DATABASE_URL] для production? (y/n)')
   production_db_url  = true
   production_db_name = ''
-  puts 'Этот параметр можно задать на сервере; его значение не должно попасть в репозиторий'
+  puts(
+    'Этот параметр можно задать на сервере; '\
+    'его значение не должно попасть в репозиторий'
+  )
 else
   production_db_url  = false
   production_db_name = $main.ask('Название БД для production =')
@@ -32,6 +49,11 @@ erb(
   use_url: production_db_url,
   db_name: production_db_name
 )
+
+d('contrib', 'contrib')
+
+$main.run('chmod +x contrib/pre-commit')
+$main.run('ln -s $(pwd)/contrib/pre-commit $(pwd)/.git/hooks/pre-commit')
 
 d('config/locales', 'base-files/config/locales')
 
@@ -66,6 +88,18 @@ $main.inject_into_file(
   END
 end
 
+$main.inject_into_file(
+  'app/views/layouts/application.html.erb',
+  after: '<body>'
+) do
+  <<-END
+
+    <%= AlertsPresenter.flashes(self) %>
+  END
+end
+
+d('app/views/layouts', 'base-files/layouts')
+
 $main.run 'yarn add webpack-bundle-analyzer --dev'
 
 $main.send(:after_bundle) do
@@ -86,3 +120,10 @@ if (process.env.DIAGRAM) {
     END
   end
 end
+
+# rename
+copy_file(
+  'app/assets/stylesheets/application.css',
+  'app/assets/stylesheets/application.scss'
+)
+remove_file('app/assets/stylesheets/application.css')

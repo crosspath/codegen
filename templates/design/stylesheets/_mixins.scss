@@ -1,0 +1,17 @@
+@mixin screen-to($width) {
+  @media screen and (max-width: $width - 1px) {
+    @content;
+  }
+}
+
+@mixin screen-from($width) {
+  @media screen and (min-width: $width) {
+    @content;
+  }
+}
+
+@mixin screen-between($width1, $width2) {
+  @media screen and (min-width: $width1) and (max-width: $width2 - 1px) {
+    @content;
+  }
+}

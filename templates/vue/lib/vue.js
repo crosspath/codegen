@@ -1,12 +1,14 @@
 import { ready } from 'lib/dom';
 
+import 'lib/formulate';
+import 'lib/vue-components';
+
 import Vue from 'vue/dist/vue.esm';
+import VueI18n from 'vue-i18n';
 
-// Добавление файлов с кодом компонентов Vue. Пример:
-// import UserButton from 'components/buttons/user_button.vue';
+Vue.use(VueI18n);
 
-// Регистрация тегов для компонентов Vue. Пример:
-// Vue.component('user-button', UserButton);
+const vue_i18n = new VueI18n({locale: 'ru'});
 
 ready(() => {
   // Все узлы DOM, для которых нужно создать экземпляр компонента Vue,
@@ -15,5 +17,5 @@ ready(() => {
   // узлов, то его можно задать в вызове `querySelectorAll`.
   const elements = document.querySelectorAll('[vue]');
   for (const el of elements)
-    new Vue({el: el});
+    new Vue({el: el, i18n: vue_i18n});
 });

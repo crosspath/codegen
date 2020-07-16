@@ -1,5 +1,6 @@
 # Без валидаций в формах, поскольку валидации выполняются на уровне моделей.
 # Поддерживаемые действия: `create`, `update`, `destroy`.
+# Можно добавлять свои действия как методы класса формы.
 #
 # Пример формы:
 #     class ArticleForm < BaseForm
@@ -8,7 +9,8 @@
 #       # тогда нужен параметр `model_name`.
 #       model_name :Article
 #
-#       # Список разрешённых атрибутов для `create` и `update`.
+#       # Список разрешённых атрибутов для всех действий,
+#       # используется в действиях `create` и `update`.
 #       permit :name, :content, :published, category_ids: []
 #
 #       # Список разрешённых атрибутов только для `create`
@@ -37,15 +39,27 @@
 # Например, в методе `destroy` можно удалить связанные объекты в транзакции,
 # обновить счётчики и отправить электронное письмо.
 #
+# Метод `collect_errors` можно использовать для обработки множества объектов.
+# Пример метода класса формы:
+#
+#     def create(names)
+#       collect_errors do |errors, objects|
+#         names.each do |name|
+#           object = model_class.find_of_create_by(name: name)
+#           objects << object unless object.valid?
+#         end
+#       end
+#     end
+#
 class BaseForm
   class << self
-    def permit(*attributes)
-      @_permit = attributes
+    def permit(*attributes_list)
+      @_permit = attributes_list
     end
 
-    def permit_for(create: [], update: [])
-      @_permit_for_create = create
-      @_permit_for_update = update
+    def permit_for(options = {})
+      @_permit_for ||= {}
+      @_permit_for.merge!(options.symbolize_keys)
     end
 
     def model_name(class_name)
@@ -59,7 +73,7 @@ class BaseForm
     end
 
     def update(object, params)
-      object.attributes = update_attributes(params)
+      object.attributes = attributes(params, :update)
 
       self.new(object.save, object)
     end
@@ -71,7 +85,7 @@ class BaseForm
     private
 
     def new_model_object(params)
-      model_class.new(create_attributes(params))
+      model_class.new(attributes(params, :create))
     end
 
     def model_class
@@ -79,23 +93,29 @@ class BaseForm
       @_model_name.constantize
     end
 
-    def create_attributes(params)
-      attrs_list = (@_permit || []) + (@_permit_for_create || [])
-      safe_attributes(params, attrs_list)
-    end
-
-    def update_attributes(params)
-      attrs_list = (@_permit || []) + (@_permit_for_update || [])
-      safe_attributes(params, attrs_list)
-    end
-
-    def safe_attributes(params, attrs_list)
+    def attributes(params, key = nil)
+      attrs_list = (@_permit || []) + (key && @_permit_for && @_permit_for[key.to_sym] || [])
       unless params.respond_to?(:permit)
         params = ActionController::Parameters.new(params)
       end
       params.permit(attrs_list)
     rescue NoMethodError
       raise ArgumentError, "Unexpected value: #{params.inspect}"
+    end
+
+    def collect_errors
+      errors  = []
+      objects = []
+
+      yield errors, objects
+
+      objects.each do |obj|
+        errors.concat(obj.errors.messages.values.flatten)
+      end
+
+      empty_object = model_class.new
+      empty_object.errors[:base].concat(errors.uniq)
+      self.new(errors.empty?, empty_object)
     end
   end
 

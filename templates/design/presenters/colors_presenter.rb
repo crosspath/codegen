@@ -1,11 +1,13 @@
 module ColorsPresenter
   module_function
 
+  FILE_PATH = 'app/assets/stylesheets/colors.scss'
+
   def colors
-    lines = File.readlines(Rails.root.join('app/assets/stylesheets/colors.scss'))
+    lines = File.readlines(Rails.root.join(FILE_PATH))
 
     lines.map do |line|
-      if line.starts_with?('//')
+      if line.starts_with?('//') || line.strip.empty?
         nil
       else
         line.chomp(";\n").split(':').map(&:strip)
