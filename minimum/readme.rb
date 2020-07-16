@@ -12,3 +12,5 @@ erb(
   ruby:    RUBY_VERSION,
   bundler: Bundler::VERSION
 )
+
+f('RELEASE-NOTES.md', 'readme/RELEASE-NOTES.md')

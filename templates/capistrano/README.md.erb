@@ -1,11 +1,9 @@
-## Деплой
+# Выкладывание кода на сервер
 
-```
-bundle exec cap production deploy
-```
+Подготовка (выполняется 1 раз на компьютере):
 
-С помощью аргумента `BRANCH` можно указывать ветку для деплоя, по умолчанию деплоится `master`.
+    gem install ed25519 bcrypt_pbkdf
 
-```
-BRANCH=develop bundle exec cap production deploy
-```
+Выкладывание кода из выбранной ветки:
+
+    cap production deploy BRANCH=develop

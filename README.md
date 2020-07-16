@@ -11,3 +11,7 @@
     rails app:template LOCATION=redis.rb
     rails app:template LOCATION=svelte.rb
     rails app:template LOCATION=vue.rb
+
+См. доступные методы для генератора:
+
+    gems/railties-*/lib/rails/generators/base.rb
