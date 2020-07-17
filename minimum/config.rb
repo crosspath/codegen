@@ -38,24 +38,3 @@ Rails.application.config.autoload_paths += %w[
   serializers
 ]
 END
-
-$main.run 'yarn add webpack-bundle-analyzer --dev'
-
-after_bundle_install do
-  $main.rails_command 'webpacker:install'
-
-  $main.inject_into_file(
-    'config/webpack/production.js',
-    before: 'module.exports = environment.toWebpackConfig()'
-  ) do
-    <<-END
-// Run `NODE_ENV=production DIAGRAM=1 bin/webpack`
-// when you want to see volumes of JS packs.
-if (process.env.DIAGRAM) {
-  const { BundleAnalyzerPlugin } = require('webpack-bundle-analyzer');
-  environment.plugins.append('BundleAnalyzer', new BundleAnalyzerPlugin());
-}
-
-    END
-  end
-end

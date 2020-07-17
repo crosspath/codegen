@@ -50,6 +50,14 @@ def yaml(save_to, read_from)
   $main.create_file(save_to, result.slice(3, result.length))
 end
 
+def remove_strings(file, strings)
+  $main.gsub_file(file, /#{strings.join('|')}/m, '')
+end
+
+def replace_strings(file, strings)
+  $main.gsub_file(file, strings[:from], strings[:to])
+end
+
 $_bundle_commands = []
 
 def after_bundle_install(&block)

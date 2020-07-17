@@ -1,21 +1,3 @@
-puts '      reset required gem versions'
-%w[pg puma sass-rails webpacker turbolinks].each do |name|
-  $main.gsub_file('Gemfile', /^#[^\n]*\ngem '#{name}'.*$/, "gem '#{name}'")
-end
-
-puts '      remove    jbuilder, byebug, web-console'
-%w[jbuilder byebug web-console].each do |name|
-  $main.gsub_file('Gemfile', /\n\s*#[^\n]*\n\s*gem '#{name}'.*$/, '')
-end
-
-$main.gsub_file('Gemfile', /\ngroup :development, :test do\nend\n/, '')
-
-$main.gem 'slim-rails'
-
-$main.gem_group :development, :test do
-  $main.gem 'dotenv-rails'
-end
-
 $main.append_to_file(
   '.gitignore',
   <<-LINE
@@ -51,12 +33,9 @@ end
 
 $main.inject_into_file(
   'app/views/layouts/application.html.erb',
+  "\n    <%= AlertsPresenter.flashes(self) %>",
   after: '<body>'
-) do
-  <<-END
-    <%= AlertsPresenter.flashes(self) %>
-  END
-end
+)
 
 erb(
   'app/views/layouts/application.html.slim',
@@ -64,9 +43,21 @@ erb(
   skip_turbolinks: $main.options[:skip_turbolinks]
 )
 
-# rename
-$main.copy_file(
-  'app/assets/stylesheets/application.css',
-  'app/assets/stylesheets/application.scss'
-)
-remove_file('app/assets/stylesheets/application.css')
+$main.create_file('app/assets/stylesheets/application.scss') do
+  existing = File.read('app/assets/stylesheets/application.css')
+  requires = []
+
+  existing.gsub!(%r{/\*(.*)\*/}m) do |match|
+    match.split("\n").each do |x|
+      res = x.match(/=\s*(require_.+)\Z/)
+      requires << res[1] if res
+    end
+    ''
+  end
+  existing.strip!
+  header = requires.map { |x| "//= #{x}\n" }
+
+  [header, (existing.empty? ? '' : "\n"), existing].join
+end
+
+$main.remove_file('app/assets/stylesheets/application.css')

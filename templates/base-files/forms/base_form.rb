@@ -94,7 +94,8 @@ class BaseForm
     end
 
     def attributes(params, key = nil)
-      attrs_list = (@_permit || []) + (key && @_permit_for && @_permit_for[key.to_sym] || [])
+      attrs_list = @_permit || []
+      attrs_list += key && @_permit_for && @_permit_for[key.to_sym] || []
       unless params.respond_to?(:permit)
         params = ActionController::Parameters.new(params)
       end
