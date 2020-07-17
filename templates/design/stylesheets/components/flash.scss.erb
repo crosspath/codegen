@@ -6,24 +6,54 @@
 // @see https://getbootstrap.com/docs/4.4/components/alerts/
 <%- end %>
 
-.alert {
-  background-color: white;
+.flash-message {
+<% if use_bootstrap %>
+  @extend .alert;
+<% end %>
   border: 1px solid red;
   border-radius: 4px;
   color: #333;
-<% if use_bootstrap %>
-
-  &.alert--alert {
-    @extend .alert-danger;
-  }
-  &.alert--error {
-    @extend .alert-danger;
-  }
-  &.alert--info {
-    @extend .alert-light;
-  }
-  &.alert--notice {
-    @extend .alert-info;
-  }
-<%- end %>
+  margin-bottom: 1rem;
+  padding: 0.4rem;
 }
+
+<% if use_bootstrap %>
+.flash-message--alert {
+  @extend .alert-danger;
+}
+.flash-message--error {
+  @extend .alert-danger;
+}
+.flash-message--info {
+  @extend .alert-light;
+}
+.flash-message--notice {
+  @extend .alert-info;
+}
+<% else %>
+$blue:   #1F89D1;
+$red:    #C31D09;
+$yellow: #EDE80C;
+$grass:  #8FB516;
+
+.flash-message--alert {
+  @extend .flash-message;
+  background-color: lighten($yellow, 25%);
+  border-color: $yellow;
+}
+.flash-message--error {
+  @extend .flash-message;
+  background-color: lighten($red, 50%);
+  border-color: $red;
+}
+.flash-message--info {
+  @extend .flash-message;
+  background-color: lighten($blue, 40%);
+  border-color: $blue;
+}
+.flash-message--notice {
+  @extend .flash-message;
+  background-color: lighten($grass, 25%);
+  border-color: $grass;
+}
+<%- end %>
