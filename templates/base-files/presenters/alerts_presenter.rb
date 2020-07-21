@@ -31,8 +31,10 @@ module AlertsPresenter
 
     return '' if flash.blank?
 
-    flash.map do |key, message|
-      vh.content_tag('div', message, class: "flash-message--#{key}")
+    flash.map do |key, messages|
+      Array.wrap(messages).map do |msg|
+        vh.content_tag('div', message, class: "flash-message--#{key}")
+      end.join.html_safe
     end.join.html_safe
   end
 end

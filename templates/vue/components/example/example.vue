@@ -1,5 +1,7 @@
 <template lang="pug">
-  FormFor(:post-url='Routes.root' :put-url='Routes.root' v-model='record')
+  FormFor(
+    :post-url='Routes.root_path' :put-url='Routes.root_path' v-model='record'
+  )
     h2(v-t='"example.header"')
     FormulateInput(
       type='text' name='name' validation='required' :label='$t("name")'

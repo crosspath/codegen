@@ -7,10 +7,10 @@
 
 Применение к существующей папке:
 
-    rails app:template LOCATION=capistrano.rb
-    rails app:template LOCATION=redis.rb
-    rails app:template LOCATION=svelte.rb
-    rails app:template LOCATION=vue.rb
+    rails app:template LOCATION=../codegen/capistrano.rb
+    rails app:template LOCATION=../codegen/redis.rb
+    rails app:template LOCATION=../codegen/svelte.rb
+    rails app:template LOCATION=../codegen/vue.rb
 
 ## Доступные методы для генератора
 

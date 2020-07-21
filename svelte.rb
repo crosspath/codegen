@@ -3,15 +3,10 @@ $main ||= self
 require_relative 'functions.rb'
 require_relative 'js/xhr.rb'
 
-# run 'yarn add svelte svelte-loader'
-
 rails_command 'webpacker:install:svelte'
 
-f('app/javascript/lib/svelte.js', 'js/lib/svelte.js')
+d('app/javascript/lib', 'svelte/lib')
 
 append_to_file('app/javascript/packs/application.js') do
-  <<-LINE
-import 'lib/svelte';
-import 'lib/xhr';
-  LINE
+  "import 'lib/svelte';\n"
 end

@@ -1,4 +1,3 @@
-<% render partial: 'common/flash' %>
 <% if logged_in? %>
   <p><%= current_user.email %></p>
   <%= form_tag session_path, method: :delete do %>

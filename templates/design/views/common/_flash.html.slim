@@ -1,6 +1,0 @@
-- flash.each do |type, msg|
-  - if msg.is_a?(Array)
-    - msg.each do |elem|
-      div.alert class="alert--#{type}" = elem
-  - else
-    div.alert class="alert--#{type}" = msg

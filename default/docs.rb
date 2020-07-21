@@ -11,7 +11,7 @@ $main.append_to_file(
 к вашему файлу до первой точки в его названии, например,
 [http://localhost:3000/design/colors](http://localhost:3000/design/colors) —
 это тестовая страница для проверки цветов, определённых в файле
-`app/assets/stylesheets/colors.scss`.
+`app/assets/stylesheets/_colors.scss`.
 
 Страницы в папке `design` доступны для просмотра только тогда, когда веб-сервер
 запущен в среде `development`, это среда для разработки. В среде `production`

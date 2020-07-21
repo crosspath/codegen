@@ -1,26 +1,27 @@
 $main.gem 'blueprinter'
-$main.gem 'js-routes'
+$main.gem 'railbus'
 
 $main.run 'yarn add axios'
 
-$main.initializer 'js_routes.rb', <<-LINE
-JsRoutes.setup do |config|
-  config.exclude = [/^sidekiq/, /^rails/, /^update_rails/]
-  config.include = [//]
-  config.compact = true
-end
-LINE
-
 after_bundle_install do
   $main.rails_command 'webpacker:install:erb'
+
+  $main.inject_into_file(
+    'config/webpacker.yml',
+    "    - .js.erb\n",
+    after: "- .js\n"
+  )
 end
 
-f('app/javascript/lib/xhr.js', 'js/xhr.js')
-f('app/javascript/lib/dom.js', 'js/dom.js')
+d('app/javascript/lib', 'js/lib')
+
+$main.append_to_file('app/javascript/packs/application.js') do
+  "import 'lib/xhr';\n"
+end
 
 $main.inject_into_file(
   'app/models/application_record.rb',
-  after: 'self.abstract_class = true'
+  after: "self.abstract_class = true\n"
 ) do
   <<-END
 
@@ -30,7 +31,7 @@ $main.inject_into_file(
     end
 
     def serializer_class
-      @_serializer_name ||= "#{self.name}Serializer".freeze
+      @_serializer_name ||= "\#{self.name}Serializer".freeze
       @_serializer_name.constantize
     end
 

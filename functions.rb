@@ -68,8 +68,8 @@ def after_bundle_install(&block)
   end
 end
 
-unless $_bundle_commands.empty?
-  at_exit do
+at_exit do
+  unless $_bundle_commands.empty?
     $main.send(:bundle_command, 'install', 'BUNDLE_IGNORE_MESSAGES' => '1')
     $_bundle_commands.each { |block| block.call }
   end

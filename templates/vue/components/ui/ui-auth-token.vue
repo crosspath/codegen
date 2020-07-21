@@ -3,7 +3,7 @@
 </template>
 
 <script>
-  import { auth_token_name, auth_token_value } from 'common/dom';
+  import { auth_token_name, auth_token_value } from 'lib/dom';
 
   export default {
     data() {

@@ -1,13 +1,12 @@
 import { ready } from 'lib/dom';
 
-// Добавление файлов с кодом компонентов Svelte. Пример:
-// import UserButton from 'components/buttons/user_button.svelte';
+import COMPONENTS from 'lib/svelte-components';
 
-// Регистрация тегов для компонентов Svelte.
-const COMPONENTS = {
-  // Пример:
-  // "user-button": UserButton,
-};
+function props(element) {
+  return Object.fromEntries(
+    Object.values(element.attributes).map(v => [v.name, v.value])
+  );
+}
 
 ready(() => {
   // Все узлы DOM, для которых нужно создать экземпляр компонента Svelte,
@@ -19,7 +18,7 @@ ready(() => {
     const tag = el.tagName.toLowerCase();
     const component = COMPONENTS[tag];
     if (component)
-      new component({target: el, props: el.dataset});
+      new component({target: el, props: props(el)});
     else
       console.error(`Unknown Svelte component for ${tag}`);
   }
