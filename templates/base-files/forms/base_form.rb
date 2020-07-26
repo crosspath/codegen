@@ -38,6 +38,21 @@
 # писем.
 # Например, в методе `destroy` можно удалить связанные объекты в транзакции,
 # обновить счётчики и отправить электронное письмо.
+#     def create(params, author)
+#       super(params) do |object|
+#         object.author = author
+#       end
+#     end
+#     def update(object, params)
+#       super(object, params) do |_object|
+#         object.name = object.name.strip
+#       end
+#     end
+#     def destroy(object)
+#       form = super(object)
+#       UserMailer.object_deleted(object) if form.success
+#       form
+#     end
 #
 # Метод `collect_errors` можно использовать для обработки множества объектов.
 # Пример метода класса формы:
@@ -68,18 +83,18 @@ class BaseForm
 
     def create(params)
       object = new_model_object(params)
-
-      self.new(object.save, object)
+      yield(object) if block_given?
+      new(object.save, object)
     end
 
     def update(object, params)
       object.attributes = attributes(params, :update)
-
-      self.new(object.save, object)
+      yield(object) if block_given?
+      new(object.save, object)
     end
 
     def destroy(object)
-      self.new(object.destroy, object)
+      new(object.destroy, object)
     end
 
     private

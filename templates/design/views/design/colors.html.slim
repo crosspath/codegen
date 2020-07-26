@@ -24,7 +24,7 @@ table class="colors"
 javascript:
   (function() {
     let cells = document.querySelectorAll('.color');
-    let page_style = document.querySelector('.page').style;
+    let page_style = document.body.style;
     for (let cell of cells) {
       cell.addEventListener('mouseover', function(event) {
         let bg = event.currentTarget.style.backgroundColor;
