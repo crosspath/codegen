@@ -1,5 +1,14 @@
 $main.gem 'sorcery'
 
+$main.append_to_file('db/seeds.rb') do
+  <<-LINE
+User.find_or_create_by!(
+  login:    'admin@localhost',
+  password: 'password'
+)
+  LINE
+end
+
 after_bundle_install do
   $main.generate('sorcery:install', 'reset_password', 'brute_force_protection')
 

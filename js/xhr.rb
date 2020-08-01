@@ -4,6 +4,8 @@ $main.gem 'railbus'
 $main.run 'yarn add axios'
 
 after_bundle_install do
+  $main.generate('railbus:install')
+
   $main.rails_command 'webpacker:install:erb'
 
   $main.inject_into_file(
