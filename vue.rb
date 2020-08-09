@@ -38,7 +38,7 @@ d('app/javascript/components', 'vue/components', recursive: true)
 
 create_file('app/views/design/vue-example.html.slim') do
   <<-LINE
-example-component (:example-object='{"id": 1, "name": "test"}')
+example-component (vue :example-object='{"id": 1, "name": "test"}')
   LINE
 end
 
