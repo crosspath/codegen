@@ -1,6 +1,6 @@
 import { ready } from 'lib/dom';
 
-import COMPONENTS from 'lib/svelte-components';
+import components from 'lib/svelte-components';
 
 function props(element) {
   return Object.fromEntries(
@@ -16,7 +16,7 @@ ready(() => {
   const elements = document.querySelectorAll('[svelte]');
   for (const el of elements) {
     const tag = el.tagName.toLowerCase();
-    const component = COMPONENTS[tag];
+    const component = components[tag];
     if (component)
       new component({target: el, props: props(el)});
     else
