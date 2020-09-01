@@ -8,6 +8,7 @@
 Применение к существующей папке:
 
     rails app:template LOCATION=../codegen/capistrano.rb
+    rails app:template LOCATION=../codegen/data-migrations.rb
     rails app:template LOCATION=../codegen/redis.rb
     rails app:template LOCATION=../codegen/svelte.rb
     rails app:template LOCATION=../codegen/vue.rb
