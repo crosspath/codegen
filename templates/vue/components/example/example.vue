@@ -1,7 +1,5 @@
 <template lang="pug">
-  FormFor(
-    :post-url='Routes.root_path' :put-url='Routes.root_path' v-model='record'
-  )
+  FormulateForm(v-model='record' @submit='submit_form')
     h2(v-t='"example.header"')
     FormulateInput(
       type='text' name='name' validation='required' :label='$t("name")'
@@ -17,19 +15,10 @@
 
   import Routes from 'lib/routes';
 
-  import FormFor from 'components/ui/ui-form-for';
-
   export default {
     i18n: {
       sharedMessages: SharedMessages,
       messages:       FormMessages,
-    },
-    components: { FormFor },
-    data() {
-      return {
-        Routes: Routes,
-        record: this.exampleObject,
-      };
     },
     props: {
       exampleObject: Object, // {id: ..., name: ..., ...}
@@ -38,6 +27,20 @@
       submit_text: function() {
         const key = this.record.id == null ? 'button.add' : 'button.save';
         return this.$t(key);
+      },
+    },
+    data() {
+      return {
+        record: this.exampleObject,
+      };
+    },
+    methods: {
+      submit_form(object) {
+        Routes.root(object).then(() => {
+          console.log('Success!');
+        }).catch((...args) => {
+          console.error('Error!', args);
+        })
       },
     },
   }
