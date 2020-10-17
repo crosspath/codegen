@@ -1,12 +1,13 @@
 class DesignController < ApplicationController
   def show
-    template = "design/#{params[:id]}"
+    layout   = params[:layout].to_s
+    template = "design/#{layout}/#{params[:id]}"
     path     = File.join('app/views', template)
 
-    if template.include?('..') || Dir["#{path}.*"].empty?
+    if layout.empty? || template.include?('..') || Dir["#{path}.*"].empty?
       head :not_found
     else
-      render template
+      render template, layout: layout
     end
   end
 end

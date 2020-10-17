@@ -22,6 +22,26 @@ d('app/presenters', 'base-files/presenters')
 d('app/queries', 'base-files/queries')
 
 $main.inject_into_file(
+  'app/controllers/application_controller.rb',
+  before: "\nend"
+) do
+  <<-END.rstrip
+
+  def with_form(form)
+    if form.success
+      yield form
+    else
+      render json: { errors: form.errors }, status: 422
+    end
+  end
+
+  def render_json_errors(errors)
+    render json: { errors: errors }, status: 422
+  end
+  END
+end
+
+$main.inject_into_file(
   'app/views/layouts/application.html.erb',
   before: '    <%= csrf_meta_tags %>'
 ) do

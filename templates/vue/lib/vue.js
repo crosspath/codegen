@@ -8,6 +8,9 @@ import VueI18n from 'vue-i18n';
 
 Vue.use(VueI18n);
 
+// Отключить предупреждение о работе в режиме разработки.
+Vue.config.productionTip = false;
+
 const vue_i18n = new VueI18n({locale: 'ru'});
 
 for (const key in components)

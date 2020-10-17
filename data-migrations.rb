@@ -3,7 +3,7 @@ require_relative 'functions.rb'
 gem 'data_migrate'
 
 after_bundle_install do
-  if `bundle show | grep capistrano`.present?
+  if `bundle info capistrano`.include?('Summary')
     append_to_file('Capfile', "require 'capistrano/data_migrate'\n")
   end
 end
