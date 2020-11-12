@@ -1,3 +1,5 @@
+$main ||= self
+
 require_relative 'functions.rb'
 
 gem 'data_migrate'
