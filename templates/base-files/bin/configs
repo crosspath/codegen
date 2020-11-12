@@ -1,0 +1,12 @@
+#!/usr/bin/env ruby
+require 'fileutils'
+
+# path to your application root.
+APP_ROOT = File.expand_path('..', __dir__)
+
+FileUtils.chdir APP_ROOT do
+  puts "\n== Copying sample files =="
+  ['.env.development', '.env.test'].each do |name|
+    FileUtils.cp(name, "#{name}.local") unless File.exist?("#{name}.local")
+  end
+end

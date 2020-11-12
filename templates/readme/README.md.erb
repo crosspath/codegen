@@ -1,21 +1,13 @@
 # <%= product %>
 
-Действия по установке см. в файле [INSTALL.md](INSTALL.md)
+Действия по установке см. в файле [docs/INSTALL.md](INSTALL.md)
 
-Комментарии к выпускам: [RELEASE-NOTES.md](RELEASE-NOTES.md)
+Комментарии к выпускам: [docs/RELEASE-NOTES.md](RELEASE-NOTES.md)
 
-Рекомендации по коллективной разработке: [contrib/README.md](contrib/README.md)
+Можно запустить приложение с помощью команды `foreman start` или `forego start`.
 
-## Запуск
+Приложение будет доступно по адресу [localhost:3000](http://localhost:3000).
 
-```
-foreman start
-```
+Для запуска тестов можно использовать `bin/rspec`, например:
 
-[http://localhost:3000](http://localhost:3000)
-
-## Автотесты
-
-Запускать с помощью `rspec` или `bundle exec rspec`, например:
-
-    rspec spec/models/news_spec.rb
+    bin/rspec spec/models/news_spec.rb

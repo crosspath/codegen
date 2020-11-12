@@ -8,14 +8,14 @@ $main.append_to_file(
 Thumbs.db
 [Dd]esktop.ini
 ~$*
+
+/vendor/*
+!/vendor/.keep
   LINE
 )
 
 d('', 'base-files')
-d('contrib', 'contrib')
-
-$main.run('chmod +x contrib/pre-commit')
-$main.run('ln -s $(pwd)/contrib/pre-commit $(pwd)/.git/hooks/pre-commit')
+d('bin', 'base-files/bin')
 
 d('app/forms', 'base-files/forms')
 d('app/presenters', 'base-files/presenters')

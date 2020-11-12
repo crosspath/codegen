@@ -2,7 +2,6 @@ require 'erubi'
 require 'yaml'
 
 def cf(save_to, from)
-  # puts "      create    #{save_to}"
   $main.create_file(save_to, File.read(from))
 end
 
@@ -34,7 +33,6 @@ def erb(save_to, read_from, **locals)
 
   result = b.eval(Erubi::Engine.new(File.read(file_name)).src)
 
-  # puts "      create    #{save_to}"
   $main.create_file(save_to, result)
 end
 
@@ -46,7 +44,6 @@ def yaml(save_to, read_from)
 
   result = YAML.dump(entries)
 
-  # puts "      create    #{save_to}"
   $main.create_file(save_to, result.slice(3, result.length))
 end
 
