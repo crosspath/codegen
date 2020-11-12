@@ -13,9 +13,9 @@ after_bundle_install do
     "    - .js.erb\n",
     after: "- .js\n"
   )
-end
 
-d('app/javascript/lib', 'js/lib')
+  d('app/javascript/lib', 'js/lib')
+end
 
 $main.append_to_file('app/javascript/packs/application.js') do
   "import 'lib/xhr';\n"
