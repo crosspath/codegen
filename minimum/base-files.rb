@@ -17,6 +17,8 @@ Thumbs.db
 d('', 'base-files')
 d('bin', 'base-files/bin')
 
+$main.run('chmod +x bin/configs bin/setup')
+
 d('app/forms', 'base-files/forms')
 d('app/presenters', 'base-files/presenters')
 d('app/queries', 'base-files/queries')

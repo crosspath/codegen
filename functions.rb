@@ -9,6 +9,11 @@ def f(save_to, from)
   cf(save_to, File.join(__dir__, 'templates', from))
 end
 
+def af(save_to, from)
+  from = File.join(__dir__, 'templates', from)
+  $main.append_to_file(save_to, File.read(from))
+end
+
 def d(as, from, recursive: false)
   directory = File.join(__dir__, 'templates', from, '*')
   Dir.glob(directory, File::FNM_DOTMATCH).each do |path|
