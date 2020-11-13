@@ -15,6 +15,10 @@
     rails app:template LOCATION=../codegen/tests.rb
     rails app:template LOCATION=../codegen/vue.rb
 
+После добавления всех необходимых библиотек:
+
+    rails app:template LOCATION=../codegen/sort-gems.rb
+
 ## Доступные методы для генератора
 
 1. [Thor::Actions](https://rdoc.info/github/erikhuda/thor/master/Thor/Actions)

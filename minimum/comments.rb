@@ -1,6 +1,11 @@
 remove_strings(
   'Gemfile',
   [
+    "# Bundle edge Rails instead: gem 'rails', github: 'rails/rails'\n",
+    "# Use Active Model has_secure_password\n",
+    "# gem 'bcrypt', '~> 3.1.7'\n",
+    "# Use Active Storage variant\n",
+    "# gem 'image_processing', '~> 1.2'\n",
     "# Reduces boot times through caching; required in config/boot.rb\n",
     "  # Spring speeds up development by keeping your application running "\
         "in the background. Read more: https://github.com/rails/spring\n",
