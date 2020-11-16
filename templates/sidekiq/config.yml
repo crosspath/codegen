@@ -1,0 +1,11 @@
+:concurrency: 5
+development:
+  :concurrency: 5
+production:
+  :concurrency: 15
+:queues:
+  - [critical, 6]
+  - [default, 5]
+  - [mailers, 3]
+  - [periodic, 2]
+  - [low, 1]
