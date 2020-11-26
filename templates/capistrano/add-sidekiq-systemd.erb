@@ -1,0 +1,41 @@
+<%
+  # LOCALS:
+  # product_name: String
+  # service_name: String
+  # path:         String
+%>
+#!/usr/bin/env ruby
+#
+# Сохранить в /usr/lib/systemd/system (CentOS), /lib/systemd/system (Ubuntu)
+#
+# `journalctl -u sidekiq-sms -rn 100` — просмотр логов.
+#
+# На основе https://github.com/mperham/sidekiq/blob/master/examples/systemd/sidekiq.service
+
+FILE = <<~FF
+  [Unit]
+  Description=Sidekiq instance for <%= product_name %>
+  After=syslog.target network.target
+
+  [Service]
+  Type=notify
+  WatchdogSec=10
+  WorkingDirectory=<%= path %>/current
+  ExecStart=/home/deploy/.rvm/gems/ruby-2.6.5/wrappers/bundle exec sidekiq -e production
+  Environment=MALLOC_ARENA_MAX=2
+  RestartSec=1
+  Restart=on-failure
+  StandardOutput=syslog
+  StandardError=syslog
+  SyslogIdentifier=sidekiq
+
+  User=deploy
+  Group=deploy
+  UMask=0002
+
+  [Install]
+  WantedBy=multi-user.target
+FF
+
+File.write('/lib/systemd/system/<%= service_name %>.service', FILE)
+system('systemctl enable <%= service_name %>')

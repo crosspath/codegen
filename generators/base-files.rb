@@ -146,9 +146,7 @@ def base_gems(answers)
 
   $main.gem 'slim-rails' if answers[:slim]
 
-  $main.gem_group :development, :test do
-    $main.gem 'dotenv-rails'
-  end
+  $main.gem 'dotenv-rails'
 end
 
 def base_debug
