@@ -1,15 +1,15 @@
-$main.gem 'sorcery'
-
-$main.append_to_file('db/seeds.rb') do
-  <<-LINE
-User.find_or_create_by!(
-  login:    'admin@localhost',
-  password: 'password'
-)
-  LINE
+def sorcery_seeds
+  $main.append_to_file('db/seeds.rb') do
+    <<-LINE
+User.find_or_initialize_by(email: 'admin@localhost').tap do |u|
+  u.password = 'password'
+  u.save!
+end
+    LINE
+  end
 end
 
-after_bundle_install do
+def sorcery_base
   $main.generate('sorcery:install', 'reset_password', 'brute_force_protection')
 
   d('app/controllers', 'sorcery/controllers', recursive: true)
@@ -53,4 +53,15 @@ after_bundle_install do
   )
 
   puts 'Sorcery installed'
+end
+
+Generator.add_actions do |answers|
+  next unless answers[:sorcery]
+
+  $main.gem 'sorcery'
+  sorcery_seeds
+
+  after_bundle_install do
+    sorcery_base
+  end
 end

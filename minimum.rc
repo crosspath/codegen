@@ -8,4 +8,4 @@
 --skip-system-test
 --webpacker
 --no-skip-webpack-install
---template=~/Documents/codegen/minimum.rb
+--template=~/Documents/codegen/codegen.rb

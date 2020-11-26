@@ -1,7 +1,5 @@
-$main.run 'yarn add webpack-bundle-analyzer --dev'
-
-after_bundle_install do
-  # $main.rails_command 'webpacker:install'
+def webpack_bundle
+  $main.run 'yarn add webpack-bundle-analyzer --dev'
 
   $main.inject_into_file(
     'config/webpack/production.js',
@@ -17,7 +15,9 @@ if (process.env.DIAGRAM) {
 
     END
   end
+end
 
+def webpack_comment
   replace_strings(
     'config/webpacker.yml',
     {
@@ -60,4 +60,15 @@ if (process.env.DIAGRAM) {
           "// or the `imagePath` JavaScript helper below.",
     }
   )
+end
+
+Generator.add_actions do |answers|
+  next unless answers[:webpack]
+
+  after_bundle_install do
+    $main.rails_command 'webpacker:install'
+
+    webpack_bundle
+    webpack_comment
+  end
 end

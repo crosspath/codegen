@@ -4,4 +4,4 @@
 --skip-system-test
 --webpacker
 --no-skip-webpack-install
---template=~/Documents/codegen/default.rb
+--template=~/Documents/codegen/codegen.rb
