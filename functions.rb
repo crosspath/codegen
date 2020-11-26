@@ -1,4 +1,5 @@
 require 'erubi'
+require 'json'
 require 'yaml'
 
 def cf(save_to, from)
@@ -58,6 +59,16 @@ end
 
 def replace_strings(file, strings)
   $main.gsub_file(file, strings[:from], strings[:to])
+end
+
+def move_npm_package_to_dev(*names)
+  j = JSON.parse(File.read('package.json'))
+  names.each do |name|
+    j['devDependencies'] ||= {}
+    j['devDependencies'][name] = j['dependencies'][name]
+    j['dependencies'].delete(name)
+  end
+  $main.create_file('package.json', JSON.pretty_generate(j))
 end
 
 $_bundle_commands = []

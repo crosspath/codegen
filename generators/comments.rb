@@ -1,6 +1,4 @@
 Generator.add_actions do |answers|
-  next unless answers[:base_comment]
-
   remove_strings(
     'Gemfile',
     [

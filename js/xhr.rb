@@ -15,6 +15,8 @@ after_bundle_install do
   )
 
   d('app/javascript/lib', 'js/lib')
+
+  move_npm_package_to_dev('rails-erb-loader')
 end
 
 $main.append_to_file('app/javascript/packs/application.js') do

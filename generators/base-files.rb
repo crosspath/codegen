@@ -38,22 +38,22 @@ def base_controller(answers)
     with_form = <<-END.rstrip
 
 
-    def with_form(form)
-      if form.success
-        yield form
-      else
-        render json: { errors: form.errors }, status: 422
-      end
+  def with_form(form)
+    if form.success
+      yield form
+    else
+      render json: { errors: form.errors }, status: 422
     end
+  end
     END
 
     <<-END.rstrip
 
-    protected#{with_form}
+  protected#{with_form}
 
-    def render_json_errors(errors)
-      render json: { errors: errors }, status: 422
-    end
+  def render_json_errors(errors)
+    render json: { errors: errors }, status: 422
+  end
     END
   end
 end
@@ -86,8 +86,8 @@ end
 
 def base_scss
   css_file = 'app/assets/stylesheets/application.css'
-  unless File.exist?(css_file)
-    puts "Skip, #{css_file} does not exist"
+  unless File.writable?(css_file)
+    puts "Skip, #{css_file} is not writable"
     return
   end
 
@@ -144,8 +144,6 @@ def base_gems(answers)
     $main.gsub_file('Gemfile', /\n\s*#[^\n]*\n\s*gem '#{name}'.*$/, '')
   end
 
-  $main.gsub_file('Gemfile', "\ngroup :development, :test do\nend\n", '')
-
   $main.gem 'slim-rails' if answers[:slim]
 
   $main.gem_group :development, :test do
@@ -163,12 +161,6 @@ end
 
 def base_data_migrations
   $main.gem 'data_migrate'
-
-  after_bundle_install do
-    if `bundle info capistrano`.include?('Summary')
-      $main.append_to_file('Capfile', "require 'capistrano/data_migrate'\n")
-    end
-  end
 
   $main.environment(nil, env: 'development') do
     "config.middleware.use CheckDataMigration"

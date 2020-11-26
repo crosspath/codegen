@@ -6,7 +6,7 @@ Generator.add_actions do |answers|
     product: answers[:product_name]
   )
 
-  f('docs/INSTALL.md', 'readme/INSTALL.md.erb')
+  f('docs/INSTALL.md', 'readme/INSTALL.md')
   f('docs/RELEASE-NOTES.md', 'readme/RELEASE-NOTES.md')
 
   if answers[:product_specs]

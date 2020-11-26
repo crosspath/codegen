@@ -35,7 +35,7 @@ def sort_gems
     end
   end
 
-  create_file('Gemfile', result)
+  $main.create_file('Gemfile', result)
 end
 
 Generator.add_actions do |answers|

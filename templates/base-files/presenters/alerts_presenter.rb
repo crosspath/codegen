@@ -33,7 +33,7 @@ module AlertsPresenter
 
     flash.map do |key, messages|
       Array.wrap(messages).map do |msg|
-        vh.content_tag('div', message, class: "flash-message--#{key}")
+        vh.content_tag('div', msg, class: "flash-message--#{key}")
       end.join.html_safe
     end.join.html_safe
   end

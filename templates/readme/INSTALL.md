@@ -11,3 +11,9 @@
 
 На сервере для `production` необходимо установить переменные среды, указанные
 в файле `.env.production`.
+
+## Решение возможных проблем
+
+Если в MacOS 10.15 не удаётся установить `node` или `node-sass`: [node-gyp][1]
+
+[1]: https://github.com/nodejs/node-gyp/blob/master/macOS_Catalina.md

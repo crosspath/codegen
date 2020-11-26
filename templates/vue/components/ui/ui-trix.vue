@@ -1,4 +1,4 @@
-<template>
+<template lang="pug">
   div
     input(type='hidden' :name='name' :id='input_id' :value='value')
     trix-editor.trix-content(

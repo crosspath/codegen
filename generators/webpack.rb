@@ -66,7 +66,9 @@ Generator.add_actions do |answers|
   next unless answers[:webpack]
 
   after_bundle_install do
-    $main.rails_command 'webpacker:install'
+    unless `bundle info webpacker`.include?('Summary')
+      $main.rails_command 'webpacker:install'
+    end
 
     webpack_bundle
     webpack_comment

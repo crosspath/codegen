@@ -3,7 +3,7 @@ Generator.add_actions do |answers|
 
   $main.gem 'sidekiq'
 
-  af('Procfile', "sidekiq:  bundle exec sidekiq\n")
+  $main.append_to_file('Procfile', "sidekiq:  bundle exec sidekiq\n")
 
   $main.inject_into_file(
     'config/application.rb',
@@ -11,21 +11,23 @@ Generator.add_actions do |answers|
     before: "  end\nend\n"
   )
 
-  templates = File.join(__dir__, 'templates', 'sidekiq')
+  templates = File.join(__dir__, '..', 'templates', 'sidekiq')
 
   $main.initializer(
     'sidekiq.rb',
     File.read(File.join(templates, 'initializer.rb'))
   )
-  f('config/config.yml', 'sidekiq/config.yml')
+  f('config/sidekiq.yml', 'sidekiq/config.yml')
 
-  $main.inject_into_file(
-    'config/routes.rb',
-    "require 'sidekiq/web'\n\n",
-    before: 'Rails.application.routes.draw do'
-  )
+  $main.prepend_to_file('config/routes.rb', "require 'sidekiq/web'\n\n")
+
   $main.route <<-END
-    constraints(->(rq) { User.find_by(id: rq.session[:user_id])&.admin? }) do
+    is_admin = ->(rq) do
+      user = User.find_by(id: rq.session[:user_id])
+      user && !user.login_locked?
+    end
+
+    constraints(is_admin) do
       mount Sidekiq::Web, at: '/sidekiq'
     end
   END

@@ -9,16 +9,22 @@ end
   end
 end
 
-def sorcery_base
+def sorcery_base(answers)
   $main.generate('sorcery:install', 'reset_password', 'brute_force_protection')
 
   d('app/controllers', 'sorcery/controllers', recursive: true)
 
-  f('app/mailers/user_mailer.rb', 'sorcery/mailers/user_mailer.rb')
+  if answers[:mail]
+    f('app/mailers/user_mailer.rb', 'sorcery/mailers/user_mailer.rb')
+  end
 
   f('app/models/user.rb', 'sorcery/models/user.rb')
 
-  d('app/views', 'sorcery/views', recursive: true)
+  if answers[:slim]
+    d('app/views', 'sorcery/views/slim', recursive: true)
+  else
+    d('app/views', 'sorcery/views/erb', recursive: true)
+  end
 
   $main.route <<-END
   scope module: :users do
@@ -34,17 +40,19 @@ def sorcery_base
   d('config/locales', 'sorcery/locales')
   d('app/forms', 'sorcery/forms', recursive: true)
 
-  $main.gsub_file(
-    'config/initializers/sorcery.rb',
-    /(?:\#\s)?user.unlock_token_mailer =[^\n]*/,
-    'user.unlock_token_mailer = UserMailer'
-  )
+  if answers[:mail]
+    $main.gsub_file(
+      'config/initializers/sorcery.rb',
+      /(?:\#\s)?user.unlock_token_mailer =[^\n]*/,
+      'user.unlock_token_mailer = UserMailer'
+    )
 
-  $main.gsub_file(
-    'config/initializers/sorcery.rb',
-    /(?:\#\s)?user.reset_password_mailer =[^\n]*/,
-    'user.reset_password_mailer = UserMailer'
-  )
+    $main.gsub_file(
+      'config/initializers/sorcery.rb',
+      /(?:\#\s)?user.reset_password_mailer =[^\n]*/,
+      'user.reset_password_mailer = UserMailer'
+    )
+  end
 
   $main.gsub_file(
     'config/initializers/sorcery.rb',
@@ -62,6 +70,6 @@ Generator.add_actions do |answers|
   sorcery_seeds
 
   after_bundle_install do
-    sorcery_base
+    sorcery_base(answers)
   end
 end

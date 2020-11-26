@@ -15,12 +15,15 @@ FileUtils.chdir APP_ROOT do
   # Install JavaScript dependencies
   system('bin/yarn')
 
-  puts "\n== Applying migrations =="
-  system! 'bin/rails db:migrate'
+  puts "\n== Applying migrations & seeds to dev database =="
+  system! 'bin/rails db:migrate db:seed'
+
+  puts "\n== Applying migrations to test database =="
+  system! 'bin/rails db:migrate RAILS_ENV=test'
 
   puts "\n== Removing old logs and tempfiles =="
   system! 'bin/rails log:clear tmp:clear'
 
-  puts "\n== Restarting application server =="
-  system! 'bin/rails restart'
+  # puts "\n== Restarting application server =="
+  # system! 'bin/rails restart'
 end
