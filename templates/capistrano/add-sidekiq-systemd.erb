@@ -37,5 +37,5 @@ FILE = <<~FF
   WantedBy=multi-user.target
 FF
 
-File.write('/lib/systemd/system/<%= service_name %>.service', FILE)
-system('systemctl enable <%= service_name %>')
+File.write('~/.config/systemd/user/<%= service_name %>.service', FILE)
+system('systemctl --user enable <%= service_name %>')
