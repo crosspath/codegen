@@ -29,9 +29,7 @@ def vue_packages(answers)
   packages << ' @braid/vue-formulate' if answers[:vue_formulate]
 
   $main.run "yarn add #{packages}"
-  $main.run 'yarn add pug pug-plain-loader --dev' if answers[:vue_pug]
-
-  move_npm_package_to_dev('vue-loader', 'vue-template-compiler')
+  $main.run 'yarn add pug pug-plain-loader' if answers[:vue_pug]
 end
 
 def vue_files(answers)

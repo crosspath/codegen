@@ -12,6 +12,7 @@ Generator.add_actions do |answers|
       "import 'lib/svelte';\n"
     end
 
-    move_npm_package_to_dev('svelte', 'svelte-loader')
+    # TODO: Проверить, будет ли выполняться сборка.
+    # move_npm_package_to_dev('svelte', 'svelte-loader')
   end
 end
