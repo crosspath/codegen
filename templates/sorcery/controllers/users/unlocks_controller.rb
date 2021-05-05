@@ -2,9 +2,9 @@ class Users::UnlocksController < ApplicationController
   before_action :redirect_if_logged
 
   def show
-    form = Users::UnlockForm.create(params)
+    form = UserAuthForm.unlock(params)
 
-    flash[form.success ? :notice : :alert] = form.messages
+    flash[form.success ? :notice : :alert] = form.errors
 
     redirect_to session_path
   end

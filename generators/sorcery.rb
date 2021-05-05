@@ -28,9 +28,9 @@ def sorcery_base(answers)
 
   $main.route <<-END
   scope module: :users do
-    resource :session, path: 'auth', only: [:show, :create, :destroy]
-    resource :reset_password, path: 'reset-password', only: [:show, :create]
     resource :change_password, path: 'change-password', only: [:show, :create]
+    resource :reset_password, path: 'reset-password', only: [:show, :create]
+    resource :session, path: 'auth', only: [:show, :create, :destroy]
     resource :unlock, only: [:show]
   end
   END

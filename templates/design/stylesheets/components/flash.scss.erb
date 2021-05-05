@@ -1,6 +1,10 @@
-@import "../colors";
+<%
+  # LOCALS:
+  # use_bootstrap: true | false
+%>
+@import "../_colors";
 <% if use_bootstrap %>
-@import "../bootstrap-base";
+@import "../_bootstrap-base";
 @import "bootstrap/scss/_alert";
 
 // @see https://getbootstrap.com/docs/4.4/components/alerts/

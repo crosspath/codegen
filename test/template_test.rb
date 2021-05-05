@@ -22,7 +22,7 @@ class TemplateTest < Minitest::Test
 
   def run_generator(name, message)
     output, err = capture_subprocess_io do
-      system("DISABLE_SPRING=1 rails new test_app --rc=#{name}.rc")
+      system("DISABLE_SPRING=1 rails new test_app --rc=#{name}.rc --template=codegen.rb")
     end
     assert_includes output, message
   end

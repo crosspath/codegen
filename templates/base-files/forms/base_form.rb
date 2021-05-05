@@ -1,13 +1,11 @@
 # Без валидаций в формах, поскольку валидации выполняются на уровне моделей.
 # Поддерживаемые действия: `create`, `update`, `destroy`.
-# Можно добавлять свои действия как методы класса формы.
+# Можно добавлять свои действия как методы модуля.
 #
 # Пример формы:
-#     class ArticleForm < BaseForm
-#       # Название класса модели определяется как строка до слова "Form"
-#       # в названии класса формы. Если нужно использовать другую модель,
-#       # тогда нужен параметр `model_name`.
-#       model_name :Article
+#
+#     module ArticleForm
+#       extend BaseForm
 #
 #       # Список разрешённых атрибутов для всех действий,
 #       # используется в действиях `create` и `update`.
@@ -17,132 +15,164 @@
 #       # и только для `update`.
 #       permit_for create: [{attachments: []}],
 #           update: [:created_at]
+#
+#       # Можно убрать метод для удаления объектов.
+#       undefine_form_method :destroy
+#       # Можно указывать несколько методов через запятую:
+#       # undefine_form_method :create, :update, :destroy
+#
+#       # Можно переопределить стандартные методы (create, update, destroy) и добавить свои.
+#       # Например, отправка писем, удаление связанных объектов в транзакции, обновление счётчиков.
+#
+#       def self.create(params, author)
+#         super(params) do |object|
+#           object.version = 0
+#           object.author  = author
+#         end
+#       end
+#
+#       def self.update(object, params)
+#         super(object, params) do |_object|
+#           object.version += 1
+#         end
+#       end
+#
+#       # def self.destroy(object)
+#       #   super(object).on_success do |_result|
+#       #     UserMailer.object_deleted(object)
+#       #   end
+#       # end
 #     end
 #
 # Применение в контроллере:
-#     form = ArticleForm.create(params[:article])
-#     if form.success
-#       redirect_to article_path(form.object)
-#     else
-#       @article = form.object
-#       flash.now[:alert] = form.errors
-#       render :show
-#     end
 #
-# Можно сделать недоступными методы `create`, `update` или `destroy`,
-# если добавить такую строку в класс формы:
-#     class << self; private :create; end
+#     p ArticleForm.create(params.require(:article))
+#     # => #<struct BaseForm::Result success=..., object=..., errors=[...]>
 #
-# Можно переопределить методы `create`, `update` и `destroy`, если нужно
-# добавить в них аргументы или дополнительные действия, например, отправку
-# писем.
-# Например, в методе `destroy` можно удалить связанные объекты в транзакции,
-# обновить счётчики и отправить электронное письмо.
-#     def create(params, author)
-#       super(params) do |object|
-#         object.author = author
-#       end
-#     end
-#     def update(object, params)
-#       super(object, params) do |_object|
-#         object.name = object.name.strip
-#       end
-#     end
-#     def destroy(object)
-#       form = super(object)
-#       UserMailer.object_deleted(object) if form.success
-#       form
-#     end
+#     p ArticleForm.update(Article.first, params.require(:article))
+#     # => #<struct BaseForm::Result success=..., object=..., errors=[...]>
 #
-# Метод `collect_errors` можно использовать для обработки множества объектов.
-# Пример метода класса формы:
+#     p ArticleForm.destroy(Article.first)
+#     # => NoMethodError
 #
-#     def create(names)
-#       collect_errors do |errors, objects|
+# Метод `for_collection` можно использовать для обработки множества объектов.
+# Пример метода формы:
+#
+#     def self.create(names)
+#       for_collection do |_errors, objects|
 #         names.each do |name|
 #           object = model_class.find_of_create_by(name: name)
 #           objects << object unless object.valid?
 #         end
 #       end
 #     end
-#
-class BaseForm
-  class << self
-    def permit(*attributes_list)
-      @_permit = attributes_list
+
+module BaseForm
+  Result = Struct.new(:success, :object, :errors)
+  Result.class_eval do
+    def errors
+      res = self[:errors] || []
+      res += object.errors.messages.values.flatten if object.respond_to?(:errors)
+      res
     end
 
-    def permit_for(options = {})
-      @_permit_for ||= {}
-      @_permit_for.merge!(options.symbolize_keys)
+    def on_success
+      yield(self) if success
+      self
     end
 
-    def model_name(class_name)
-      @_model_name = class_name
-    end
-
-    def create(params)
-      object = new_model_object(params)
-      yield(object) if block_given?
-      new(object.save, object)
-    end
-
-    def update(object, params)
-      object.attributes = attributes(params, :update)
-      yield(object) if block_given?
-      new(object.save, object)
-    end
-
-    def destroy(object)
-      new(object.destroy, object)
-    end
-
-    private
-
-    def new_model_object(params)
-      model_class.new(attributes(params, :create))
-    end
-
-    def model_class
-      @_model_name ||= self.name.sub(/Form$/, '')
-      @_model_name.constantize
-    end
-
-    def attributes(params, key = nil)
-      attrs_list = @_permit || []
-      attrs_list += key && @_permit_for && @_permit_for[key.to_sym] || []
-      unless params.respond_to?(:permit)
-        params = ActionController::Parameters.new(params)
-      end
-      params.permit(attrs_list)
-    rescue NoMethodError
-      raise ArgumentError, "Unexpected value: #{params.inspect}"
-    end
-
-    def collect_errors
-      errors  = []
-      objects = []
-
-      yield errors, objects
-
-      objects.each do |obj|
-        errors.concat(obj.errors.messages.values.flatten)
-      end
-
-      empty_object = model_class.new
-      empty_object.errors[:base].concat(errors.uniq)
-      self.new(errors.empty?, empty_object)
+    def on_failure
+      yield(self) unless success
+      self
     end
   end
 
-  attr_reader :success, :object
+  # Form actions
 
-  def initialize(success, object)
-    @success = success
-    @object  = object
+  def create(params)
+    object = new_model_object(params)
+    yield(object) if block_given?
+    result(object.save, object)
   end
 
-  def errors
-    @object ? @object.errors.messages.values.flatten : []
+  def update(object, params)
+    object.attributes = attributes(params, :update)
+    yield(object) if block_given?
+    result(object.save, object)
+  end
+
+  def destroy(object)
+    result(object.destroy, object)
+  end
+
+  # DSL, module-scoped methods
+
+  def permit(*attributes_list)
+    @_permit = attributes_list
+  end
+
+  def permit_for(options = {})
+    @_permit_for ||= {}
+    @_permit_for.merge!(options.symbolize_keys)
+  end
+
+  def model_name(class_name)
+    @_model_name = class_name
+  end
+
+  def undefine_form_method(*actions)
+    singleton_class.class_eval do
+      undef_method(*actions)
+    end
+  end
+  alias :undefine_form_methods :undefine_form_method
+
+  private
+
+  # Helper methods for form actions
+
+  def new_model_object(params)
+    model_class.new(attributes(params, :create))
+  end
+
+  def model_class
+    @_model_name ||= self.name.sub(/Form$/, '')
+    @_model_name.constantize
+  end
+
+  def attributes(params, key = nil)
+    attrs_list = @_permit || []
+    attrs_list += key && @_permit_for && @_permit_for[key.to_sym] || []
+    unless params.respond_to?(:permit)
+      params = ActionController::Parameters.new(params)
+    end
+    params.permit(attrs_list)
+  rescue NoMethodError
+    raise ArgumentError, "Unexpected value: #{params.inspect}"
+  end
+
+  def for_collection
+    errors  = []
+    objects = []
+
+    yield errors, objects
+
+    objects.each do |obj|
+      errors.concat(obj.errors.messages.values.flatten) if obj.respond_to?(:errors)
+    end
+
+    result(errors.empty?, objects, errors.uniq)
+  end
+
+  def result(success, object = nil, errors = [])
+    Result.new(success, object, errors)
+  end
+
+  def success(object = nil, errors = [])
+    Result.new(true, object, errors)
+  end
+
+  def failure(object = nil, errors = [])
+    Result.new(false, object, errors)
   end
 end

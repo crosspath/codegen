@@ -9,7 +9,7 @@ Generator.add_actions do |answers|
     d('app/javascript/lib', 'svelte/lib')
 
     $main.append_to_file('app/javascript/packs/application.js') do
-      "import 'lib/svelte';\n"
+      "import '../lib/svelte';\n"
     end
 
     # TODO: Проверить, будет ли выполняться сборка.

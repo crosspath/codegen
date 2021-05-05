@@ -3,7 +3,7 @@ Generator.add_actions do |answers|
 
   $main.gem 'sidekiq'
 
-  $main.append_to_file('Procfile', "sidekiq:  bundle exec sidekiq\n")
+  $main.append_to_file('Procfile', "sidekiq:  bin/bundle exec sidekiq\n")
 
   $main.inject_into_file(
     'config/application.rb',

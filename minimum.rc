@@ -6,6 +6,6 @@
 --skip-action-cable
 --skip-turbolinks
 --skip-system-test
+--skip-sprockets
 --webpacker
 --no-skip-webpack-install
---template=~/Documents/codegen/codegen.rb

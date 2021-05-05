@@ -6,9 +6,16 @@
 %>
 #!/usr/bin/env ruby
 #
-# Сохранить в /usr/lib/systemd/system (CentOS), /lib/systemd/system (Ubuntu)
+# Если сохранить в глобальном уровне (на уровне всей системы):
+# * для CentOS в папке /usr/lib/systemd/system
+# * для Ubuntu в папке /lib/systemd/system
 #
-# `journalctl -u sidekiq-sms -rn 100` — просмотр логов.
+# У пользователя на сервере, который используется в Capistrano, может не быть
+# необходимых прав, поэтому предпочтительно сохранить файл сервиса в папке
+# этого пользователя:
+# * ~/.config/systemd/user
+#
+# Команда для просмотра логов: `journalctl -u sidekiq-sms -rn 100`
 #
 # На основе https://github.com/mperham/sidekiq/blob/master/examples/systemd/sidekiq.service
 
@@ -21,7 +28,7 @@ FILE = <<~FF
   Type=notify
   WatchdogSec=10
   WorkingDirectory=<%= path %>/current
-  ExecStart=/home/deploy/.rvm/gems/ruby-2.6.5/wrappers/bundle exec sidekiq -e production
+  ExecStart=/home/deploy/.rvm/gems/ruby-<%= RUBY_VERSION %>/wrappers/bundle exec sidekiq -e production
   Environment=MALLOC_ARENA_MAX=2
   RestartSec=1
   Restart=on-failure

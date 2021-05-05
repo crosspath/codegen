@@ -36,6 +36,7 @@ end
 
 def capistrano_after_bundle
   $main.run 'bundle binstubs capistrano'
+  $main.remove_file 'bin/capify'
   $main.run 'bin/cap install'
 
   requires = <<~END
@@ -53,18 +54,12 @@ def capistrano_after_bundle
     'require "capistrano/passenger"',
   ]
 
-  replace_strings('Capfile', uncomment.map { |x| {from: "\# #{x}", to: x} })
-
-  deploy_text = <<~END
-  # Разворачивание на сервере
-
-      bin/cap production deploy
-  END
-
-  $main.append_to_file('README.md', deploy_text)
+  uncomment.each do |x|
+    replace_strings('Capfile', {from: "\# #{x}", to: x})
+  end
 
   deploy_conf = <<~END
-    set :rvm_ruby_version, '2.6.5'
+    set :rvm_ruby_version, '#{RUBY_VERSION}'
 
     set :passenger_restart_with_touch, true
   END
@@ -75,6 +70,7 @@ def capistrano_after_bundle
     before: 'set :application'
   )
 
+  path = '/var/www/html' # TODO: Уточнить путь
   $main.inject_into_file(
     'config/deploy.rb',
     "set :deploy_to, '#{path}'\n",

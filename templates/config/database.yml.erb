@@ -1,9 +1,14 @@
+<%
+  # LOCALS:
+  # use_url: true | false
+  # db_name: String
+%>
 default: &default
   adapter: postgresql
   encoding: unicode
   # For details on connection pooling, see Rails configuration guide
   # https://guides.rubyonrails.org/configuring.html#database-pooling
-  pool: <%%= ENV.fetch("RAILS_MAX_THREADS") { 5 } %>
+  pool: <%%= ENV.fetch("RAILS_MAX_THREADS", 5) %>
 
 development:
   <<: *default
@@ -23,5 +28,5 @@ production:
 <%- else %>
   database: <%= db_name %>
   username: deploy
-  password: <%%= ENV['<%= db_name.upcase %>_DATABASE_PASSWORD'] %>
+  password: <%= "<""%= ENV['#{db_name.upcase}_DATABASE_PASSWORD'] %"">" %>
 <%- end %>

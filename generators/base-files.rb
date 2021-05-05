@@ -35,21 +35,17 @@ def base_controller(answers)
     'app/controllers/application_controller.rb',
     before: "\nend"
   ) do
-    with_form = <<-END.rstrip
+    <<-END.rstrip
 
+  protected
 
   def with_form(form)
     if form.success
       yield form
     else
-      render json: { errors: form.errors }, status: 422
+      render_json_errors(form.errors)
     end
   end
-    END
-
-    <<-END.rstrip
-
-  protected#{with_form}
 
   def render_json_errors(errors)
     render json: { errors: errors }, status: 422
@@ -58,7 +54,7 @@ def base_controller(answers)
   end
 end
 
-def base_layout(answers)
+def base_layout_erb(answers)
   $main.inject_into_file(
     'app/views/layouts/application.html.erb',
     before: '    <%= csrf_meta_tags %>'
@@ -74,41 +70,31 @@ def base_layout(answers)
     "\n    <%= AlertsPresenter.flashes(self) %>",
     after: '<body>'
   )
-
-  if answers[:slim]
-    erb(
-      'app/views/layouts/application.html.slim',
-      'base-files/layouts/application.html.slim.erb',
-      skip_turbolinks: $main.options[:skip_turbolinks]
-    )
-  end
 end
 
-def base_scss
+def base_layout_slim(answers)
+  erb(
+    'app/views/layouts/application.slim',
+    'base-files/layouts/application.slim.erb',
+    skip_turbolinks: $main.options[:skip_turbolinks]
+  )
+
+  $main.remove_file('app/views/layouts/application.html.erb')
+end
+
+def base_scss(answers)
   css_file = 'app/assets/stylesheets/application.css'
-  unless File.writable?(css_file)
-    puts "Skip, #{css_file} is not writable"
-    return
-  end
 
-  $main.create_file('app/assets/stylesheets/application.scss') do
+  $main.create_file("#{css_dir(answers)}/application.scss") do
     existing = File.read(css_file)
-    requires = []
 
-    existing.gsub!(%r{/\*(.*)\*/}m) do |match|
-      match.split("\n").each do |x|
-        res = x.match(/=\s*(require_.+)\Z/)
-        requires << res[1] if res
-      end
-      ''
-    end
+    existing.gsub!(%r{/\*(.*)\*/}m, '')
     existing.strip!
-    header = requires.map { |x| "//= #{x}\n" }
 
-    [header, (existing.empty? ? '' : "\n"), existing].join
+    existing
   end
 
-  $main.remove_file('app/assets/stylesheets/application.css')
+  $main.remove_file(css_file)
 end
 
 def base_locale_ru
@@ -134,13 +120,19 @@ def base_paths(answers)
 end
 
 def base_gems(answers)
+  use_sass = !answers[:webpack]
+
   puts '      reset required gem versions'
-  %w[pg puma sass-rails webpacker turbolinks].each do |name|
+  gems = %w[pg puma webpacker turbolinks]
+  gems << 'sass-rails' if use_sass
+  gems.each do |name|
     $main.gsub_file('Gemfile', /^#[^\n]*\ngem '#{name}'.*$/, "gem '#{name}'")
   end
 
-  puts '      remove    jbuilder, byebug, web-console'
-  %w[jbuilder byebug web-console].each do |name|
+  gems = %w[jbuilder byebug web-console]
+  gems << 'sass-rails' unless use_sass
+  puts "      remove    #{gems.join(', ')}"
+  gems.each do |name|
     $main.gsub_file('Gemfile', /\n\s*#[^\n]*\n\s*gem '#{name}'.*$/, '')
   end
 
@@ -178,8 +170,12 @@ Generator.add_actions do |answers|
   base_dir('presenters')
   base_dir('queries')
   base_controller(answers)
-  base_layout(answers)
-  base_scss
+  if answers[:slim]
+    base_layout_slim(answers)
+  else
+    base_layout_erb(answers)
+  end
+  base_scss(answers)
   base_locale_ru
   base_paths(answers)
   base_gems(answers)

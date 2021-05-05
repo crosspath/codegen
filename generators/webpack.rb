@@ -6,8 +6,7 @@ def webpack_bundle
     before: 'module.exports = environment.toWebpackConfig()'
   ) do
     <<-END
-// Run `NODE_ENV=production DIAGRAM=1 bin/webpack`
-// when you want to see volumes of JS packs.
+// Run `NODE_ENV=production DIAGRAM=1 bin/webpack` when you want to see volumes of JS packs.
 if (process.env.DIAGRAM) {
   const { BundleAnalyzerPlugin } = require('webpack-bundle-analyzer');
   environment.plugins.append('BundleAnalyzer', new BundleAnalyzerPlugin());
@@ -18,18 +17,6 @@ if (process.env.DIAGRAM) {
 end
 
 def webpack_comment
-  replace_strings(
-    'config/webpacker.yml',
-    {
-      from:
-          "  # Production depends on precompilation of packs prior to "\
-          "booting for performance.",
-      to:
-          "  # Production depends on precompilation of packs prior to "\
-          "booting\n"\
-          "  # for performance."
-    }
-  )
   remove_strings(
     'app/javascript/packs/application.js',
     [
@@ -42,23 +29,19 @@ def webpack_comment
           "// that code so it'll be compiled.\n\n"
     ]
   )
+end
 
-  replace_strings(
+def webpack_css(answers)
+  if answers[:design]
+    $main.append_to_file(
+      'app/javascript/stylesheets/application.scss',
+      "@import './components/flash.scss';\n"
+    )
+  end
+
+  $main.append_to_file(
     'app/javascript/packs/application.js',
-    {
-      from:
-          "\n// Uncomment to copy all static images under ../images to "\
-          "the output folder and reference\n"\
-          "// them with the image_pack_tag helper in views (e.g "\
-          "<%= image_pack_tag 'rails.png' %>)\n"\
-          "// or the `imagePath` JavaScript helper below.",
-      to:
-          "// Uncomment to copy all static images under ../images to "\
-          "the output folder\n"\
-          "// and reference them with the image_pack_tag helper in views\n"\
-          "// (e.g <%= image_pack_tag 'rails.png' %>)\n"\
-          "// or the `imagePath` JavaScript helper below.",
-    }
+    "import '../stylesheets/application.scss';\n"
   )
 end
 
@@ -66,11 +49,12 @@ Generator.add_actions do |answers|
   next unless answers[:webpack]
 
   after_bundle_install do
-    unless `bundle info webpacker`.include?('Summary')
+    unless `bin/bundle info webpacker`.include?('Summary')
       $main.rails_command 'webpacker:install'
     end
 
     webpack_bundle
     webpack_comment
+    webpack_css(answers)
   end
 end

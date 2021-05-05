@@ -4,20 +4,18 @@ class Users::ResetPasswordsController < ApplicationController
   def show; end
 
   def create
-    @email = params[:email]
-    user  = User.find_by(email: @email)
+    result   = UserAuthForm.reset_password(params)
+    messages = result.errors
 
-    if user
-      if user.deliver_reset_password_instructions!
-        flash[:notice] = t("users/reset_password.email_sent", email: @email)
-        redirect_to session_path
-      else
-        flash[:alert] = t("users/reset_password.too_often", email: @email)
-        redirect_to reset_password_path
-      end
-    else
-      flash.now[:alert] = t("users/reset_password.not_found")
-      render :show
+    case result.success
+    when :email_sent
+      redirect_to session_path, notice: messages
+    when :too_often
+      redirect_to reset_password_path, alert: messages
+    when :not_found
+      # flash.now[:alert] = messages
+      @email = params[:email]
+      render :show, alert: messages
     end
   end
 

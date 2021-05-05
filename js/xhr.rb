@@ -1,7 +1,7 @@
 $main.gem 'blueprinter'
 $main.gem 'railbus'
 
-$main.run 'yarn add axios'
+add_npm_package('axios')
 
 after_bundle_install do
   $main.generate('railbus:install')
@@ -18,7 +18,7 @@ after_bundle_install do
 end
 
 $main.append_to_file('app/javascript/packs/application.js') do
-  "import 'lib/xhr';\n"
+  "import '../lib/xhr';\n"
 end
 
 $main.inject_into_file(

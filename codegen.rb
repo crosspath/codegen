@@ -8,7 +8,6 @@ Dir["#{__dir__}/generators/*.rb"].sort.each do |file|
 end
 
 answers = {}
-options = {all: 'All', cfg: 'Configurate', no: 'Nothing'}
 
 answers[:slim] = $main.yes?('Use Slim templates? (y/n)')
 
@@ -26,11 +25,10 @@ end
 answers[:product] = $main.yes?('Add README & docs? (y/n)')
 if answers[:product]
   answers[:product_name]  = $main.ask('> Product name (for Readme) =')
-  answers[:product_specs] = $main.yes?('> Add templates for specs? (y/n)')
+  answers[:product_specs] = $main.yes?('> Add templates for product specification? (y/n)')
 end
 
-answers[:webpack] =
-    $main.send(:webpack_install?) || $main.yes?('Add Webpack? (y/n)')
+answers[:webpack] = $main.send(:webpack_install?) || $main.yes?('Add Webpack? (y/n)')
 
 answers[:design] = $main.yes?('Add tools for design? (y/n)')
 if answers[:design]
@@ -38,24 +36,26 @@ if answers[:design]
 end
 
 answers[:mail] =
-  !$main.options[:skip_action_mailer] || $main.yes?('Use ActionMailer? (y/n)')
+  !$main.options[:skip_action_mailer] && $main.yes?('Add settings for ActionMailer? (y/n)')
 
 answers[:sorcery] = $main.yes?('Add Sorcery? (y/n)')
 
 answers[:sidekiq] = $main.yes?('Add Sidekiq? (y/n)')
-answers[:redis]   = answers[:sidekiq] || $main.yes?('> Add Redis? (y/n)')
+answers[:redis]   = answers[:sidekiq] || $main.yes?('Add Redis? (y/n)')
 if answers[:redis]
   answers[:redis_model] = $main.yes?('> Add RedisModel? (y/n)')
 end
 
 answers[:test] = $main.yes?('Add gems for testing? (y/n)')
 
-answers[:svelte] = $main.yes?('Add Svelte? (y/n)')
+if answers[:webpack]
+  answers[:svelte] = $main.yes?('Add Svelte? (y/n)')
 
-answers[:vue] = $main.yes?('Add Vue? (y/n)')
-if answers[:vue]
-  answers[:vue_formulate] = $main.yes?('> Add Vue-Formulate? (y/n)')
-  answers[:vue_pug]       = $main.yes?('> Add Pug? (y/n)')
+  answers[:vue] = $main.yes?('Add Vue? (y/n)')
+  if answers[:vue]
+    answers[:vue_formulate] = $main.yes?('> Add Vue-Formulate? (y/n)')
+    answers[:vue_pug]       = $main.yes?('> Add Pug? (y/n)')
+  end
 end
 
 answers[:capistrano] = $main.yes?('Add Capistrano? (y/n)')

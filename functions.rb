@@ -71,19 +71,40 @@ def move_npm_package_to_dev(*names)
   $main.create_file('package.json', JSON.pretty_generate(j))
 end
 
+def css_dir(answers)
+  answers[:webpack] ? 'app/javascript/stylesheets' : 'app/assets/stylesheets'
+end
+
 $_bundle_commands = []
+$_npm_packages    = []
+$_npm_commands    = []
 
 def after_bundle_install(&block)
   if ARGV[0] == 'app:template'
     $_bundle_commands << block
   else
-    $main.send(:after_bundle, &block)
+     $main.send(:after_bundle, &block)
   end
+end
+
+def add_npm_package(*names)
+  $_npm_packages += names
+end
+
+def after_npm_install(&block)
+  $_npm_commands << block
 end
 
 at_exit do
   unless $_bundle_commands.empty?
     $main.send(:bundle_command, 'install', 'BUNDLE_IGNORE_MESSAGES' => '1')
-    $_bundle_commands.each { |block| block.call }
+    $_bundle_commands.each(&:call)
+  end
+
+  unless $_npm_packages.empty?
+    $main.run "yarn add #{$_npm_packages.join(' ')}"
+  end
+  unless $_npm_commands.empty?
+    $_npm_commands.each(&:call)
   end
 end
