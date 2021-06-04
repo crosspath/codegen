@@ -3,17 +3,18 @@ Generator.add_actions do |answers|
     'Gemfile',
     [
       "# Bundle edge Rails instead: gem 'rails', github: 'rails/rails'\n",
+      "# Bundle edge Rails instead: gem 'rails', github: 'rails/rails', branch: 'main'\n",
       "# Use Active Model has_secure_password\n",
       "# gem 'bcrypt', '~> 3.1.7'\n",
       "# Use Active Storage variant\n",
       "# gem 'image_processing', '~> 1.2'\n",
       "# Reduces boot times through caching; required in config/boot.rb\n",
       "  # Access an interactive console on exception pages or by calling 'console' anywhere in "\
-          "the code.",
+          "the code.\n",
       "  # Display performance information such as SQL time and flame graphs for each request in "\
-          "your browser.",
+          "your browser.\n",
       "  # Can be configured to work on production as well see: https://github.com/MiniProfiler/"\
-          "rack-mini-profiler/blob/master/README.md",
+          "rack-mini-profiler/blob/master/README.md\n",
       "  # Spring speeds up development by keeping your application running "\
           "in the background. Read more: https://github.com/rails/spring\n",
       "# Windows does not include zoneinfo files, so bundle the tzinfo-data gem\n"
@@ -63,18 +64,6 @@ Generator.add_actions do |answers|
     'config/environments/production.rb',
     {
       from:
-          "  # config.active_record.database_resolver = "\
-          "ActiveRecord::Middleware::DatabaseSelector::Resolver",
-      to:
-          "  # config.active_record.database_resolver =\n"\
-          "  #   ActiveRecord::Middleware::DatabaseSelector::Resolver"
-    }
-  )
-
-  replace_strings(
-    'config/environments/production.rb',
-    {
-      from:
           "  # config.active_record.database_resolver_context = "\
           "ActiveRecord::Middleware::DatabaseSelector::Resolver::Session",
       to:
@@ -100,10 +89,12 @@ Generator.add_actions do |answers|
     {
       from:
           "# You can also remove all the silencers if you're trying to debug "\
-          "a problem that might stem from framework code.",
+          "a problem that might stem from framework code\n# by setting BACKTRACE=1 before calling"\
+          " your invocation, like \"BACKTRACE=1 ./bin/rails runner 'MyClass.perform'\".",
       to:
         "# You can also remove all the silencers if you're trying to debug a problem\n"\
-        "# that might stem from framework code."
+        "# that might stem from framework code by setting BACKTRACE=1 before calling\n"\
+        "# your invocation, like \"BACKTRACE=1 ./bin/rails runner 'MyClass.perform'\"."
     }
   )
 

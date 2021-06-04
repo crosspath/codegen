@@ -5,7 +5,7 @@ def mail_production
   config.action_mailer.delivery_method       = :smtp
   config.action_mailer.perform_deliveries    = true
   config.action_mailer.asset_host            = ENV['ASSET_HOST']
-  config.action_mailer.default_url_options   = {
+  config.action_mailer.default_url_options = {
     host: ENV['MAILER_HOST'],
     from: ENV['MAILER_SENDER']
   }
@@ -26,8 +26,8 @@ end
 def mail_development
   $main.environment(nil, env: 'development') do
     <<-END
-  config.action_mailer.delivery_method     = :file
-  config.action_mailer.perform_deliveries  = true
+  config.action_mailer.delivery_method = :file
+  config.action_mailer.perform_deliveries = true
   config.action_mailer.default_url_options = {
     host: ENV['MAILER_HOST'],
     from: ENV['MAILER_SENDER']
