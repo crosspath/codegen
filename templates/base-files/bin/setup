@@ -10,7 +10,7 @@ end
 
 FileUtils.chdir APP_ROOT do
   puts '== Installing dependencies =='
-  system('bin/bundle check') || system!('bin/bundle install')
+  system('bundle check') || system!('bundle install')
 
   # Install JavaScript dependencies
   system('bin/yarn')

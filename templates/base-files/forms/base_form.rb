@@ -9,12 +9,12 @@
 #
 #       # Список разрешённых атрибутов для всех действий,
 #       # используется в действиях `create` и `update`.
-#       permit :name, :content, :published, category_ids: []
+#       permit attributes: [:name, :content, :published, category_ids: []]
 #
 #       # Список разрешённых атрибутов только для `create`
 #       # и только для `update`.
-#       permit_for create: [{attachments: []}],
-#           update: [:created_at]
+#       permit attributes: [{attachments: []}], on: :create
+#       permit attributes: [:created_at], on: :update
 #
 #       # Можно убрать метод для удаления объектов.
 #       undefine_form_method :destroy
@@ -24,7 +24,7 @@
 #       # Можно переопределить стандартные методы (create, update, destroy) и добавить свои.
 #       # Например, отправка писем, удаление связанных объектов в транзакции, обновление счётчиков.
 #
-#       def self.create(params, author)
+#       def self.create(params, author:)
 #         super(params) do |object|
 #           object.version = 0
 #           object.author  = author
@@ -53,7 +53,7 @@
 #     # => #<struct BaseForm::Result success=..., object=..., errors=[...]>
 #
 #     p ArticleForm.destroy(Article.first)
-#     # => NoMethodError
+#     # => NoMethodError, потому что этот метод убран через undefine_form_method
 #
 # Метод `for_collection` можно использовать для обработки множества объектов.
 # Пример метода формы:
@@ -71,8 +71,9 @@ module BaseForm
   Result = Struct.new(:success, :object, :errors)
   Result.class_eval do
     def errors
-      res = self[:errors] || []
-      res += object.errors.messages.values.flatten if object.respond_to?(:errors)
+      res = {}
+      res[:messages] = self[:errors] if self[:errors].present?
+      res[:details] = object.errors.to_hash if object.respond_to?(:errors)
       res
     end
 
@@ -89,31 +90,27 @@ module BaseForm
 
   # Form actions
 
-  def create(params)
-    object = new_model_object(params)
+  def create(params, **options)
+    object = model_class.new(attributes(params, :create, **options))
     yield(object) if block_given?
     result(object.save, object)
   end
 
-  def update(object, params)
-    object.attributes = attributes(params, :update)
+  def update(object, params, **options)
+    object.attributes = attributes(params, :update, **options)
     yield(object) if block_given?
     result(object.save, object)
   end
 
-  def destroy(object)
+  def destroy(object, **_options)
     result(object.destroy, object)
   end
 
   # DSL, module-scoped methods
 
-  def permit(*attributes_list)
-    @_permit = attributes_list
-  end
-
-  def permit_for(options = {})
-    @_permit_for ||= {}
-    @_permit_for.merge!(options.symbolize_keys)
+  def permit(attributes: [], on: nil, check: nil)
+    @_permit ||= []
+    @_permit << {attributes: attributes, on: on&.to_sym, check: check}
   end
 
   def model_name(class_name)
@@ -131,21 +128,21 @@ module BaseForm
 
   # Helper methods for form actions
 
-  def new_model_object(params)
-    model_class.new(attributes(params, :create))
-  end
-
   def model_class
     @_model_name ||= self.name.sub(/Form$/, '')
     @_model_name.constantize
   end
 
-  def attributes(params, key = nil)
-    attrs_list = @_permit || []
-    attrs_list += key && @_permit_for && @_permit_for[key.to_sym] || []
-    unless params.respond_to?(:permit)
-      params = ActionController::Parameters.new(params)
+  def attributes(params, key = nil, **options)
+    key = key&.to_sym
+
+    selected = (@_permit || []).select do |hash|
+      (hash[:on].nil? || hash[:on] == key) && (hash[:check].nil? || hash[:check].call(options))
     end
+
+    attrs_list = selected.flat_map { |hash| hash[:attributes] }
+
+    params = ActionController::Parameters.new(params) unless params.respond_to?(:permit)
     params.permit(attrs_list)
   rescue NoMethodError
     raise ArgumentError, "Unexpected value: #{params.inspect}"

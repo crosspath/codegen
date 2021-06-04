@@ -80,11 +80,11 @@ $_npm_packages    = []
 $_npm_commands    = []
 
 def after_bundle_install(&block)
-  if ARGV[0] == 'app:template'
-    $_bundle_commands << block
-  else
-     $main.send(:after_bundle, &block)
-  end
+  # if ARGV[0] == 'app:template'
+  $_bundle_commands << block
+  # else
+  # $main.send(:after_bundle, &block)
+  # end
 end
 
 def add_npm_package(*names)

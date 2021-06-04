@@ -86,6 +86,7 @@ def base_scss(answers)
   css_file = 'app/assets/stylesheets/application.css'
 
   $main.create_file("#{css_dir(answers)}/application.scss") do
+    next unless File.exist?(css_file)
     existing = File.read(css_file)
 
     existing.gsub!(%r{/\*(.*)\*/}m, '')
@@ -156,10 +157,26 @@ def base_data_migrations
     "config.middleware.use CheckDataMigration"
   end
 
+  $main.prepend_to_file('config/environments/development.rb') do
+    "require Rails.root.join('app/middlewares/check_data_migration')\n"
+  end
+
   f(
     'app/middlewares/check_data_migration.rb',
     'data-migrations/check_data_migration.rb'
   )
+end
+
+def base_lib_assets
+  $main.remove_dir('lib/assets') if Dir.empty?('lib/assets')
+end
+
+def base_vendor
+  if Dir.empty?('vendor')
+    $main.remove_dir('vendor')
+    $main.gsub_file('.gitattributes', "# Mark any vendored files as having been vendored.\n", '')
+    $main.gsub_file('.gitattributes', "vendor/* linguist-vendored\n", '')
+  end
 end
 
 Generator.add_actions do |answers|
@@ -181,4 +198,6 @@ Generator.add_actions do |answers|
   base_gems(answers)
   base_debug
   base_data_migrations
+  base_lib_assets
+  base_vendor
 end

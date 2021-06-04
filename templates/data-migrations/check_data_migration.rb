@@ -4,9 +4,7 @@ class CheckDataMigration
   end
 
   def call(env)
-    if DataMigrate::DataMigrator.needs_migration?
-      raise 'Run `rails data:migrate`'
-    end
+    raise 'Run `rails data:migrate`' if DataMigrate::DataMigrator.needs_migration?
     @app.call(env)
   end
 end

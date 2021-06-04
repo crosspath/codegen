@@ -8,6 +8,12 @@ Generator.add_actions do |answers|
       "# Use Active Storage variant\n",
       "# gem 'image_processing', '~> 1.2'\n",
       "# Reduces boot times through caching; required in config/boot.rb\n",
+      "  # Access an interactive console on exception pages or by calling 'console' anywhere in "\
+          "the code.",
+      "  # Display performance information such as SQL time and flame graphs for each request in "\
+          "your browser.",
+      "  # Can be configured to work on production as well see: https://github.com/MiniProfiler/"\
+          "rack-mini-profiler/blob/master/README.md",
       "  # Spring speeds up development by keeping your application running "\
           "in the background. Read more: https://github.com/rails/spring\n",
       "# Windows does not include zoneinfo files, so bundle the tzinfo-data gem\n"
