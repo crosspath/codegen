@@ -34,16 +34,13 @@ $main.inject_into_file(
 
     def serializer_class
       @_serializer_name ||= "\#{self.name}Serializer".freeze
-      @_serializer_name.constantize
-    end
-
-    def serialized(serializer: serializer_class, **options)
-      serializer.render_as_hash(self.all, **options)
+      const_defined?(@_serializer_name) ? const_get(@_serializer_name) : nil
     end
   end
 
-  def serialized(serializer: self.class.serializer_class, **options)
-    serializer.render_as_hash(self, **options)
+  def serializable_hash(options = {})
+    serializer = options.delete(:serializer) || self.class.serializer_class
+    serializer ? serializer.render_as_hash(self, options) : super(options)
   end
   END
 end
