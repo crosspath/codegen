@@ -116,6 +116,7 @@ def base_paths(answers)
       presenters
       queries
       serializers
+      services
     ]
   END
 end
@@ -186,6 +187,8 @@ Generator.add_actions do |answers|
   base_dir('forms')
   base_dir('presenters')
   base_dir('queries')
+  $main.empty_directory('app/serializers')
+  base_dir('services')
   base_controller(answers)
   if answers[:slim]
     base_layout_slim(answers)

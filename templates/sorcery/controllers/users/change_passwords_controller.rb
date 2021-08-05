@@ -1,6 +1,6 @@
 class Users::ChangePasswordsController < ApplicationController
   def show
-    result = UserAuthForm.find_by_token(params, current_user)
+    result = UserAuth.find_by_token(params, current_user)
 
     if result.success
       @user = result.object
@@ -13,7 +13,7 @@ class Users::ChangePasswordsController < ApplicationController
   def create
     @user = User.find_by(email: session[:user_email])
 
-    result = UserAuthForm.change_password(@user, params)
+    result = UserAuth.change_password(@user, params)
     if result.success
       session.delete(:user_email)
       redirect_to(logged_in? ? root_path : session_path, notice: result.errors)

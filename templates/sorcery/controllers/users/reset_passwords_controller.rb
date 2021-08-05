@@ -4,7 +4,7 @@ class Users::ResetPasswordsController < ApplicationController
   def show; end
 
   def create
-    result   = UserAuthForm.reset_password(params)
+    result   = UserAuth.reset_password(params)
     messages = result.errors
 
     case result.success

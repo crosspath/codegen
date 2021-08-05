@@ -54,39 +54,9 @@
 #
 #     p ArticleForm.destroy(Article.first)
 #     # => NoMethodError, потому что этот метод убран через undefine_form_method
-#
-# Метод `for_collection` можно использовать для обработки множества объектов.
-# Пример метода формы:
-#
-#     def self.create(names)
-#       for_collection do |_errors, objects|
-#         names.each do |name|
-#           object = model_class.find_of_create_by(name: name)
-#           objects << object unless object.valid?
-#         end
-#       end
-#     end
 
 module BaseForm
-  Result = Struct.new(:success, :object, :errors)
-  Result.class_eval do
-    def errors
-      res = {}
-      res[:messages] = self[:errors] if self[:errors].present?
-      res[:details] = object.errors.to_hash if object.respond_to?(:errors)
-      res
-    end
-
-    def on_success
-      yield(self) if success
-      self
-    end
-
-    def on_failure
-      yield(self) unless success
-      self
-    end
-  end
+  include BaseService
 
   # Form actions
 
@@ -97,7 +67,7 @@ module BaseForm
   end
 
   def update(object, params, **options)
-    object.attributes = attributes(params, :update, **options)
+    object.attributes = attributes(params, :update, object: object, **options)
     yield(object) if block_given?
     result(object.save, object)
   end
@@ -110,7 +80,7 @@ module BaseForm
 
   def permit(attributes: [], on: nil, check: nil)
     @_permit ||= []
-    @_permit << {attributes: attributes, on: on&.to_sym, check: check}
+    @_permit << { attributes: attributes, on: on&.to_sym, check: check }
   end
 
   def model_name(class_name)
@@ -122,54 +92,75 @@ module BaseForm
       undef_method(*actions)
     end
   end
-  alias :undefine_form_methods :undefine_form_method
+  alias undefine_form_methods undefine_form_method
 
   private
 
   # Helper methods for form actions
 
   def model_class
-    @_model_name ||= self.name.sub(/Form$/, '')
+    @_model_name ||= name.sub(/Form$/, '')
     @_model_name.constantize
   end
 
   def attributes(params, key = nil, **options)
+    params = ActionController::Parameters.new(params) unless params.respond_to?(:permit)
+    params.permit(attributes_list(key, **options))
+  rescue NoMethodError
+    raise ArgumentError, "Unexpected value: #{params.inspect}"
+  end
+
+  # rubocop:disable Metrics/AbcSize, Metrics/CyclomaticComplexity, Style/ParallelAssignment
+  def attributes_list(key = nil, **options)
     key = key&.to_sym
 
     selected = (@_permit || []).select do |hash|
       (hash[:on].nil? || hash[:on] == key) && (hash[:check].nil? || hash[:check].call(options))
     end
 
-    attrs_list = selected.flat_map { |hash| hash[:attributes] }
+    attrs_list  = selected.flat_map { |hash| hash[:attributes] }
+    array, hash = merge_attributes_list(attrs_list)
 
-    params = ActionController::Parameters.new(params) unless params.respond_to?(:permit)
-    params.permit(attrs_list)
-  rescue NoMethodError
-    raise ArgumentError, "Unexpected value: #{params.inspect}"
+    replace_empty_hash_in_array_to_hash(array + [hash])
   end
 
-  def for_collection
-    errors  = []
-    objects = []
+  def merge_attributes_list(attrs_list)
+    array, hash = [], {}
 
-    yield errors, objects
-
-    objects.each do |obj|
-      errors.concat(obj.errors.messages.values.flatten) if obj.respond_to?(:errors)
+    attrs_list.each do |e|
+      case e
+      when Array
+        new_array, new_hash = combine_attributes(e)
+        array += new_array
+        hash.merge!(new_hash)
+      when Hash
+        e.each do |k, v|
+          # Для операции вида "разрешить все ключи" используется запись вида `атрибут: {}`, но если
+          # использовать `атрибут: [{}]`, то ни один ключ не попадёт в результат. Эта ситуация
+          # исправляется дальше в `replace_empty_hash_in_array_to_hash`.
+          if v == {}
+            hash[k] ||= [{}]
+          else
+            new_array, new_hash = merge_attributes_list(Array.wrap(hash[k]) + Array.wrap(v))
+            hash[k] = new_array + (new_hash.empty? ? [] : [new_hash])
+          end
+        end
+      else
+        array << e
+      end
     end
 
-    result(errors.empty?, objects, errors.uniq)
+    [array, hash]
   end
+  # rubocop:enable Metrics/AbcSize, Metrics/CyclomaticComplexity, Style/ParallelAssignment
 
-  def result(success, object = nil, errors = [])
-    Result.new(success, object, errors)
-  end
-
-  def success(object = nil, errors = [])
-    Result.new(true, object, errors)
-  end
-
-  def failure(object = nil, errors = [])
-    Result.new(false, object, errors)
+  def replace_empty_hash_in_array_to_hash(list)
+    list.map do |e|
+      if e.is_a?(Hash)
+        e.transform_values { |v| v == [{}] ? {} : replace_empty_hash_in_array_to_hash(v) }
+      else
+        e
+      end
+    end
   end
 end

@@ -1,7 +1,5 @@
-module UserAuthForm
-  extend BaseForm
-
-  undefine_form_methods :create, :update, :destroy
+module UserAuth
+  extend BaseService
 
   def self.find_by_token(params, user = nil)
     token = params[:token]

@@ -38,7 +38,7 @@ def sorcery_base(answers)
   $main.route "root to: 'welcome#index'"
 
   d('config/locales', 'sorcery/locales')
-  d('app/forms', 'sorcery/forms', recursive: true)
+  d('app/services', 'sorcery/services', recursive: true)
 
   if answers[:mail]
     $main.gsub_file(
