@@ -20,8 +20,7 @@ def webpack_comment
   remove_strings(
     'app/javascript/packs/application.js',
     [
-      "// This file is automatically compiled by Webpack, along with any "\
-          "other files\n"\
+      "// This file is automatically compiled by Webpack, along with any other files\n"\
           "// present in this directory. You're encouraged to place your "\
           "actual application logic in\n"\
           "// a relevant structure within app/javascript and only use these "\

@@ -7,7 +7,7 @@
       plural: {
         keys: [:zero, :one, :few, :many, :other],
 
-        rule: lambda do |n|
+        rule: ->(n) do
           if n == 0
             :zero
           elsif n % 1 > 0

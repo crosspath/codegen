@@ -11,8 +11,5 @@ Generator.add_actions do |answers|
     $main.append_to_file('app/javascript/packs/application.js') do
       "import '../lib/svelte';\n"
     end
-
-    # TODO: Проверить, будет ли выполняться сборка.
-    # move_npm_package_to_dev('svelte', 'svelte-loader')
   end
 end
