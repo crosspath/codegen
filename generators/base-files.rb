@@ -11,7 +11,14 @@ Thumbs.db
 ~$*
 
 /vendor/*
-!/vendor/.keep
+
+# For Heroku
+.yarn/*
+!.yarn/cache
+!.yarn/releases
+!.yarn/plugins
+!.yarn/sdks
+!.yarn/versions
     LINE
   )
 end
@@ -109,18 +116,6 @@ def base_locale_ru
   END
 end
 
-def base_paths(answers)
-  $main.initializer 'paths.rb', <<~END
-    Rails.application.config.autoload_paths += %w[
-      forms
-      presenters
-      queries
-      serializers
-      services
-    ]
-  END
-end
-
 def base_gems(answers)
   use_sass = !answers[:webpack]
 
@@ -197,7 +192,6 @@ Generator.add_actions do |answers|
   end
   base_scss(answers)
   base_locale_ru
-  base_paths(answers)
   base_gems(answers)
   base_debug
   base_data_migrations

@@ -6,7 +6,7 @@ class User < ApplicationRecord
   validates :password, length: 6..30, allow_nil: true
 
   def reload
-    super
     self.password = nil
+    super
   end
 end
