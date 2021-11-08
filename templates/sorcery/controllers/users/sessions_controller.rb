@@ -7,7 +7,7 @@ class Users::SessionsController < ApplicationController
     @email = params[:email]
     reason = nil
 
-    login(@email, params[:password]) do |user, failure_reason|
+    login(@email, params[:password]) do |_user, failure_reason|
       reason = failure_reason
     end
 

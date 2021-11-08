@@ -19,11 +19,14 @@
 #     end
 
 module BaseService
-  Result = Struct.new(:success, :object, :errors) do
+  Result = Struct.new(:success, :object, :messages) do
     def errors
-      res = {}
-      res[:messages] = self[:errors] if self[:errors].present?
-      res[:details]  = object.errors.to_hash if object.respond_to?(:errors) && !object.errors.empty?
+      res     = {}
+      details = object.respond_to?(:errors) && object.errors
+
+      res[:messages] = messages if messages.present?
+      res[:details]  = details.to_hash if details.present?
+
       res
     end
 
@@ -38,43 +41,56 @@ module BaseService
     end
   end
 
-  # rubocop:disable Metrics/AbcSize
   Collection = Struct.new(:items) do
     def errors
-      names_map = {}
-      count_map = {}
+      helper = CollectionErrorsHelper.new({})
 
-      items.flat_map do |item|
-        next unless item.respond_to?(:errors)
-
-        name = item.class.name
-        names_map[name] ||= name.underscore
-        count_map[name] ||= 0
-
-        index = count_map[name]
-        count_map[name] += 1
-
-        item.errors.map do |error|
-          ["#{names_map[name]}[#{index}].#{error.attribute}", error.message]
-        end
-      end.to_h
+      items.flat_map { |item| helper.messages_for(item) }.to_h
     end
   end
-  # rubocop:enable Metrics/AbcSize
+
+  CollectionErrorsHelper = Struct.new(:counter) do
+    def messages_for(item)
+      key = item.class.name
+
+      use_key(key) { item.respond_to?(:errors) ? generate_messages(item, key) : [] }
+    end
+
+    private
+
+    def use_key(key)
+      counter[key] ||= [key.underscore, 0]
+      result = yield
+      counter[key][1] += 1
+      result
+    end
+
+    def generate_messages(item, key)
+      name, count = counter[key]
+
+      item.errors.map do |*error|
+        # Rails 6.0 requires block with 2 arguments: attribute name and message.
+        # Rails 6.1 requires block with 1 argument: instance of ActiveModel::Error.
+        attribute, message = error.size == 1 ? [error[0].attribute, error[0].message] : error
+
+        ["#{name}[#{count}].#{attribute}", message]
+      end
+    end
+  end
 
   def collection(items)
     Collection.new(items)
   end
 
-  def result(success, object = nil, errors = [])
-    Result.new(success, object, errors)
+  def result(success, object = nil, messages = [])
+    Result.new(success, object, messages)
   end
 
-  def success(object = nil, errors = [])
-    Result.new(true, object, errors)
+  def success(object = nil, messages = [])
+    Result.new(true, object, messages)
   end
 
-  def failure(object = nil, errors = [])
-    Result.new(false, object, errors)
+  def failure(object = nil, messages = [])
+    Result.new(false, object, messages)
   end
 end

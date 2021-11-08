@@ -34,7 +34,7 @@ def webpack_css(answers)
   if answers[:design]
     $main.append_to_file(
       'app/javascript/stylesheets/application.scss',
-      "@import './components/flash.scss';\n"
+      "@import './components/flash';\n"
     )
   end
 

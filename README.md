@@ -2,6 +2,7 @@
 
 Создание папки с проектом:
 
+    rails new app_name --rc=api.rc --template=codegen/codegen.rb
     rails new app_name --rc=minimum.rc --template=codegen/codegen.rb
     rails new app_name --rc=default.rc --template=codegen/codegen.rb
 

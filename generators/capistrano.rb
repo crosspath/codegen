@@ -113,7 +113,7 @@ Generator.add_actions do |answers|
     $main.gem 'capistrano-rails'
     $main.gem 'capistrano-rails-console'
     $main.gem 'capistrano-rvm'
-    $main.gem 'capistrano-sidekiq', '2.0.0.beta5' if answers[:sidekiq]
+    $main.gem 'capistrano-sidekiq' if answers[:sidekiq]
     $main.gem 'capistrano-yarn'
   end
 

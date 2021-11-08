@@ -43,7 +43,7 @@ def erb(save_to, read_from, **locals)
 end
 
 def yaml(save_to, read_from)
-  entries = File.exists?(save_to) ? YAML.load(save_to).to_ruby : {}
+  entries = File.exist?(save_to) ? YAML.load(save_to).to_ruby : {}
   append  = File.read(File.join(__dir__, 'templates', read_from))
 
   entries.deep_merge!(append)
@@ -54,15 +54,21 @@ def yaml(save_to, read_from)
 end
 
 def remove_strings(file, strings)
-  $main.gsub_file(file, /#{strings.join('|')}/m, '')
+  $main.gsub_file(file, /#{strings.join('|')}/m, '') if File.exist?(file)
 end
 
 def replace_strings(file, strings)
-  $main.gsub_file(file, strings[:from], strings[:to])
+  $main.gsub_file(file, strings[:from], strings[:to]) if File.exist?(file)
 end
 
 def css_dir(answers)
   answers[:webpack] ? 'app/javascript/stylesheets' : 'app/assets/stylesheets'
+end
+
+def empty_dir?(directory)
+  entries = Dir.glob("#{directory}/*", flags: File::FNM_DOTMATCH)
+  except  = %w[. .. .keep].map { |x| "#{directory}/#{x}" }
+  (entries - except).empty?
 end
 
 $_bundle_commands = []

@@ -1,8 +1,6 @@
 Generator.add_actions do |answers|
   next unless answers[:svelte]
 
-  require_relative '../js/xhr.rb'
-
   after_bundle_install do
     $main.rails_command 'webpacker:install:svelte'
 

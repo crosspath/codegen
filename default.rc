@@ -5,4 +5,5 @@
 --skip-jbuilder
 --skip-sprockets
 --skip-system-test
+--skip-turbolinks
 --webpacker

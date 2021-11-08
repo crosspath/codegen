@@ -1,8 +1,8 @@
 // For Vue-Formulate
 
-@import './_bootstrap-base';
+@import './bootstrap-base';
 @import 'bootstrap/scss/forms';
-@import 'bootstrap/scss/utilities/spacing';
+@import 'bootstrap/scss/vendor/rfs';
 @import 'bootstrap/scss/buttons';
 
 @import '@braid/vue-formulate/themes/snow/snow';
@@ -21,12 +21,13 @@
 }
 
 .formulate-input .formulate-input-label {
-  @extend .ml-2, .mb-2;
+  @include margin-left(1rem);
+  @include margin-bottom(1rem);
   font-size: 1rem;
 }
 
 .formulate-input-element--select > select {
-  @extend .pl-1;
+  @include padding-left(0.5rem);
   -webkit-appearance: none;
 }
 

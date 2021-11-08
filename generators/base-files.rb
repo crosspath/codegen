@@ -11,6 +11,14 @@ Thumbs.db
 ~$*
 
 /vendor/*
+    LINE
+  )
+
+  return if $main.options[:api]
+
+  $main.append_to_file(
+    '.gitignore',
+    <<-LINE
 
 # For Heroku
 .yarn/*
@@ -61,6 +69,24 @@ def base_controller(answers)
   end
 end
 
+def base_layout(answers)
+  if answers[:slim]
+    base_layout_slim(answers)
+  else
+    base_layout_erb(answers)
+  end
+end
+
+def base_stylesheet_in_erb(answers)
+  return '' unless answers[:webpack]
+
+  if answers[:turbolinks]
+    "<%= stylesheet_pack_tag 'application', 'data-turbolinks-track' => 'reload', media: 'all' %>"
+  else
+    "<%= stylesheet_pack_tag 'application', media: 'all' %>"
+  end
+end
+
 def base_layout_erb(answers)
   $main.inject_into_file(
     'app/views/layouts/application.html.erb',
@@ -69,6 +95,7 @@ def base_layout_erb(answers)
     <<-END
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
+    #{base_stylesheet_in_erb(answers)}
     END
   end
 
@@ -83,7 +110,7 @@ def base_layout_slim(answers)
   erb(
     'app/views/layouts/application.slim',
     'base-files/layouts/application.slim.erb',
-    skip_turbolinks: $main.options[:skip_turbolinks]
+    skip_turbolinks: !answers[:turbolinks]
   )
 
   $main.remove_file('app/views/layouts/application.html.erb')
@@ -94,8 +121,8 @@ def base_scss(answers)
 
   $main.create_file("#{css_dir(answers)}/application.scss") do
     next unless File.exist?(css_file)
-    existing = File.read(css_file)
 
+    existing = File.read(css_file)
     existing.gsub!(%r{/\*(.*)\*/}m, '')
     existing.strip!
 
@@ -120,13 +147,13 @@ def base_gems(answers)
   use_sass = !answers[:webpack]
 
   puts '      reset required gem versions'
-  gems = %w[pg puma webpacker turbolinks]
+  gems = %w[pg puma webpacker]
   gems << 'sass-rails' if use_sass
   gems.each do |name|
     $main.gsub_file('Gemfile', /^#[^\n]*\ngem '#{name}'.*$/, "gem '#{name}'")
   end
 
-  gems = %w[jbuilder byebug web-console]
+  gems = %w[byebug rack-mini-profiler web-console]
   gems << 'sass-rails' unless use_sass
   puts "      remove    #{gems.join(', ')}"
   gems.each do |name|
@@ -135,7 +162,9 @@ def base_gems(answers)
 
   $main.gem 'slim-rails' if answers[:slim]
 
-  $main.gem 'dotenv-rails'
+  $main.gem_group :development, :test do
+    $main.gem 'dotenv-rails'
+  end
 end
 
 def base_debug
@@ -144,6 +173,11 @@ def base_debug
     $main.gem 'binding_of_caller'
     $main.gem 'pry-rails' if RUBY_VERSION < '2.7'
   end
+
+  $main.append_to_file(
+    'Gemfile',
+    "# gem 'rack-mini-profiler', group :development # panel with timing of a page load\n"
+  )
 end
 
 def base_data_migrations
@@ -157,18 +191,15 @@ def base_data_migrations
     "require Rails.root.join('app/middlewares/check_data_migration')\n"
   end
 
-  f(
-    'app/middlewares/check_data_migration.rb',
-    'data-migrations/check_data_migration.rb'
-  )
+  f('app/middlewares/check_data_migration.rb', 'data-migrations/check_data_migration.rb')
 end
 
 def base_lib_assets
-  $main.remove_dir('lib/assets') if Dir.empty?('lib/assets')
+  $main.remove_dir('lib/assets') if empty_dir?('lib/assets')
 end
 
 def base_vendor
-  if Dir.empty?('vendor')
+  if empty_dir?('vendor')
     $main.remove_dir('vendor')
     $main.gsub_file('.gitattributes', "# Mark any vendored files as having been vendored.\n", '')
     $main.gsub_file('.gitattributes', "vendor/* linguist-vendored\n", '')
@@ -176,25 +207,30 @@ def base_vendor
 end
 
 Generator.add_actions do |answers|
+  next unless answers[:base]
+
   base_gitignore
   base_root
   base_bin
   base_dir('forms')
-  base_dir('presenters')
   base_dir('queries')
   $main.empty_directory('app/serializers')
   base_dir('services')
   base_controller(answers)
-  if answers[:slim]
-    base_layout_slim(answers)
-  else
-    base_layout_erb(answers)
-  end
-  base_scss(answers)
   base_locale_ru
   base_gems(answers)
-  base_debug
   base_data_migrations
   base_lib_assets
   base_vendor
+
+  if $main.options[:api]
+    $main.remove_dir('app/javascript') if empty_dir?('app/javascript')
+    $main.remove_file('Procfile.dev')
+  else
+    base_dir('presenters')
+    base_layout(answers)
+    base_scss(answers)
+    base_debug
+    add_npm_package('turbolinks') if answers[:turbolinks]
+  end
 end

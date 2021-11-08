@@ -35,7 +35,7 @@ end
 def vue_files(answers)
   $main.append_to_file("#{css_dir(answers)}/application.scss") do
     lines = ["@import 'vue-multiselect/dist/vue-multiselect.min.css';\n"]
-    lines << "@import './_formulate.scss';\n" if answers[:vue_formulate]
+    lines << "@import './formulate';\n" if answers[:vue_formulate]
     lines.join
   end
 
@@ -80,8 +80,6 @@ end
 
 Generator.add_actions do |answers|
   next unless answers[:vue]
-
-  require_relative '../js/xhr.rb'
 
   vue_presenter
 
