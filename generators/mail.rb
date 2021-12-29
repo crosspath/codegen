@@ -52,6 +52,7 @@ def mail_dotenv
       "MAILER_HOST=localhost:3000\nMAILER_SENDER=admin@localhost\n"
 
   $main.append_to_file('.env', mailer_constants)
+  $main.create_file('.env.production') unless File.exist?('.env.production')
 
   $main.append_to_file(
     '.env.production',

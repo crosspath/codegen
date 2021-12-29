@@ -54,6 +54,14 @@ def yaml(save_to, read_from)
 end
 
 def remove_strings(file, strings)
+  pattern = Regexp.new('[]{}()<>#$^*-+?'.each_char.map { |x| "\\#{x}" }.join('|'))
+  strings = strings.map do |str|
+    if str.is_a?(Regexp)
+      str
+    else
+      str.gsub(pattern) { |x| "\\#{x}" }
+    end
+  end
   $main.gsub_file(file, /#{strings.join('|')}/m, '') if File.exist?(file)
 end
 

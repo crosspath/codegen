@@ -122,7 +122,7 @@ def base_scss(answers)
     existing
   end
 
-  $main.remove_file(css_file)
+  css_files.each { |x| $main.remove_file(x) }
 end
 
 def base_locale_ru
@@ -211,7 +211,10 @@ Generator.add_actions do |answers|
   base_controller(answers)
   base_locale_ru
   base_gems(answers)
-  base_data_migrations
+  # FIXME: DataMigrate::Migration is not compatible with Rails 7
+  # Current: DataMigrate::Migration < ActiveRecord::Migration
+  # Should be: DataMigrate::Migration < ActiveRecord::Migration[7.0]
+  # base_data_migrations
   base_lib_assets
   base_vendor
 

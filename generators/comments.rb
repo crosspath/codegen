@@ -59,7 +59,7 @@ Generator.add_actions do |answers|
     ]
   )
 
-  remove_strings('db/seeds.rb', ["#[^\n]*\n"])
+  remove_strings('db/seeds.rb', [/#[^\n]*\n/])
   if File.read('db/seeds.rb').strip.empty?
     $main.append_to_file('db/seeds.rb', "# db/seeds.rb\n")
   end
@@ -69,6 +69,6 @@ Generator.add_actions do |answers|
       "in config/application.rb.\n\s*"
 
   %w[development test production].each do |key|
-    remove_strings("config/environments/#{key}.rb", [env_string])
+    remove_strings("config/environments/#{key}.rb", [/#{env_string}/])
   end
 end
