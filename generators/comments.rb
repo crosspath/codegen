@@ -2,22 +2,25 @@ Generator.add_actions do |answers|
   remove_strings(
     'Gemfile',
     [
-      "# Bundle edge Rails instead: gem 'rails', github: 'rails/rails'\n",
-      "# Bundle edge Rails instead: gem 'rails', github: 'rails/rails', branch: 'main'\n",
-      "# Use Active Model has_secure_password\n",
-      "# gem 'bcrypt', '~> 3.1.7'\n",
-      "# Use Active Storage variant\n",
-      "# gem 'image_processing', '~> 1.2'\n",
+      "# Bundle edge Rails instead: gem \"rails\", github: \"rails/rails\", branch: \"main\"\n",
+      "# The original asset pipeline for Rails [https://github.com/rails/sprockets-rails]\n",
+      "# Use postgresql as the database for Active Record\n",
+      "# Use the Puma web server [https://github.com/puma/puma]\n",
+      "# Bundle and transpile JavaScript [https://github.com/rails/jsbundling-rails]\n",
+      "# Bundle and process CSS [https://github.com/rails/cssbundling-rails]\n",
+      "# Use Kredis to get higher-level data types in Redis [https://github.com/rails/kredis]\n",
+      "# gem \"kredis\"\n",
+      "# Use Active Model has_secure_password [https://guides.rubyonrails.org/active_model_basics.html#securepassword]\n",
+      "# gem \"bcrypt\", \"~> 3.1.7\"\n",
+      "# Windows does not include zoneinfo files, so bundle the tzinfo-data gem\n",
       "# Reduces boot times through caching; required in config/boot.rb\n",
-      "  # Access an interactive console on exception pages or by calling 'console' anywhere in "\
-          "the code.\n",
-      "  # Display performance information such as SQL time and flame graphs for each request in "\
-          "your browser.\n",
-      "  # Can be configured to work on production as well see: https://github.com/MiniProfiler/"\
-          "rack-mini-profiler/blob/master/README.md\n",
-      "  # Spring speeds up development by keeping your application running "\
-          "in the background. Read more: https://github.com/rails/spring\n",
-      "# Windows does not include zoneinfo files, so bundle the tzinfo-data gem\n"
+      "# Use Sass to process CSS\n",
+      "# gem \"sassc-rails\"\n",
+      "# Use Active Storage variants [https://guides.rubyonrails.org/active_storage_overview.html#transforming-images]\n",
+      "# gem \"image_processing\", \"~> 1.2\"\n",
+      "# See https://guides.rubyonrails.org/debugging_rails_applications.html#debugging-with-the-debug-gem\n",
+      "# Add speed badges [https://github.com/MiniProfiler/rack-mini-profiler]\n",
+      "# Speed up commands on slow machines / big apps [https://github.com/rails/spring]\n",
     ]
   )
 
@@ -27,23 +30,32 @@ Generator.add_actions do |answers|
       "# Require the gems listed in Gemfile, including any gems\n"\
           "# you've limited to :test, :development, or :production.\n",
       "    # Initialize configuration defaults for originally generated Rails version.\n",
-      "\n\s*# Settings in config.+ any gems in your application.\n"
-    ]
-  )
-
-  remove_strings(
-    'config/puma.rb',
-    [
-      "# Specifies the `port` that Puma will listen on to receive requests; default is 3000.\n#\n",
-      "\n# Specifies the `environment` that Puma will run in.\n#\n"
+      <<-END,
+    # Configuration for the application, engines, and railties goes here.
+    #
+    # These settings can be overridden in specific environments using the files
+    # in config/environments, which are processed later.
+    #
+    # config.time_zone = "Central Time (US & Canada)"
+    # config.eager_load_paths << Rails.root.join("extras")
+      END
+      "    # Don't generate system test files.\n",
+      <<-END,
+    # Only loads a smaller set of middleware suitable for API only apps.
+    # Middleware like session, flash, cookies can be added back manually.
+    # Skip views, helpers and assets when generating a new resource.
+      END
     ]
   )
 
   remove_strings(
     'config/routes.rb',
     [
-      "  # For details on the DSL available within this file, see "\
-          "https://guides.rubyonrails.org/routing.html\n"
+      "  # Define your application routes per the DSL in https://guides.rubyonrails.org/routing.html\n",
+      <<-END,
+  # Defines the root path route ("/")
+  # root "articles#index"
+      END
     ]
   )
 
@@ -59,68 +71,4 @@ Generator.add_actions do |answers|
   %w[development test production].each do |key|
     remove_strings("config/environments/#{key}.rb", [env_string])
   end
-
-  replace_strings(
-    'config/environments/production.rb',
-    {
-      from:
-          "  # config.active_record.database_resolver_context = "\
-          "ActiveRecord::Middleware::DatabaseSelector::Resolver::Session",
-      to:
-          "  # config.active_record.database_resolver_context =\n"\
-          "  #   ActiveRecord::Middleware::DatabaseSelector::Resolver::Session"
-    }
-  )
-
-  replace_strings(
-    'config/initializers/backtrace_silencers.rb',
-    {
-      from:
-          "# You can add backtrace silencers for libraries that you're using "\
-          "but don't wish to see in your backtraces.",
-      to:
-          "# You can add backtrace silencers for libraries that you're using\n"\
-          "# but don't wish to see in your backtraces."
-    }
-  )
-
-  replace_strings(
-    'config/initializers/backtrace_silencers.rb',
-    {
-      from:
-          "# You can also remove all the silencers if you're trying to debug "\
-          "a problem that might stem from framework code\n# by setting BACKTRACE=1 before calling"\
-          " your invocation, like \"BACKTRACE=1 ./bin/rails runner 'MyClass.perform'\".",
-      to:
-        "# You can also remove all the silencers if you're trying to debug a problem\n"\
-        "# that might stem from framework code by setting BACKTRACE=1 before calling\n"\
-        "# your invocation, like \"BACKTRACE=1 ./bin/rails runner 'MyClass.perform'\"."
-    }
-  )
-
-  replace_strings(
-    'config/initializers/content_security_policy.rb',
-    {
-      from:
-          "#   policy.connect_src :self, :https, \"http://localhost:3035\", "\
-          "\"ws://localhost:3035\" if Rails.env.development?",
-      to:
-        "#   if Rails.env.development?\n"\
-        "#     policy.connect_src(:self, :https, \"http://localhost:3035\", "\
-        "\"ws://localhost:3035\")\n"\
-        "#   end"
-    }
-  )
-
-  replace_strings(
-    'config/initializers/content_security_policy.rb',
-    {
-      from:
-          "# Rails.application.config.content_security_policy_nonce_generator"\
-          " = -> request { SecureRandom.base64(16) }",
-      to:
-          "# Rails.application.config.content_security_policy_nonce_generator =\n"\
-          "#   -> request { SecureRandom.base64(16) }"
-    }
-  )
 end

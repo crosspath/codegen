@@ -13,10 +13,10 @@ html
 
 <% if skip_turbolinks %>
     = stylesheet_link_tag 'application', media: 'all'
-    = javascript_pack_tag 'application'
+    = javascript_include_tag 'application'
 <% else %>
     = stylesheet_link_tag 'application', 'data-turbolinks-track' => 'reload', media: 'all'
-    = javascript_pack_tag 'application', 'data-turbolinks-track' => 'reload'
+    = javascript_include_tag 'application', 'data-turbolinks-track' => 'reload'
 <% end %>
 
   body

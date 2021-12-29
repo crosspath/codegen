@@ -35,7 +35,7 @@ end
 def xhr_application_record
   $main.inject_into_file(
     'app/models/application_record.rb',
-    after: "self.abstract_class = true\n"
+    after: "primary_abstract_class\n"
   ) do
     <<-END
 

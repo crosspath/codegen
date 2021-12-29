@@ -15,11 +15,8 @@ FileUtils.chdir APP_ROOT do
   # Install JavaScript dependencies
   system('bin/yarn')
 
-  puts "\n== Applying migrations & seeds to dev database =="
+  puts "\n== Applying migrations & seeds =="
   system! 'bin/rails db:migrate db:seed'
-
-  puts "\n== Applying migrations to test database =="
-  system! 'bin/rails db:migrate RAILS_ENV=test'
 
   # puts "\n== Removing old logs and tempfiles =="
   # system! 'bin/rails log:clear tmp:clear'

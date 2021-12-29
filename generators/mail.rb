@@ -51,9 +51,7 @@ def mail_dotenv
   mailer_constants =
       "MAILER_HOST=localhost:3000\nMAILER_SENDER=admin@localhost\n"
 
-  %w[.env.development .env.test].each do |env_name|
-    $main.append_to_file(env_name, mailer_constants)
-  end
+  $main.append_to_file('.env', mailer_constants)
 
   $main.append_to_file(
     '.env.production',

@@ -54,16 +54,16 @@ def base_controller(answers)
 
   protected
 
+  def render_json_errors(errors)
+    render json: { errors: errors }, status: 422
+  end
+
   def with_form(form)
     if form.success
       yield form
     else
       render_json_errors(form.errors)
     end
-  end
-
-  def render_json_errors(errors)
-    render json: { errors: errors }, status: 422
   end
     END
   end
@@ -77,16 +77,6 @@ def base_layout(answers)
   end
 end
 
-def base_stylesheet_in_erb(answers)
-  return '' unless answers[:webpack]
-
-  if answers[:turbolinks]
-    "<%= stylesheet_pack_tag 'application', 'data-turbolinks-track' => 'reload', media: 'all' %>"
-  else
-    "<%= stylesheet_pack_tag 'application', media: 'all' %>"
-  end
-end
-
 def base_layout_erb(answers)
   $main.inject_into_file(
     'app/views/layouts/application.html.erb',
@@ -94,8 +84,6 @@ def base_layout_erb(answers)
   ) do
     <<-END
     <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    #{base_stylesheet_in_erb(answers)}
     END
   end
 
@@ -117,13 +105,18 @@ def base_layout_slim(answers)
 end
 
 def base_scss(answers)
-  css_file = 'app/assets/stylesheets/application.css'
+  css_files = [
+    'app/assets/stylesheets/application.css',
+    'app/assets/stylesheets/application.sass.scss',
+  ]
 
   $main.create_file("#{css_dir(answers)}/application.scss") do
-    next unless File.exist?(css_file)
+    existing = css_files.each_with_object('') do |file_path, buffer|
+      buffer << File.read(file_path) << "\n" if File.exist?(file_path)
+    end
 
-    existing = File.read(css_file)
     existing.gsub!(%r{/\*(.*)\*/}m, '')
+    existing.gsub!(%r{ *//.*?$}m, '')
     existing.strip!
 
     existing
@@ -138,8 +131,11 @@ def base_locale_ru
     require 'i18n/backend/pluralization'
     I18n::Backend::Simple.send(:include, I18n::Backend::Pluralization)
 
-    Rails.application.config.i18n.available_locales = ['ru']
-    Rails.application.config.i18n.default_locale = 'ru'
+    Rails.application.configure do
+      config.i18n.available_locales = ['ru']
+      config.i18n.default_locale = 'ru'
+      config.i18n.load_path += Dir[Rails.root.join('config/locales/**/*.yml')]
+    end
   END
 end
 
@@ -147,14 +143,12 @@ def base_gems(answers)
   use_sass = !answers[:webpack]
 
   puts '      reset required gem versions'
-  gems = %w[pg puma webpacker]
-  gems << 'sass-rails' if use_sass
+  gems = %w[pg puma]
   gems.each do |name|
     $main.gsub_file('Gemfile', /^#[^\n]*\ngem '#{name}'.*$/, "gem '#{name}'")
   end
 
-  gems = %w[byebug rack-mini-profiler web-console]
-  gems << 'sass-rails' unless use_sass
+  gems = %w[web-console]
   puts "      remove    #{gems.join(', ')}"
   gems.each do |name|
     $main.gsub_file('Gemfile', /\n\s*#[^\n]*\n\s*gem '#{name}'.*$/, '')
@@ -173,11 +167,6 @@ def base_debug
     $main.gem 'binding_of_caller'
     $main.gem 'pry-rails' if RUBY_VERSION < '2.7'
   end
-
-  $main.append_to_file(
-    'Gemfile',
-    "# gem 'rack-mini-profiler', group :development # panel with timing of a page load\n"
-  )
 end
 
 def base_data_migrations
@@ -201,8 +190,11 @@ end
 def base_vendor
   if empty_dir?('vendor')
     $main.remove_dir('vendor')
-    $main.gsub_file('.gitattributes', "# Mark any vendored files as having been vendored.\n", '')
-    $main.gsub_file('.gitattributes', "vendor/* linguist-vendored\n", '')
+    text = <<~END
+      # Mark any vendored files as having been vendored.
+      vendor/* linguist-vendored
+    END
+    $main.gsub_file('.gitattributes', text, '')
   end
 end
 
@@ -224,7 +216,6 @@ Generator.add_actions do |answers|
   base_vendor
 
   if $main.options[:api]
-    $main.remove_dir('app/javascript') if empty_dir?('app/javascript')
     $main.remove_file('Procfile.dev')
   else
     base_dir('presenters')

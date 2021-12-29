@@ -1,9 +1,9 @@
+--css=sass
 --database=postgresql
+--javascript=webpack
 --no-skip-webpack-install
 --skip-action-cable
 --skip-action-mailbox
+--skip-hotwire
 --skip-jbuilder
---skip-sprockets
 --skip-system-test
---skip-turbolinks
---webpacker

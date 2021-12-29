@@ -62,7 +62,7 @@ def replace_strings(file, strings)
 end
 
 def css_dir(answers)
-  answers[:webpack] ? 'app/javascript/stylesheets' : 'app/assets/stylesheets'
+  'app/assets/stylesheets'
 end
 
 def empty_dir?(directory)

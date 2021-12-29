@@ -54,7 +54,7 @@ def sorcery_base(answers)
     scope module: :users do
       resource :change_password, path: 'change-password', only: [:create]
       resource :reset_password, path: 'reset-password', only: [:create]
-      resource :session, path: 'auth', only: [:create, :destroy]
+      resource :session, path: 'auth', only: [:create, :destroy, :show]
       resource :unlock, only: [:create]
     end
     END

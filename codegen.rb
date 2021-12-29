@@ -28,8 +28,8 @@ if answers[:product]
   answers[:product_specs] = $main.yes?('> Add templates for product specification? (y/n)')
 end
 
-answers[:webpack] =
-  !$main.options[:api] && ($main.send(:webpack_install?) || $main.yes?('Add Webpack? (y/n)'))
+# answers[:webpack] = !$main.options[:api]
+answers[:webpack] = false # FIXME: temporarily disabled due to new front-end gems for Rails 7
 
 answers[:design] = !$main.options[:api] && $main.yes?('Add tools for design? (y/n)')
 if answers[:design]
@@ -43,9 +43,6 @@ answers[:sorcery] = $main.yes?('Add Sorcery? (y/n)')
 
 answers[:sidekiq] = !$main.options[:skip_active_job] && $main.yes?('Add Sidekiq? (y/n)')
 answers[:redis]   = answers[:sidekiq] || $main.yes?('Add Redis? (y/n)')
-if answers[:redis]
-  answers[:redis_model] = $main.yes?('> Add RedisModel? (y/n)')
-end
 
 answers[:test] = $main.yes?('Add gems for testing? (y/n)')
 
