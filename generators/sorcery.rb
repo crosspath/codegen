@@ -24,10 +24,8 @@ def sorcery_base(answers)
   )
 
   if answers[:mail]
-    f('app/mailers/user_mailer.rb', 'sorcery/mailers/user_mailer.rb')
-  end
+    d('app/mailers', 'sorcery/mailers')
 
-  if answers[:mail]
     if answers[:slim]
       d('app/views', 'sorcery/mailer_views/slim', recursive: true)
     else

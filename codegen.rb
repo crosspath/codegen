@@ -9,6 +9,8 @@ end
 
 answers = {}
 
+answers[:spring] = $main.yes?('Add Spring preloader? (y/n)')
+
 answers[:slim] = $main.yes?('Use Slim templates? (y/n)')
 
 answers[:base] = $main.yes?('Add all base files? (y/n)')

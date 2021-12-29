@@ -128,9 +128,6 @@ end
 def base_locale_ru
   d('config/locales', 'config/locales')
   $main.initializer 'i18n.rb', <<~END
-    require 'i18n/backend/pluralization'
-    I18n::Backend::Simple.send(:include, I18n::Backend::Pluralization)
-
     Rails.application.configure do
       config.i18n.available_locales = ['ru']
       config.i18n.default_locale = 'ru'
@@ -145,16 +142,17 @@ def base_gems(answers)
   puts '      reset required gem versions'
   gems = %w[pg puma]
   gems.each do |name|
-    $main.gsub_file('Gemfile', /^#[^\n]*\ngem '#{name}'.*$/, "gem '#{name}'")
+    $main.gsub_file('Gemfile', /^#[^\n]*\ngem ['"]#{name}['"].*$/, "gem '#{name}'")
   end
 
   gems = %w[web-console]
   puts "      remove    #{gems.join(', ')}"
   gems.each do |name|
-    $main.gsub_file('Gemfile', /\n\s*#[^\n]*\n\s*gem '#{name}'.*$/, '')
+    $main.gsub_file('Gemfile', /\n\s*#[^\n]*\n\s*gem ['"]#{name}['"].*$/, '')
   end
 
   $main.gem 'slim-rails' if answers[:slim]
+  $main.gem 'rails-i18n'
 
   $main.gem_group :development, :test do
     $main.gem 'dotenv-rails'
@@ -187,6 +185,20 @@ def base_lib_assets
   $main.remove_dir('lib/assets') if empty_dir?('lib/assets')
 end
 
+def base_spring
+  $main.gem_group :development, :test do
+    $main.gem 'spring' if answers[:spring]
+  end
+
+  $main.environment(nil, env: 'test') do
+    'config.cache_classes = false'
+  end
+
+  after_bundle_install do
+    $main.run 'bundle exec spring binstub --all'
+  end
+end
+
 def base_vendor
   if empty_dir?('vendor')
     $main.remove_dir('vendor')
@@ -216,6 +228,7 @@ Generator.add_actions do |answers|
   # Should be: DataMigrate::Migration < ActiveRecord::Migration[7.0]
   # base_data_migrations
   base_lib_assets
+  base_spring if answers[:spring]
   base_vendor
 
   if $main.options[:api]
