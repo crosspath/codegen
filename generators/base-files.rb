@@ -185,7 +185,7 @@ def base_lib_assets
   $main.remove_dir('lib/assets') if empty_dir?('lib/assets')
 end
 
-def base_spring
+def base_spring(answers)
   $main.gem_group :development, :test do
     $main.gem 'spring' if answers[:spring]
   end
@@ -228,7 +228,7 @@ Generator.add_actions do |answers|
   # Should be: DataMigrate::Migration < ActiveRecord::Migration[7.0]
   # base_data_migrations
   base_lib_assets
-  base_spring if answers[:spring]
+  base_spring(answers) if answers[:spring]
   base_vendor
 
   if $main.options[:api]
