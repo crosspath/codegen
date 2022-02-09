@@ -1,0 +1,35 @@
+#!/usr/bin/env ruby
+
+if ARGV.size == 0
+  puts 'Run on server:'
+  puts "  #{__FILE__} service-name 'Application name' user"
+  puts 'Example:'
+  puts "  #{__FILE__} app-rails 'Circuit Breaker' deployer"
+  exit
+end
+
+service   = ARGV[0]
+app_name  = ARGV[1]
+user      = ARGV[2]
+directory = File.dirname(File.expand_path(__dir__))
+
+FILE = <<~SERVICE
+  [Unit]
+  Description=#{app_name}
+  Requires=network.target
+
+  [Service]
+  Type=simple
+  User=#{user}
+  Group=#{user}
+  WorkingDirectory=#{directory}
+  ExecStart=/usr/bin/bash -c 'source /etc/profile; bin/rails s -p 3000'
+  TimeoutSec=30s
+  RestartSec=1s
+  Restart=always
+
+  [Install]
+  WantedBy=multi-user.target
+SERVICE
+
+File.write("/etc/systemd/system/#{service}.service", FILE)
