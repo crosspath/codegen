@@ -1,6 +1,5 @@
-import { ready } from 'lib/dom';
-
 import components from 'lib/svelte-components';
+import { ready } from 'lib/dom';
 
 function props(element) {
   return Object.fromEntries(
@@ -17,9 +16,11 @@ ready(() => {
   for (const el of elements) {
     const tag = el.tagName.toLowerCase();
     const component = components[tag];
-    if (component)
+    if (component) {
+      el.innerHTML = '';
       new component({target: el, props: props(el)});
-    else
+    } else {
       console.error(`Unknown Svelte component for ${tag}`);
+    }
   }
 });
