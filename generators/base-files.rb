@@ -38,7 +38,7 @@ end
 
 def base_bin
   d('bin', 'base-files/bin')
-  $main.run('chmod +x bin/configs bin/setup')
+  $main.run('chmod +x bin/configs bin/setup bin/systemd-service')
 end
 
 def base_dir(dir)

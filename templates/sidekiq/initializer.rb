@@ -18,4 +18,4 @@ end
 log_path = Rails.configuration.paths['log'].first
 Sidekiq.logger = ActiveSupport::Logger.new(log_path, 2, 100.megabytes)
 
-Sidekiq.default_worker_options = { retry: 0 }
+Sidekiq.default_job_options = { retry: 0 }
