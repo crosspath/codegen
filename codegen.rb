@@ -13,6 +13,8 @@ answers[:spring] = $main.yes?('Add Spring preloader? (y/n)')
 
 answers[:slim] = $main.yes?('Use Slim templates? (y/n)')
 
+# TODO: GraphQL or RESTful
+
 answers[:base] = $main.yes?('Add all base files? (y/n)')
 
 # Для разработчиков параметры доступа к базе данных (DATABASE_URL) будут
