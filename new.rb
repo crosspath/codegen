@@ -6,7 +6,6 @@
 # ./new.rb file-name-with-options
 
 require "io/console"
-require "railties"
 
 # OptionName ::= String
 # OptionValue ::= String | true | false
@@ -307,7 +306,9 @@ OPTIONS = {
     default: ->(_) { "e" },
     apply: ->(opt, val) do
       opt["webpack"] = OPTIONS[:front_end_lib][:variants][val.shift].downcase # First item.
-      opt[".webpack"] = val unless val.empty? # All the rest items.
+      unless val.empty? # All the rest items.
+        opt[".front_end_libs"] = OPTIONS[:front_end_lib][:variants].slice(*val).values.map(&:downcase)
+      end
     end,
     skip_if: ->(opt) { opt[".rails_version"] >= 7 || opt["api"] || opt["skip-javascript"] || !opt[".webpacker"] },
   },
@@ -498,7 +499,20 @@ module CLI
   extend self
 
   def read_option_values_from_file(file_name)
-    file_name ? File.readlines(file_name).to_h { |line| line.strip.split(":", 2) } : {}
+    file_name ? File.readlines(file_name).to_h { |line| line.split(":", 2).map(&:strip) } : {}
+  end
+
+  def args_for_rails_new(option_values)
+    args = [option_values[".app_path"]]
+
+    option_values.reject { |k, _| k.begin_with?(".") }.each do |k, v|
+      next if v == false
+
+      args << "--#{k}"
+      args << v unless v == true
+    end
+
+    args
   end
 end
 
@@ -530,9 +544,36 @@ OPTIONS.each do |key, definition|
   definition[:apply].call(option_values, value)
 end
 
-# Debug
-puts "Ready to use these options:"
-
-option_values.each do |key, value|
-  puts "#{key}: #{value}"
+results = option_values.each_with_object("") do |(key, value), acc|
+  acc << "#{key}: #{value}"
 end
+
+# Debug
+puts "Ready to use these options:", results
+
+if Ask.yes?(label: "Save option values into file?", default: ->(_) { true })
+  file_name = Ask.line(label: "File path")
+  File.write(file_name, results)
+end
+
+puts "Installing railties gem..."
+rails_version = Gem::Requirement.new("~> #{option_values[".rails_version"]}")
+# gem install -N --backtrace --version '~> #{option_values[".rails_version"]}' railties
+Gem.install("railties", rails_version, document: [])
+
+puts "Generating application..."
+railties_bin_path = Gem.bin_path("railties", "rails", rails_version)
+railties_path = railties_bin_path.delete_suffix("/exe/rails")
+require "#{railties_path}/lib/rails/ruby_version_check"
+require "#{railties_path}/lib/rails/command"
+Rails::Command.invoke :application, args_for_rails_new(option_values)
+
+front_end_libs = option_values[".front_end_libs"] || []
+unless front_end_libs.empty?
+  puts "Adding front-end libraries..."
+  FileUtils.chdir(option_values[".app_path"]) do
+    front_end_libs.each { |lib| system("bin/rails webpacker:install:#{lib}") }
+  end
+end
+
+puts "Done!"
