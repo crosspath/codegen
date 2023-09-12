@@ -7,21 +7,22 @@
 
 require "io/console"
 
-# OptionName ::= String
+# Types:
+#
+# GeneratorOptionName ::= Symbol
+# RailsOptionName ::= String
 # OptionValue ::= String | true | false
+# GeneratorOptions ::= Hash(GeneratorOptionName, OptionValue)
+# RailsOptions ::= Hash(RailsOptionName, OptionValue)
 # OptionDefinition ::= Hash {
 #   label: String,
 #   type: :text | :boolean | :one_of | :many_of,
 #   variants: Hash(String, String), # if type == :one_of || type == :many_of
-#   default: Proc(Hash(OptionName, OptionValue)) -> OptionValue, # optional
-#   apply: Proc(Hash(OptionName, OptionValue), OptionValue),
-#   skip_if: Proc(Hash(OptionName, OptionValue)) -> true | false # optional
+#   default: Proc(GeneratorOptions, RailsOptions) -> OptionValue, # optional
+#   apply: Proc(GeneratorOptions, RailsOptions, OptionValue), # optional
+#   skip_if: Proc(GeneratorOptions, RailsOptions) -> true | false # optional
 # }
 # typeof OPTIONS == Hash(Symbol, OptionDefinition)
-#
-# OptionName:
-# - down_case if Rails generator knows this name;
-# - starts with "." otherwise.
 OPTIONS = {
   rails_version: {
     label: "Rails version",
@@ -30,13 +31,11 @@ OPTIONS = {
       "6" => "Rails 6",
       "7" => "Rails 7",
     },
-    default: ->(_) { "7" },
-    apply: ->(opt, val) { opt[".rails_version"] = val.to_i },
+    default: ->(_, _) { "7" },
   },
   app_path: {
     label: "Application path",
     type: :text,
-    apply: ->(opt, val) { opt[".app_path"] = val },
   },
   mode: {
     # @see railties/lib/rails/generators/rails/app/app_generator.rb
@@ -68,21 +67,21 @@ OPTIONS = {
       "2" => "Minimal (Ruby on Rails + front-end)",
       "3" => "API-only (no app/assets, app/helpers)",
     },
-    default: ->(_) { "1" },
-    apply: ->(opt, val) do
+    default: ->(_, _) { "1" },
+    apply: ->(_gopt, ropt, val) do
       case val
       when "1" then next
-      when "2" then opt["minimal"] = true
-      when "3" then opt["api"] = true
+      when "2" then ropt["minimal"] = true
+      when "3" then ropt["api"] = true
       end
     end,
   },
   active_record: {
     label: "Add Active Record - Rails ORM",
     type: :boolean,
-    default: ->(opt) { true },
-    apply: ->(opt, val) { opt["skip-action-record"] = !val },
-    skip_if: ->(opt) { opt["minimal"] },
+    default: ->(_, _) { true },
+    apply: ->(_gopt, ropt, val) { ropt["skip-action-record"] = !val },
+    skip_if: ->(_gopt, ropt) { ropt["minimal"] },
   },
   db: {
     label: "Database",
@@ -99,118 +98,123 @@ OPTIONS = {
       "9" => "jdbc",
       "0" => "... other", # Required: gem name.
     },
-    default: ->(_) { "2" },
-    apply: ->(opt, val) do
-      opt["database"] =
-        val == "0" ? Ask.line("Gem name for database") : OPTIONS[:db][:variants][val]
+    default: ->(_, _) { "2" },
+    apply: ->(_gopt, ropt, val) do
+      ropt["database"] = OPTIONS[:db][:variants][val] unless val == "0"
     end,
-    skip_if: ->(opt) { opt["skip-action-record"] },
+    skip_if: ->(_gopt, ropt) { ropt["minimal"] || ropt["skip-action-record"] },
+  },
+  db_gem: {
+    label: "Gem name for database",
+    type: :text,
+    apply: ->(_gopt, ropt, val) { ropt["database"] = val },
+    skip_if: ->(gopt, ropt) { ropt["minimal"] || ropt["skip-action-record"] || gopt[:db] != "0" },
   },
   js: {
     label: "Add JavaScript",
     type: :boolean,
-    default: ->(opt) { !opt["minimal"] },
-    apply: ->(opt, val) { opt["skip-javascript"] = !val },
-    skip_if: ->(opt) { opt["api"] },
+    default: ->(_gopt, ropt) { !ropt["minimal"] },
+    apply: ->(_gopt, ropt, val) { ropt["skip-javascript"] = !val },
+    skip_if: ->(_gopt, ropt) { ropt["api"] },
   },
   dev_gems: {
     label: "Add gems for development - web-console, rack-mini-profiler",
     type: :boolean,
-    default: ->(opt) { !opt["minimal"] },
-    apply: ->(opt, val) { opt["skip-dev-gems"] = !val },
-    skip_if: ->(opt) { opt["api"] },
+    default: ->(_gopt, ropt) { !ropt["minimal"] },
+    apply: ->(_gopt, ropt, val) { ropt["skip-dev-gems"] = !val },
+    skip_if: ->(_gopt, ropt) { ropt["api"] },
   },
   keeps: {
     label: "Files .keep in directories: */concerns, lib/tasks, log, tmp",
     type: :boolean,
-    default: ->(opt) { false },
-    apply: ->(opt, val) { opt["skip-keeps"] = !val },
+    default: ->(_, _) { false },
+    apply: ->(_gopt, ropt, val) { ropt["skip-keeps"] = !val },
   },
   mailer: {
     label: "Add Action Mailer - send emails",
     type: :boolean,
-    default: ->(opt) { !opt["minimal"] },
-    apply: ->(opt, val) do
-      if opt["minimal"]
-        opt["no-skip-action-mailer"] = true if val
+    default: ->(_gopt, ropt) { !ropt["minimal"] },
+    apply: ->(_gopt, ropt, val) do
+      if ropt["minimal"]
+        ropt["no-skip-action-mailer"] = true if val
       else
-        opt["skip-action-mailer"] = true unless val
+        ropt["skip-action-mailer"] = true unless val
       end
     end,
   },
   mailbox: {
     label: "Add Action Mailbox - receive emails",
     type: :boolean,
-    default: ->(opt) { !opt["minimal"] },
-    apply: ->(opt, val) do
-      if opt["minimal"]
-        opt["no-skip-action-mailbox"] = true if val
+    default: ->(_gopt, ropt) { !ropt["minimal"] },
+    apply: ->(_gopt, ropt, val) do
+      if ropt["minimal"]
+        ropt["no-skip-action-mailbox"] = true if val
       else
-        opt["skip-action-mailbox"] = true unless val
+        ropt["skip-action-mailbox"] = true unless val
       end
     end,
   },
   action_text: {
     label: "Add Action Text - embedded HTML editor",
     type: :boolean,
-    default: ->(opt) { !opt["minimal"] },
-    apply: ->(opt, val) do
-      if opt["minimal"]
-        opt["no-skip-action-text"] = true if val
+    default: ->(_gopt, ropt) { !ropt["minimal"] },
+    apply: ->(_gopt, ropt, val) do
+      if ropt["minimal"]
+        ropt["no-skip-action-text"] = true if val
       else
-        opt["skip-action-text"] = true unless val
+        ropt["skip-action-text"] = true unless val
       end
     end,
-    skip_if: ->(opt) { opt["api"] || opt["skip-javascript"] },
+    skip_if: ->(_gopt, ropt) { ropt["api"] || ropt["skip-javascript"] },
   },
   active_job: {
     label: "Add Active Job - queue manager",
     type: :boolean,
-    default: ->(opt) { !opt["minimal"] },
-    apply: ->(opt, val) do
-      if opt["minimal"]
-        opt["no-skip-active-job"] = true if val
+    default: ->(_gopt, ropt) { !ropt["minimal"] },
+    apply: ->(_gopt, ropt, val) do
+      if ropt["minimal"]
+        ropt["no-skip-active-job"] = true if val
       else
-        opt["skip-active-job"] = true unless val
+        ropt["skip-active-job"] = true unless val
       end
     end,
   },
   active_storage: {
     label: "Add Active Storage - file uploader",
     type: :boolean,
-    default: ->(opt) { !opt["minimal"] },
-    apply: ->(opt, val) do
-      if opt["minimal"]
-        opt["no-skip-active-storage"] = true if val
+    default: ->(_gopt, ropt) { !ropt["minimal"] },
+    apply: ->(_gopt, ropt, val) do
+      if ropt["minimal"]
+        ropt["no-skip-active-storage"] = true if val
       else
-        opt["skip-active-storage"] = true unless val
+        ropt["skip-active-storage"] = true unless val
       end
     end,
   },
   action_cable: {
     label: "Add Action Cable - WebSockets support",
     type: :boolean,
-    default: ->(opt) { !opt["minimal"] },
-    apply: ->(opt, val) do
-      if opt["minimal"]
-        opt["no-skip-active-cable"] = true if val
+    default: ->(_gopt, ropt) { !ropt["minimal"] },
+    apply: ->(_gopt, ropt, val) do
+      if ropt["minimal"]
+        ropt["no-skip-active-cable"] = true if val
       else
-        opt["skip-active-cable"] = true unless val
+        ropt["skip-active-cable"] = true unless val
       end
     end,
   },
   assets: {
     label: "Add asset pipeline",
     type: :boolean,
-    default: ->(opt) { true },
-    apply: ->(opt, val) do
-      if opt[".rails_version"] < 7
-        opt["skip-sprockets"] = !val
+    default: ->(_, _) { true },
+    apply: ->(gopt, ropt, val) do
+      if gopt[:rails_version] < 7
+        ropt["skip-sprockets"] = !val
       else
-        opt["skip-asset-pipeline"] = !val
+        ropt["skip-asset-pipeline"] = !val
       end
     end,
-    skip_if: ->(opt) { opt["api"] },
+    skip_if: ->(_gopt, ropt) { ropt["api"] },
   },
   assets_lib: {
     label: "Library for asset pipeline",
@@ -219,35 +223,39 @@ OPTIONS = {
       "1" => "Sprockets",
       "2" => "Propshaft",
     },
-    default: ->(_) { "1" },
-    apply: ->(opt, val) { opt["asset-pipeline"] = OPTIONS[:assets_lib][:variants][val].downcase },
-    skip_if: ->(opt) { opt["api"] || opt[".rails_version"] < 7 || opt["skip-asset-pipeline"] },
+    default: ->(_, _) { "1" },
+    apply: ->(_gopt, ropt, val) do
+      ropt["asset-pipeline"] = OPTIONS[:assets_lib][:variants][val].downcase
+    end,
+    skip_if: ->(gopt, ropt) do
+      ropt["api"] || gopt[:rails_version] < 7 || ropt["skip-asset-pipeline"]
+    end,
   },
   hotwire: {
     label: "Add Hotwire",
     type: :boolean,
-    default: ->(opt) { !opt["minimal"] },
-    apply: ->(opt, val) do
-      if opt["minimal"]
-        opt["no-skip-hotwire"] = true if val
+    default: ->(_gopt, ropt) { !ropt["minimal"] },
+    apply: ->(_gopt, ropt, val) do
+      if ropt["minimal"]
+        ropt["no-skip-hotwire"] = true if val
       else
-        opt["skip-hotwire"] = true unless val
+        ropt["skip-hotwire"] = true unless val
       end
     end,
-    skip_if: ->(opt) { opt[".rails_version"] < 7 || opt["api"] || opt["skip-javascript"] },
+    skip_if: ->(gopt, ropt) { gopt[:rails_version] < 7 || ropt["api"] || ropt["skip-javascript"] },
   },
   turbolinks: {
     label: "Add Turbolinks",
     type: :boolean,
-    default: ->(opt) { !opt["minimal"] },
-    apply: ->(opt, val) do
-      if opt["minimal"]
-        opt["no-skip-turbolinks"] = true if val
+    default: ->(_gopt, ropt) { !ropt["minimal"] },
+    apply: ->(_gopt, ropt, val) do
+      if ropt["minimal"]
+        ropt["no-skip-turbolinks"] = true if val
       else
-        opt["skip-turbolinks"] = true unless val
+        ropt["skip-turbolinks"] = true unless val
       end
     end,
-    skip_if: ->(opt) { opt[".rails_version"] >= 7 || opt["api"] || opt["skip-javascript"] },
+    skip_if: ->(gopt, ropt) { gopt[:rails_version] >= 7 || ropt["api"] || ropt["skip-javascript"] },
   },
   js_bundler: {
     label: "Bundler for JavaScript",
@@ -258,37 +266,41 @@ OPTIONS = {
       "r" => "Rollup",
       "w" => "Webpack",
     },
-    default: ->(_) { "i" },
-    apply: ->(opt, val) { opt["javascript"] = OPTIONS[:js_bundler][:variants][val].downcase },
-    skip_if: ->(opt) { opt[".rails_version"] < 7 || opt["api"] || opt["skip-javascript"] },
+    default: ->(_, _) { "i" },
+    apply: ->(_gopt, ropt, val) do
+      ropt["javascript"] = OPTIONS[:js_bundler][:variants][val].downcase
+    end,
+    skip_if: ->(gopt, ropt) { gopt[:rails_version] < 7 || ropt["api"] || ropt["skip-javascript"] },
   },
   css_lib: {
     label: "Library for CSS",
     type: :one_of,
     variants: {
-      "b" => "Bootstrap",
-      "p" => "PostCSS",
-      "s" => "Sass",
-      "t" => "Tailwind",
-      "u" => "Bulma", # https://bulma.io/documentation/overview/
+      "1" => "None of these",
+      "2" => "Bootstrap",
+      "3" => "Bulma", # https://bulma.io/documentation/overview/
+      "4" => "PostCSS",
+      "5" => "Sass",
+      "6" => "Tailwind",
     },
-    default: ->(_) { "u" },
-    apply: ->(opt, val) { opt["css"] = OPTIONS[:css_lib][:variants][val].downcase },
-    skip_if: ->(opt) { opt[".rails_version"] < 7 || opt["api"] },
+    default: ->(_, _) { "1" },
+    apply: ->(_gopt, ropt, val) do
+      ropt["css"] = OPTIONS[:css_lib][:variants][val].downcase unless val == "1"
+    end,
+    skip_if: ->(gopt, ropt) { gopt[:rails_version] < 7 || ropt["api"] },
   },
   webpacker: {
     label: "Add Webpacker",
     type: :boolean,
-    default: ->(opt) { !opt["minimal"] },
-    apply: ->(opt, val) do
-      opt[".webpacker"] = val
-      if opt["minimal"]
-        opt["no-skip-webpack-install"] = true if val
+    default: ->(_gopt, ropt) { !ropt["minimal"] },
+    apply: ->(_gopt, ropt, val) do
+      if ropt["minimal"]
+        ropt["no-skip-webpack-install"] = true if val
       else
-        opt["skip-webpack-install"] = true unless val
+        ropt["skip-webpack-install"] = true unless val
       end
     end,
-    skip_if: ->(opt) { opt[".rails_version"] >= 7 || opt["api"] || opt["skip-javascript"] },
+    skip_if: ->(gopt, ropt) { gopt[:rails_version] >= 7 || ropt["api"] || ropt["skip-javascript"] },
   },
   front_end_lib: {
     label: "Libraries for front-end",
@@ -303,107 +315,109 @@ OPTIONS = {
       "t" => "Stimulus",
       "v" => "Vue",
     },
-    default: ->(_) { "e" },
-    apply: ->(opt, val) do
-      opt["webpack"] = OPTIONS[:front_end_lib][:variants][val.shift].downcase # First item.
+    default: ->(_, _) { "e" },
+    apply: ->(_gopt, ropt, val) do
+      ropt["webpack"] = OPTIONS[:front_end_lib][:variants][val.shift].downcase # First item.
       unless val.empty? # All the rest items.
-        opt[".front_end_libs"] = OPTIONS[:front_end_lib][:variants].slice(*val).values.map(&:downcase)
+        lib_names = OPTIONS[:front_end_lib][:variants].slice(*val).values
+        gopt[:front_end_libs] = lib_names.map(&:downcase)
       end
     end,
-    skip_if: ->(opt) { opt[".rails_version"] >= 7 || opt["api"] || opt["skip-javascript"] || !opt[".webpacker"] },
+    skip_if: ->(gopt, ropt) do
+      gopt[:rails_version] >= 7 || ropt["api"] || ropt["skip-javascript"] || !gopt[:webpacker]
+    end,
   },
   spring: {
     label: "Add Spring",
     type: :boolean,
-    default: ->(opt) { !opt["minimal"] },
-    apply: ->(opt, val) do
-      if opt["minimal"]
-        opt["no-skip-spring"] = true if val
+    default: ->(_gopt, ropt) { !ropt["minimal"] },
+    apply: ->(_gopt, ropt, val) do
+      if ropt["minimal"]
+        ropt["no-skip-spring"] = true if val
       else
-        opt["skip-spring"] = true unless val
+        ropt["skip-spring"] = true unless val
       end
     end,
-    skip_if: ->(opt) { opt[".rails_version"] >= 7 },
+    skip_if: ->(gopt, _ropt) { gopt[:rails_version] >= 7 },
   },
   jbuilder: {
     label: "Add jbuilder",
     type: :boolean,
-    default: ->(opt) { !opt["minimal"] },
-    apply: ->(opt, val) do
-      if opt["minimal"]
-        opt["no-skip-jbuilder"] = true if val
+    default: ->(_gopt, ropt) { !ropt["minimal"] },
+    apply: ->(_gopt, ropt, val) do
+      if ropt["minimal"]
+        ropt["no-skip-jbuilder"] = true if val
       else
-        opt["skip-jbuilder"] = true unless val
+        ropt["skip-jbuilder"] = true unless val
       end
     end,
   },
   bootsnap: {
     label: "Add Bootsnap",
     type: :boolean,
-    default: ->(opt) { !opt["minimal"] },
-    apply: ->(opt, val) do
-      if opt["minimal"]
-        opt["no-skip-bootsnap"] = true if val
+    default: ->(_gopt, ropt) { !ropt["minimal"] },
+    apply: ->(_gopt, ropt, val) do
+      if ropt["minimal"]
+        ropt["no-skip-bootsnap"] = true if val
       else
-        opt["skip-bootsnap"] = true unless val
+        ropt["skip-bootsnap"] = true unless val
       end
     end,
   },
   tests: {
     label: "Add tests - Minitest",
     type: :boolean,
-    default: ->(opt) { !opt["minimal"] },
-    apply: ->(opt, val) do
-      opt[".tests"] = val
-      if opt["minimal"]
-        opt["no-skip-test"] = true if val
+    default: ->(_gopt, ropt) { !ropt["minimal"] },
+    apply: ->(_gopt, ropt, val) do
+      if ropt["minimal"]
+        ropt["no-skip-test"] = true if val
       else
-        opt["skip-test"] = true unless val
+        ropt["skip-test"] = true unless val
       end
     end,
   },
   system_tests: {
     label: "Add system tests - Capybara, Selenium",
     type: :boolean,
-    default: ->(opt) { !opt["minimal"] },
-    apply: ->(opt, val) do
-      if opt["minimal"]
-        opt["no-skip-system-test"] = true if val
+    default: ->(_gopt, ropt) { !ropt["minimal"] },
+    apply: ->(_gopt, ropt, val) do
+      if ropt["minimal"]
+        ropt["no-skip-system-test"] = true if val
       else
-        opt["skip-system-test"] = true unless val
+        ropt["skip-system-test"] = true unless val
       end
     end,
-    skip_if: ->(opt) { opt["api"] || !opt[".tests"] },
+    skip_if: ->(gopt, ropt) { ropt["api"] || gopt[:tests] },
   },
   bundle_install: {
     label: "Run `bundle install` at the end of this process",
     type: :boolean,
-    default: ->(opt) { true },
-    apply: ->(opt, val) { opt["skip-bundle"] = !val },
+    default: ->(_, _) { true },
+    apply: ->(_gopt, ropt, val) { ropt["skip-bundle"] = !val },
   },
   # listen: {
   #   label: "Add `listen` gem",
   #   type: :boolean,
-  #   default: ->(opt) { true },
-  #   apply: ->(opt, val) { opt["skip-listen"] = !val },
+  #   default: ->(_, _) { true },
+  #   apply: ->(_gopt, ropt, val) { ropt["skip-listen"] = !val },
   # },
   # puma: {
   #   label: "Add Puma",
   #   type: :boolean,
-  #   default: ->(opt) { true },
-  #   apply: ->(opt, val) { opt["skip-puma"] = !val },
+  #   default: ->(_, _) { true },
+  #   apply: ->(_gopt, ropt, val) { ropt["skip-puma"] = !val },
   # },
   # git: {
   #   label: "Create .gitignore",
   #   type: :boolean,
-  #   default: ->(opt) { true },
-  #   apply: ->(opt, val) { opt["skip-git"] = !val },
+  #   default: ->(_, _) { true },
+  #   apply: ->(_gopt, ropt, val) { ropt["skip-git"] = !val },
   # },
   # gemfile: {
   #   label: "Add Gemfile",
   #   type: :boolean,
-  #   default: ->(opt) { true },
-  #   apply: ->(opt, val) { opt["skip-gemfile"] = !val },
+  #   default: ->(_, _) { true },
+  #   apply: ->(_gopt, ropt, val) { ropt["skip-gemfile"] = !val },
   # },
 }
 
@@ -412,23 +426,23 @@ module Ask
 
   extend self
 
-  def line(definition)
+  def line(definition, default_value)
+    default_text = default_value ? " (default: #{default_value})" : nil
     loop do
-      default = definition[:default]
-      print definition[:label], (default ? " (default: #{default})" : ""), " -> "
+      print definition[:label], default_text, " -> "
       answer = get_string
-      answer = default if answer.empty?
+      answer = default_value if answer.empty?
       return answer if answer
 
       puts "Unexpected answer!"
     end
   end
 
-  def yes?(definition)
+  def yes?(definition, default_value)
+    default_text = default_value ? " (default: #{default_value})" : nil
     loop do
-      default = definition.key?(:default) ? (definition[:default] ? "y" : "n") : nil
-      print definition[:label], (default ? " (default: #{default})" : ""), " (y/n) -> "
-      answer = get_char || default
+      print definition[:label], default_text, " (y/n) -> "
+      answer = get_char || default_value
       puts
 
       case answer
@@ -440,16 +454,16 @@ module Ask
     end
   end
 
-  def one_of(definition)
-    default = definition[:default]
+  def one_of(definition, default_value)
+    default_text = default_value ? " (default: #{default_value})" : nil
     variants = definition[:variants].transform_keys(&:to_s)
     hint = variants.map { |k, v| "#{k} - #{v}" }.join("\n")
 
-    print definition[:label], (default ? " (default: #{default})" : ""), "\n", hint, "\n"
+    print definition[:label], default_text, "\n", hint, "\n"
 
     loop do
       print "Choose one -> "
-      answer = get_char || default
+      answer = get_char || default_value
       puts
 
       return answer if variants.key?(answer)
@@ -458,17 +472,17 @@ module Ask
     end
   end
 
-  def many_of(definition)
-    default = definition[:default]
+  def many_of(definition, default_value)
+    default_text = default_value ? " (default: #{default_value})" : nil
     variants = definition[:variants].transform_keys(&:to_s)
     hint = variants.map { |k, v| "#{k} - #{v}" }.join("\n")
 
-    print definition[:label], (default ? " (default: #{default})" : ""), "\n", hint, "\n"
+    print definition[:label], default_text, "\n", hint, "\n"
 
     loop do
-      print "Choose one or more -> "
+      print "Choose one or more and press Enter -> "
       answer = get_string
-      answer = default if answer.empty?
+      answer = default_value if answer.empty?
       keys = answer.split("")
 
       return keys if (variants.keys & keys).size == keys.size
@@ -495,17 +509,117 @@ module Ask
   end
 end
 
-module CLI
-  extend self
-
-  def read_option_values_from_file(file_name)
-    file_name ? File.readlines(file_name).to_h { |line| line.split(":", 2).map(&:strip) } : {}
+class CLI
+  def initialize(argv)
+    @option_values_from_file = read_option_values_from_file(argv[0])
+    @generator_option_values = {}
+    @rails_option_values = {}
   end
 
-  def args_for_rails_new(option_values)
-    args = [option_values[".app_path"]]
+  def call
+    OPTIONS.each do |key, definition|
+      if definition.key?(:skip_if)
+        next if definition[:skip_if].call(@generator_option_values, @rails_option_values)
+      end
 
-    option_values.reject { |k, _| k.begin_with?(".") }.each do |k, v|
+      @generator_option_values[key] =
+        if @option_values_from_file.key?(key)
+          if definition[:type] == :boolean
+            string_to_boolean(@option_values_from_file[key])
+          else
+            @option_values_from_file[key]
+          end
+        else
+          answer(definition)
+        end
+
+      @generator_option_values[key] = @generator_option_values[key].to_i if key == :rails_version
+
+      definition[:apply]&.call(
+        @generator_option_values,
+        @rails_option_values,
+        @generator_option_values[key]
+      )
+    end
+
+    results = @generator_option_values.each_with_object("".dup) do |(key, value), acc|
+      acc << "#{key}: #{value}\n"
+    end
+
+    # Debug
+    puts "", "Ready to use these options:", results, ""
+
+    if Ask.yes?({label: "Save option values into file?"}, "y")
+      file_name = Ask.line({label: "File path"}, nil)
+      File.write(file_name, results)
+    end
+  end
+
+  def read_option_values_from_file(file_name)
+    return {} if file_name.nil? || file_name.empty?
+
+    File.readlines(file_name).to_h do |line|
+      k, v = line.split(":", 2).map(&:strip)
+      [k.to_sym, v]
+    end
+  end
+
+  def string_to_boolean(str)
+    str == "true" ? true : (str == "false" ? false : raise(ArgumentError, str))
+  end
+
+  def answer(definition)
+    puts
+
+    default_value = default(definition)
+
+    case definition[:type]
+    when :text
+      Ask.line(definition, default_value)
+    when :boolean
+      Ask.yes?(definition, default_value)
+    when :one_of
+      Ask.one_of(definition, default_value)
+    when :many_of
+      Ask.many_of(definition, default_value)
+    else
+      raise ArgumentError, definition[:type].to_s
+    end
+  end
+
+  def default(definition)
+    value = definition[:default]&.call(@generator_option_values, @rails_option_values)
+    return if value.nil?
+
+    definition[:type] == :boolean ? (value ? "y" : "n") : value
+  end
+
+  def install_railties
+    @rails_version = Gem::Requirement.new("~> #{@generator_option_values[:rails_version]}")
+    # Example: gem install -N --backtrace --version '~> 7' railties
+    Gem.install("railties", @rails_version, document: [])
+  end
+
+  def generate_app
+    railties_bin_path = Gem.bin_path("railties", "rails", @rails_version)
+    railties_path = railties_bin_path.delete_suffix("/exe/rails")
+    require "#{railties_path}/lib/rails/ruby_version_check"
+    require "#{railties_path}/lib/rails/command"
+    Rails::Command.invoke :application, args_for_rails_new
+
+    front_end_libs = @generator_option_values[:front_end_lib] || []
+    unless front_end_libs.empty?
+      puts "Adding front-end libraries..."
+      FileUtils.chdir(@generator_option_values[:app_path]) do
+        front_end_libs.each { |lib| system("bin/rails webpacker:install:#{lib}") }
+      end
+    end
+  end
+
+  def args_for_rails_new
+    args = ["new", @generator_option_values[:app_path]]
+
+    @rails_option_values.each do |k, v|
       next if v == false
 
       args << "--#{k}"
@@ -516,64 +630,19 @@ module CLI
   end
 end
 
-option_values_from_file = CLI.read_option_values_from_file(ARGV[0])
-option_values = {}
+begin
+  cli = CLI.new(ARGV)
 
-OPTIONS.each do |key, definition|
-  next if definition.key?(:skip_if) && definition[:skip_if].call(option_values)
+  puts "Press Ctrl+C to stop anytime."
+  cli.call
 
-  if option_values_from_file.key?(key)
-    option_values[key] = option_values_from_file[key]
-    next
-  end
+  puts "Installing railties gem..."
+  cli.install_railties
 
-  value =
-    case definition[:type]
-    when :text
-      Ask.line(definition)
-    when :boolean
-      Ask.yes?(definition)
-    when :one_of
-      Ask.one_of(definition)
-    when :many_of
-      Ask.many_of(definition)
-    else
-      raise ArgumentError, definition[:type].to_s
-    end
+  puts "Generating application..."
+  cli.generate_app
 
-  definition[:apply].call(option_values, value)
+  puts "Done!"
+rescue Ask::Interrupt
+  exit(2)
 end
-
-results = option_values.each_with_object("") do |(key, value), acc|
-  acc << "#{key}: #{value}"
-end
-
-# Debug
-puts "Ready to use these options:", results
-
-if Ask.yes?(label: "Save option values into file?", default: ->(_) { true })
-  file_name = Ask.line(label: "File path")
-  File.write(file_name, results)
-end
-
-puts "Installing railties gem..."
-rails_version = Gem::Requirement.new("~> #{option_values[".rails_version"]}")
-# gem install -N --backtrace --version '~> #{option_values[".rails_version"]}' railties
-Gem.install("railties", rails_version, document: [])
-
-puts "Generating application..."
-railties_bin_path = Gem.bin_path("railties", "rails", rails_version)
-railties_path = railties_bin_path.delete_suffix("/exe/rails")
-require "#{railties_path}/lib/rails/ruby_version_check"
-require "#{railties_path}/lib/rails/command"
-Rails::Command.invoke :application, args_for_rails_new(option_values)
-
-front_end_libs = option_values[".front_end_libs"] || []
-unless front_end_libs.empty?
-  puts "Adding front-end libraries..."
-  FileUtils.chdir(option_values[".app_path"]) do
-    front_end_libs.each { |lib| system("bin/rails webpacker:install:#{lib}") }
-  end
-end
-
-puts "Done!"
