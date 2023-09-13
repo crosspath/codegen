@@ -4,6 +4,7 @@
 # CLI example:
 # ./new.rb
 # ./new.rb file-name-with-options
+# NO_SAVE=1 ./new.rb file-name-with-options
 
 require "io/console"
 
@@ -316,7 +317,7 @@ OPTIONS = {
     },
     default: ->(_, _) { "e" },
     apply: ->(gopt, ropt, val) do
-      ropt["webpack"] = OPTIONS[:front_end_lib][:variants][val.first].downcase # First item only.
+      ropt["webpack"] = OPTIONS[:front_end_lib][:variants][val[0]].downcase # First item only.
     end,
     skip_if: ->(gopt, ropt) do
       gopt[:rails_version] >= 7 || ropt["api"] || ropt["skip-javascript"] || !gopt[:webpacker]
@@ -479,9 +480,8 @@ module Ask
       answer = get_string
       answer = default_value if answer.empty?
       keys = answer.split("")
-      warn "answer #{answer.inspect}"
 
-      return keys if (variants.keys & keys).size == keys.size
+      return answer if (variants.keys & keys).size == keys.size
 
       puts "Unexpected answer!"
     end
@@ -542,12 +542,13 @@ class CLI
       acc << "#{key}: #{value}\n"
     end
 
-    # Debug
-    puts "", "Ready to use these options:", results, ""
+    if ENV.fetch("NO_SAVE", "0") == "0"
+      puts "", "Ready to use these options:", results, ""
 
-    if Ask.yes?({label: "Save option values into file?"}, "y")
-      file_name = Ask.line({label: "File path"}, nil)
-      File.write(file_name, results)
+      if Ask.yes?({label: "Save option values into file?"}, "y")
+        file_name = Ask.line({label: "File path"}, nil)
+        File.write(file_name, results)
+      end
     end
   end
 
@@ -599,19 +600,9 @@ class CLI
   def generate_app
     railties_bin_path = Gem.bin_path("railties", "rails", @rails_version)
     railties_path = railties_bin_path.delete_suffix("/exe/rails")
-    # require "#{railties_path}/lib/rails/ruby_version_check"
-    # require "#{railties_path}/lib/rails/command"
-    # Rails::Command.invoke :application, args_for_rails_new
-
-    front_end_libs = @generator_option_values[:front_end_lib] || []
-    front_end_libs.shift # First item has been already initialized.
-    unless front_end_libs.empty?
-      puts "Adding front-end libraries... #{@generator_option_values[:app_path].inspect}"
-      FileUtils.chdir(@generator_option_values[:app_path]) do
-        libs = OPTIONS[:front_end_lib][:variants].slice(*front_end_libs).values.map(&:downcase)
-        libs.each { |lib| system("bin/rails webpacker:install:#{lib}") }
-      end
-    end
+    require "#{railties_path}/lib/rails/ruby_version_check"
+    require "#{railties_path}/lib/rails/command"
+    Rails::Command.invoke :application, args_for_rails_new
   end
 
   def args_for_rails_new
@@ -626,6 +617,78 @@ class CLI
 
     args
   end
+
+  def add_postinstall_steps
+    @postinstall = PostInstallScript.new(@generator_option_values)
+    @postinstall.add_steps
+  end
+
+  def has_postinstall_steps?
+    @postinstall.has_steps?
+  end
+
+  def run_postinstall_script
+    @postinstall.create
+    @postinstall.run
+    @postinstall.remove
+  end
+end
+
+class PostInstallScript
+  def initialize(generator_option_values)
+    @generator_option_values = generator_option_values
+    @app_path = File.expand_path(@generator_option_values[:app_path], __dir__)
+    @file_name = "bin/postinstall"
+    @steps = []
+  end
+
+  def add_steps
+    add_front_end_libs
+  end
+
+  def has_steps?
+    !@steps.empty?
+  end
+
+  def create
+    text = <<~TEXT
+      #!/usr/bin/env ruby
+      # frozen_string_literal: true
+
+      #{@steps.join("\n\n")}
+    TEXT
+
+    Dir.chdir(@app_path) do
+      File.write(@file_name, text)
+      File.chmod(0o755, @file_name) # rwxr-xr-x
+    end
+  end
+
+  def run
+    Dir.chdir(@app_path) { system(@file_name) }
+  end
+
+  def remove
+    Dir.chdir(@app_path) { File.unlink(@file_name) }
+  end
+
+  private
+
+  def add_front_end_libs
+    front_end_libs = (@generator_option_values[:front_end_lib] || "").split("")
+    front_end_libs.shift # First item has been already initialized.
+    return if front_end_libs.empty?
+
+    libs = OPTIONS[:front_end_lib][:variants].slice(*front_end_libs).values.map(&:downcase)
+    commands = libs.map { |lib| "system(\"bin/rails webpacker:install:#{lib}\") or exit(1)" }.join("\n  ")
+
+    @steps << <<~TEXT
+      puts "Adding front-end libraries..."
+      Dir.chdir(File.dirname(__dir__)) do
+        #{commands}
+      end
+    TEXT
+  end
 end
 
 begin
@@ -639,8 +702,17 @@ begin
 
   puts "Generating application..."
   cli.generate_app
+  cli.add_postinstall_steps
+
+  if cli.has_postinstall_steps?
+    puts "Run postinstall script..."
+    cli.run_postinstall_script
+  end
 
   puts "Done!"
 rescue Ask::Interrupt
   exit(2)
+rescue StandardError => e
+  warn "Current dir: #{Dir.pwd}", e.message, e.backtrace.grep_v(/ruby|bundle|gems/)
+  exit(1)
 end

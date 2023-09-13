@@ -1,0 +1,15 @@
+rails_version: 7
+app_path: tmp/api_7
+mode: 3
+active_record: true
+db: 2
+keeps: false
+mailer: true
+mailbox: true
+active_job: true
+active_storage: true
+action_cable: true
+jbuilder: true
+bootsnap: true
+tests: true
+bundle_install: true
