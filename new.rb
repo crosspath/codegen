@@ -11,7 +11,7 @@ require "io/console"
 #
 # GeneratorOptionName ::= Symbol
 # RailsOptionName ::= String
-# OptionValue ::= String | true | false
+# OptionValue ::= String | true | false | Array(String)
 # GeneratorOptions ::= Hash(GeneratorOptionName, OptionValue)
 # RailsOptions ::= Hash(RailsOptionName, OptionValue)
 # OptionDefinition ::= Hash {
@@ -81,7 +81,6 @@ OPTIONS = {
     type: :boolean,
     default: ->(_, _) { true },
     apply: ->(_gopt, ropt, val) { ropt["skip-action-record"] = !val },
-    skip_if: ->(_gopt, ropt) { ropt["minimal"] },
   },
   db: {
     label: "Database",
@@ -287,7 +286,7 @@ OPTIONS = {
     apply: ->(_gopt, ropt, val) do
       ropt["css"] = OPTIONS[:css_lib][:variants][val].downcase unless val == "1"
     end,
-    skip_if: ->(gopt, ropt) { gopt[:rails_version] < 7 || ropt["api"] },
+    skip_if: ->(gopt, ropt) { gopt[:rails_version] < 7 || ropt["api"] || !gopt[:assets] },
   },
   webpacker: {
     label: "Add Webpacker",
@@ -316,12 +315,8 @@ OPTIONS = {
       "v" => "Vue",
     },
     default: ->(_, _) { "e" },
-    apply: ->(_gopt, ropt, val) do
-      ropt["webpack"] = OPTIONS[:front_end_lib][:variants][val.shift].downcase # First item.
-      unless val.empty? # All the rest items.
-        lib_names = OPTIONS[:front_end_lib][:variants].slice(*val).values
-        gopt[:front_end_libs] = lib_names.map(&:downcase)
-      end
+    apply: ->(gopt, ropt, val) do
+      ropt["webpack"] = OPTIONS[:front_end_lib][:variants][val.first].downcase # First item only.
     end,
     skip_if: ->(gopt, ropt) do
       gopt[:rails_version] >= 7 || ropt["api"] || ropt["skip-javascript"] || !gopt[:webpacker]
@@ -484,6 +479,7 @@ module Ask
       answer = get_string
       answer = default_value if answer.empty?
       keys = answer.split("")
+      warn "answer #{answer.inspect}"
 
       return keys if (variants.keys & keys).size == keys.size
 
@@ -603,15 +599,17 @@ class CLI
   def generate_app
     railties_bin_path = Gem.bin_path("railties", "rails", @rails_version)
     railties_path = railties_bin_path.delete_suffix("/exe/rails")
-    require "#{railties_path}/lib/rails/ruby_version_check"
-    require "#{railties_path}/lib/rails/command"
-    Rails::Command.invoke :application, args_for_rails_new
+    # require "#{railties_path}/lib/rails/ruby_version_check"
+    # require "#{railties_path}/lib/rails/command"
+    # Rails::Command.invoke :application, args_for_rails_new
 
     front_end_libs = @generator_option_values[:front_end_lib] || []
+    front_end_libs.shift # First item has been already initialized.
     unless front_end_libs.empty?
-      puts "Adding front-end libraries..."
+      puts "Adding front-end libraries... #{@generator_option_values[:app_path].inspect}"
       FileUtils.chdir(@generator_option_values[:app_path]) do
-        front_end_libs.each { |lib| system("bin/rails webpacker:install:#{lib}") }
+        libs = OPTIONS[:front_end_lib][:variants].slice(*front_end_libs).values.map(&:downcase)
+        libs.each { |lib| system("bin/rails webpacker:install:#{lib}") }
       end
     end
   end
