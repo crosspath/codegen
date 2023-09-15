@@ -7,6 +7,7 @@
 # NO_SAVE=1 ./new.rb file-name-with-options
 
 require "io/console"
+require_relative "src/ask"
 
 # Types:
 #
@@ -417,99 +418,12 @@ OPTIONS = {
   # },
 }
 
-module Ask
-  Interrupt = Class.new(RuntimeError)
-
-  extend self
-
-  def line(definition, default_value)
-    default_text = default_value ? " (default: #{default_value})" : nil
-    loop do
-      print definition[:label], default_text, " -> "
-      answer = get_string
-      answer = default_value if answer.empty?
-      return answer if answer
-
-      puts "Unexpected answer!"
-    end
-  end
-
-  def yes?(definition, default_value)
-    default_text = default_value ? " (default: #{default_value})" : nil
-    loop do
-      print definition[:label], default_text, " (y/n) -> "
-      answer = get_char || default_value
-      puts
-
-      case answer
-      when "y" then return true
-      when "n" then return false
-      end
-
-      puts "Unexpected answer!"
-    end
-  end
-
-  def one_of(definition, default_value)
-    default_text = default_value ? " (default: #{default_value})" : nil
-    variants = definition[:variants].transform_keys(&:to_s)
-    hint = variants.map { |k, v| "#{k} - #{v}" }.join("\n")
-
-    print definition[:label], default_text, "\n", hint, "\n"
-
-    loop do
-      print "Choose one -> "
-      answer = get_char || default_value
-      puts
-
-      return answer if variants.key?(answer)
-
-      puts "Unexpected answer!"
-    end
-  end
-
-  def many_of(definition, default_value)
-    default_text = default_value ? " (default: #{default_value})" : nil
-    variants = definition[:variants].transform_keys(&:to_s)
-    hint = variants.map { |k, v| "#{k} - #{v}" }.join("\n")
-
-    print definition[:label], default_text, "\n", hint, "\n"
-
-    loop do
-      print "Choose one or more and press Enter -> "
-      answer = get_string
-      answer = default_value if answer.empty?
-      keys = answer.split("")
-
-      return answer if (variants.keys & keys).size == keys.size
-
-      puts "Unexpected answer!"
-    end
-  end
-
-  private
-
-  def get_string
-    Signal.trap('INT') { raise Interrupt } # Ctrl+C
-    result = STDIN.gets # nil if Ctrl+D
-    raise Interrupt unless result
-
-    result.chomp
-  end
-
-  def get_char
-    c = STDIN.getch
-    raise Interrupt if ["\u0003", "\u0004"].include?(c) # Ctrl+C, Ctrl+D
-    print c # Inserted character is hidden by default.
-    ["\r", "\n"].include?(c) ? nil : c
-  end
-end
-
 class CLI
   def initialize(argv)
     @option_values_from_file = read_option_values_from_file(argv[0])
     @generator_option_values = {}
     @rails_option_values = {}
+    @ask = Ask.new(@generator_option_values, @rails_option_values)
   end
 
   def call
@@ -526,7 +440,8 @@ class CLI
             @option_values_from_file[key]
           end
         else
-          answer(definition)
+          puts
+          @ask.question(definition)
         end
 
       @generator_option_values[key] = @generator_option_values[key].to_i if key == :rails_version
@@ -545,8 +460,8 @@ class CLI
     if ENV.fetch("NO_SAVE", "0") == "0"
       puts "", "Ready to use these options:", results, ""
 
-      if Ask.yes?({label: "Save option values into file?"}, "y")
-        file_name = Ask.line({label: "File path"}, nil)
+      if @ask.yes?(label: "Save option values into file?", default: ->(_, _) { "y" })
+        file_name = @ask.line(label: "File path")
         File.write(file_name, results)
       end
     end
@@ -563,32 +478,6 @@ class CLI
 
   def string_to_boolean(str)
     str == "true" ? true : (str == "false" ? false : raise(ArgumentError, str))
-  end
-
-  def answer(definition)
-    puts
-
-    default_value = default(definition)
-
-    case definition[:type]
-    when :text
-      Ask.line(definition, default_value)
-    when :boolean
-      Ask.yes?(definition, default_value)
-    when :one_of
-      Ask.one_of(definition, default_value)
-    when :many_of
-      Ask.many_of(definition, default_value)
-    else
-      raise ArgumentError, definition[:type].to_s
-    end
-  end
-
-  def default(definition)
-    value = definition[:default]&.call(@generator_option_values, @rails_option_values)
-    return if value.nil?
-
-    definition[:type] == :boolean ? (value ? "y" : "n") : value
   end
 
   def install_railties
