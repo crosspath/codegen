@@ -81,7 +81,7 @@ OPTIONS = {
     label: "Add Active Record - Rails ORM",
     type: :boolean,
     default: ->(_, _) { true },
-    apply: ->(_gopt, ropt, val) { ropt["skip-action-record"] = !val },
+    apply: ->(_gopt, ropt, val) { ropt["skip-active-record"] = !val },
   },
   db: {
     label: "Database",
@@ -102,13 +102,13 @@ OPTIONS = {
     apply: ->(_gopt, ropt, val) do
       ropt["database"] = OPTIONS[:db][:variants][val] unless val == "0"
     end,
-    skip_if: ->(_gopt, ropt) { ropt["minimal"] || ropt["skip-action-record"] },
+    skip_if: ->(_gopt, ropt) { ropt["skip-active-record"] },
   },
   db_gem: {
     label: "Gem name for database",
     type: :text,
     apply: ->(_gopt, ropt, val) { ropt["database"] = val },
-    skip_if: ->(gopt, ropt) { ropt["minimal"] || ropt["skip-action-record"] || gopt[:db] != "0" },
+    skip_if: ->(gopt, ropt) { ropt["skip-active-record"] || gopt[:db] != "0" },
   },
   js: {
     label: "Add JavaScript",
@@ -204,7 +204,7 @@ OPTIONS = {
     end,
   },
   assets: {
-    label: "Add asset pipeline",
+    label: "Add asset pipeline - if you reject it, you still may add bundler for JavaScript",
     type: :boolean,
     default: ->(_, _) { true },
     apply: ->(gopt, ropt, val) do
@@ -290,7 +290,7 @@ OPTIONS = {
     skip_if: ->(gopt, ropt) { gopt[:rails_version] < 7 || ropt["api"] || !gopt[:assets] },
   },
   webpacker: {
-    label: "Add Webpacker",
+    label: "Add Webpacker - Rails wrapper for JavaScript bundler",
     type: :boolean,
     default: ->(_gopt, ropt) { !ropt["minimal"] },
     apply: ->(_gopt, ropt, val) do
@@ -491,7 +491,7 @@ module Ask
 
   def get_string
     Signal.trap('INT') { raise Interrupt } # Ctrl+C
-    result = gets # nil if Ctrl+D
+    result = STDIN.gets # nil if Ctrl+D
     raise Interrupt unless result
 
     result.chomp
@@ -600,19 +600,23 @@ class CLI
   def generate_app
     railties_bin_path = Gem.bin_path("railties", "rails", @rails_version)
     railties_path = railties_bin_path.delete_suffix("/exe/rails")
+
     require "#{railties_path}/lib/rails/ruby_version_check"
     require "#{railties_path}/lib/rails/command"
+
+    $LOAD_PATH << "#{railties_path}/lib"
+
+    # system("#{railties_bin_path} #{args_for_rails_new.join(" ")}")
     Rails::Command.invoke :application, args_for_rails_new
   end
 
   def args_for_rails_new
-    args = ["new", @generator_option_values[:app_path]]
+    args = ["new", File.expand_path(@generator_option_values[:app_path], __dir__)]
 
     @rails_option_values.each do |k, v|
       next if v == false
 
-      args << "--#{k}"
-      args << v unless v == true
+      args << (v == true ? "--#{k}" : "--#{k}=#{v}")
     end
 
     args
@@ -629,8 +633,13 @@ class CLI
 
   def run_postinstall_script
     @postinstall.create
-    @postinstall.run
-    @postinstall.remove
+
+    if @generator_option_values[:bundle_install]
+      @postinstall.run
+      @postinstall.remove
+    else
+      puts "You should run `bundle install` and then `bin/postinstall` within application directory."
+    end
   end
 end
 
