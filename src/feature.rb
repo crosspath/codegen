@@ -74,4 +74,14 @@ class Feature
 
     `cp -r #{source} #{destination}`
   end
+
+  def update_ignore_file(file_name, add: [], delete: [])
+    entries = project_file_exist?(file_name) ? read_project_file(file_name).split("\n") : []
+    entries.reject! { |line| line.empty? || line.begin_with?("#") }
+
+    entries = entries + add - delete
+    entries = Set.new(entries).to_a.sort_by { |line| line.gsub(%r{!|/}, "") } + [""]
+
+    write_project_file(file_name, entries.join("\n"))
+  end
 end

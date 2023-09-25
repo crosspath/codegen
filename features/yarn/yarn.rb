@@ -42,7 +42,7 @@ module Features
 
         # @see https://yarnpkg.com/getting-started/qa#which-files-should-be-gitignored
         puts "Update .gitignore file..."
-        update_gitignore(yarnrc_yml)
+        update_gitignore_for_yarn(yarnrc_yml)
 
         # @see https://yarnpkg.com/getting-started/editor-sdks#tools-currently-supported
         puts "Add Yarn Plug'n'Play support to VS Code..."
@@ -84,8 +84,13 @@ module Features
       lines.to_h { |line| line.split(":", 2).map(&:strip) }
     end
 
-    def update_gitignore(yarnrc_yml)
-      entries = []
+    def update_gitignore_for_yarn(yarnrc_yml)
+      entries = [
+        ".yarn/*",
+        "!.yarn/patches",
+        "!.yarn/sdks",
+        "!.yarn/versions",
+      ]
 
       if yarnrc_yml["enableGlobalCache"] == "false"
         entries << "!.yarn/cache"
@@ -93,16 +98,7 @@ module Features
         entries << ".pnp.*"
       end
 
-      entries << ".yarn/*"
-      entries << "!.yarn/patches"
-      entries << "!.yarn/sdks"
-      entries << "!.yarn/versions"
-
-      gitignore = project_file_exist?(".gitignore") ? read_project_file(".gitignore").split("\n") : []
-      gitignore.reject! { |line| line.empty? || line.begin_with?("#") }
-      gitignore = Set.new(gitignore + entries).to_a.sort
-
-      write_project_file(".gitignore", gitignore.join("\n"))
+      update_ignore_file(".gitignore", add: entries)
     end
   end
 end
