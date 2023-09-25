@@ -1,0 +1,7 @@
+---
+BUNDLE_DEPLOYMENT: true
+BUNDLE_IGNORE_FUNDING_REQUESTS: true
+BUNDLE_IGNORE_MESSAGES: true
+# BUNDLE_PATH: "vendor/bundle" # "vendor/bundle" by default if BUNDLE_DEPLOYMENT = true
+BUNDLE_SILENCE_DEPRECATIONS: true
+BUNDLE_WITHOUT: "development test"
