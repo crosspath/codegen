@@ -1,0 +1,59 @@
+# syntax = docker/dockerfile:1
+
+ARG BASE_IMAGE=ruby:<%= ruby_version %>
+
+#==================
+FROM $BASE_IMAGE AS base
+
+ARG PACKAGES="build-essential cmake pkg-config"
+<% if yarn_version %>
+ARG PACKAGES="${PACKAGES} curl nodejs npm"
+<% end %>
+<% if includes_bun %>
+ARG PACKAGES="${PACKAGES} unzip"
+<% end %>
+<% if database_packages %>
+ARG PACKAGES="${PACKAGES} <%= database_packages %>"
+<% end %>
+
+RUN apt-get update -qq && \
+    apt-get install --no-install-recommends -y ${PACKAGES} && \
+    apt-get autoclean && \
+    apt-get autoremove && \
+    rm -rf /var/lib/apt/lists/*
+
+<% if yarn_version %>
+RUN --mount=type=cache,uid=1000 \
+    corepack enable && \
+    yarn set version <%= yarn_version %>
+<% end %>
+
+<% if includes_bun %>
+ENV BUN_INSTALL=/usr/local/bun
+ENV PATH=/usr/local/bun/bin:$PATH
+# TODO: Specify version - `bash -s -- "${BUN_VERSION}"`
+curl -fsSL https://bun.sh/install | bash
+<% end %>
+
+RUN gem install bundler:<%= bundler_version %>
+
+WORKDIR /rails
+
+<% if yarn_version %>
+COPY package.json yarn.lock ./
+RUN yarn install --frozen-lockfile
+<% end %>
+<% if includes_bun %>
+COPY package.json bun.lockb ./
+RUN bun install --frozen-lockfile
+<% end %>
+<% end %>
+
+COPY Gemfile Gemfile.lock ./
+RUN bundle install
+
+COPY . /rails
+
+EXPOSE 3000
+
+CMD ["bin/rails", "server", "-p", "3000" ,"-b", "0.0.0.0"]

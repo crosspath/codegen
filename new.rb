@@ -98,6 +98,7 @@ OPTIONS = {
       "8" => "jdbcpostgresql",
       "9" => "jdbc",
       "0" => "... other", # Required: gem name.
+      # "trilogy"
     },
     default: ->(_, _) { "2" },
     apply: ->(_gopt, ropt, val) do
