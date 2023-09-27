@@ -1,31 +1,19 @@
-# Дополнения для проектов на Rails
+# Project templates for Rails
 
-Создание папки с проектом:
+To create project:
 
-    rails new app_name --rc=api.rc --template=codegen/codegen.rb
-    rails new app_name --rc=minimum.rc --template=codegen/codegen.rb
-    rails new app_name --rc=default.rc --template=codegen/codegen.rb
+- run `./new.rb` and choose options in interactive mode;
+- run `./new.rb file-name-with-options`, where `file-name-with-options` is the file path to your
+  file with options (this script asks to create this file before running `rails new` command).
 
-Применение к существующей папке:
+To apply changes to existing project:
 
-    rails app:template LOCATION=../codegen/codegen.rb
+- run `./change.rb` and choose options in interactive mode;
+- run `./change.rb project-directory`, where `project-directory` is path to the directory of your
+  project;
+- run `./change.rb project-directory feature-name`, where `feature-name` is name of desired feature
+  (see list of features below). You may pass several feature names separated by space.
 
-## Доступные методы для генератора
+## Testing
 
-1. [Thor::Actions](https://rdoc.info/github/erikhuda/thor/master/Thor/Actions)
-2. `gems/railties-*/lib/rails/generators/base.rb`
-
-## Тестирование генератора
-
-Пересоздание папки с кодом проекта, сохраняя `node_modules` и `vendor`
-(для папки `app_name`):
-
-    mkdir backup__app_name
-    mv app_name/node_modules backup__app_name/node_modules
-    mv app_name/vendor backup__app_name/vendor
-    cd app_name; bin/spring stop; cd ..
-    rm -rf app_name
-    mkdir app_name
-    ln -s $(pwd)/backup__app_name/node_modules $(pwd)/app_name/node_modules
-    ln -s $(pwd)/backup__app_name/vendor $(pwd)/app_name/vendor
-    rails new app_name --rc=codegen/minimum.rc --template=codegen/codegen.rb
+Run `rake` or `rake test`.
