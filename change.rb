@@ -12,7 +12,7 @@ require "io/console"
 require_relative "src/ask"
 require_relative "src/feature"
 
-Dir["features/*/*.rb"].sort.each { |f| require(f) }
+Dir["features/*/*.rb"].sort.each { |f| require_relative(f) }
 
 class CLI
   attr_reader :app_path, :ask
@@ -30,8 +30,15 @@ class CLI
     @app_path = @ask.line(label: "Application path") if @app_path.nil? || @app_path.empty?
     @app_path = File.expand_path(@app_path, __dir__)
 
-    @features.each do |feature_name|
-      puts "Running #{feature_name}..."
+    if @features.empty?
+      Feature.all.each_key do |key|
+        @features << key if @ask.yes?(label: "Use #{key}", default: ->(_, _) { "y" })
+      end
+    end
+
+    # Sort by `Feature.all`.
+    (Feature.all.keys & @features).each do |feature_name|
+      puts "", "Using #{feature_name}..."
       Feature.all[feature_name].new(self).call
     end
   end

@@ -2,7 +2,7 @@
 
 module Features
   class Yarn < Feature
-    register_as "yarn"
+    register_as "yarn", before: "docker"
 
     def call
       # @see https://yarnpkg.com/getting-started/install
@@ -14,13 +14,13 @@ module Features
       end
 
       puts "Installing the latest stable version of Yarn..."
-      raise "Installation failed" unless system("yarn set version stable")
+      raise "Installation failed" unless system("cd #{cli.app_path} && yarn set version stable")
 
-      puts "Add \"packageManager\" entry to \"package.json\"..."
-      version = `cd #{@app_path} && yarn --version`
-      system("npm pkg set packageManager=yarn@#{version}")
+      puts "Adding \"packageManager\" entry to \"package.json\"..."
+      version = `cd #{cli.app_path} && yarn --version`
+      system("cd #{cli.app_path} && npm pkg set packageManager=yarn@#{version}")
 
-      if @ask.yes?(label: "Use Plug'n'Play in Yarn - it should not be used with React Native", default: ->(_, _) { "y" })
+      if cli.ask.yes?(label: "Use Plug'n'Play in Yarn - it should not be used with React Native", default: ->(_, _) { "y" })
         yarnrc_yml_changes = {}
 
         # @see https://yarnpkg.com/migration/pnp#enabling-yarn-pnp
@@ -29,30 +29,30 @@ module Features
         # @see https://yarnpkg.com/advanced/lexicon#local-cache
         # @see https://yarnpkg.com/features/caching#zero-installs
         # Not recommended for projects with many dependencies.
-        if @ask.yes?(label: "Use Zero-installs - store packages (.yarn/cache) in project repo", default: ->(_, _) { "n" })
+        if cli.ask.yes?(label: "Use Zero-installs - store packages (.yarn/cache) in project repo", default: ->(_, _) { "n" })
           yarnrc_yml_changes["enableGlobalCache"] = "false"
           puts warning(
-            "You may be interested in using git submodule for .yarn/cache directory. See more:\n"
+            "You may be interested in using git submodule for .yarn/cache directory. See more:\n"\
             "https://github.com/yarnpkg/berry/discussions/4845#discussioncomment-3637094"
           )
         end
 
-        puts "Update .yarnrc.yml file..."
+        puts "Updating .yarnrc.yml file..."
         yarnrc_yml = update_yarnrc_yml(add: yarnrc_yml_changes)
 
         # @see https://yarnpkg.com/getting-started/qa#which-files-should-be-gitignored
-        puts "Update .gitignore file..."
+        puts "Updating .gitignore file..."
         update_gitignore_for_yarn(yarnrc_yml)
 
         # @see https://yarnpkg.com/getting-started/editor-sdks#tools-currently-supported
-        puts "Add Yarn Plug'n'Play support to VS Code..."
-        system("yarn dlx @yarnpkg/sdks vscode")
+        puts "Adding Yarn Plug'n'Play support to VS Code..."
+        system("cd #{cli.app_path} && yarn dlx @yarnpkg/sdks vscode")
       else
         update_yarnrc_yml(add: {"nodeLinker" => "node-modules"})
       end
 
-      puts "Download front-end packages for your application..."
-      system("yarn install")
+      puts "Downloading front-end packages for your application..."
+      system("cd #{cli.app_path} && yarn install")
     end
 
     private
@@ -63,7 +63,7 @@ module Features
       lines.each_with_index do |line, index|
         # Replace options in-line.
         add.each do |key, value|
-          if line.begin_with?("#{key}:")
+          if line.start_with?("#{key}:")
             lines[index] = "#{key}: #{value}"
             add.delete(key)
           end
@@ -80,8 +80,17 @@ module Features
       lines << ""
 
       write_project_file(".yarnrc.yml", lines.join("\n"))
+      convert_yarnrc_yml_to_hash(lines)
+    end
 
-      lines.to_h { |line| line.split(":", 2).map(&:strip) }
+    def convert_yarnrc_yml_to_hash(lines)
+      result =
+        lines.filter_map do |line|
+          line = line.strip
+          line.split(":", 2).map(&:strip) if !line.empty? && !line.start_with?("#")
+        end
+
+      result.to_h
     end
 
     def update_gitignore_for_yarn(yarnrc_yml)

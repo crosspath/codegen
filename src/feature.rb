@@ -1,12 +1,36 @@
 # frozen_string_literal: true
 
 class Feature
-  class << self
+  module Registry
+    extend self
+
     attr_reader :all
 
-    def register_as(feature_name)
-      @all ||= {}
-      @all[feature_name] = self
+    def init
+      @all = []
+    end
+
+    def add(klass, feature_name, before = nil)
+      item = {klass:, feature_name:}
+
+      if before
+        index = @all.find_index { |h| h[:feature_name] == before }
+        return @all.insert(index, item) if index
+      end
+
+      @all << item
+    end
+  end
+
+  Feature::Registry.init
+
+  class << self
+    def all
+      Feature::Registry.all.to_h { |item| [item[:feature_name], item[:klass]] }
+    end
+
+    def register_as(feature_name, before: nil)
+      Feature::Registry.add(self, feature_name, before)
 
       # Instance-level method
       define_method(:feature_name) { feature_name }
@@ -77,7 +101,7 @@ class Feature
 
   def update_ignore_file(file_name, add: [], delete: [])
     entries = project_file_exist?(file_name) ? read_project_file(file_name).split("\n") : []
-    entries.reject! { |line| line.empty? || line.begin_with?("#") }
+    entries.reject! { |line| line.empty? || line.start_with?("#") }
 
     entries = entries + add - delete
     entries = Set.new(entries).to_a.sort_by { |line| line.gsub(%r{!|/}, "") } + [""]
