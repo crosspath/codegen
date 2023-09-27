@@ -9,20 +9,21 @@ module Features
     register_as "docker"
 
     def call
-      gemfile_lock = read_project_file("Gemfile.lock").split("\n")
+      @gemfile_lock = read_project_file("Gemfile.lock").split("\n")
       package_json =
         project_file_exist?("package.json") ? JSON.parse(read_project_file("package.json")) : nil
 
       locals = {
         ruby_version: read_project_file(".ruby-version").strip,
-        bundler_version: gemfile_lock.match(/\nBUNDLED WITH\n\s*(\S+)/)[1],
+        bundler_version: bundler_version,
         includes_frontend: !package_json.nil?,
         includes_bun: !package_json.nil? && project_file_exist?("bun.config.js"),
-        yarn_version: !package_json.nil? && package_json["packageManager"].match(/^yarn@(.+)$/)&.[](1)
+        yarn_version: !package_json.nil? && package_json["packageManager"].match(/^yarn@(.+)$/)&.[](1),
         add_chromium: cli.ask.yes?(label: "Add packages for Chromium", default: ->(_, _) { "n" }),
         database_packages: database_packages,
         includes_active_storage: active_storage?,
-        includes_sidekiq: !gemfile_lock.grep(/^\s*sidekiq\s/).empty?,
+        includes_sidekiq: !@gemfile_lock.grep(/^\s*sidekiq\s/).empty?,
+        has_node_modules: Dir.exist?(File.join(cli.app_path, "node_modules")),
       }
 
       if project_file_exist?("config/database.yml")
@@ -46,6 +47,13 @@ module Features
       # "jdbcpostgresql",
       # "jdbc"
     }.freeze
+
+    def bundler_version
+      index = @gemfile_lock.find_index("BUNDLED WITH")
+      raise "Cannot find 'BUNDLED WITH' in 'Gemfile.lock'" unless index
+
+      @gemfile_lock[index + 1].strip
+    end
 
     def database_packages
       return unless project_file_exist?("config/database.yml")
