@@ -69,7 +69,9 @@ module Features
     end
 
     def add_yarn_to_project
-      version = `cd #{cli.app_path} && yarn --version`.strip
+      # WARN: `yarn --version` may return "3.2.0", but directory `tmp/full_7/.yarn/releases`
+      # contains newer release, for example, 3.6.3.
+      version = Dir["#{cli.app_path}/.yarn/releases/*.cjs"].sort.last.match(/(\d\.\d\.\d)\.cjs$/)[1]
 
       if project_file_exist?("package.json")
         run_command_in_project_dir("npm pkg set packageManager=yarn@#{version}")

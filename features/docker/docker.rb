@@ -18,7 +18,7 @@ module Features
         bundler_version: bundler_version,
         includes_frontend: !package_json.nil?,
         includes_bun: !package_json.nil? && project_file_exist?("bun.config.js"),
-        yarn_version: !package_json.nil? && package_json["packageManager"].match(/^yarn@(.+)$/)&.[](1),
+        includes_yarn: !package_json.nil? && package_json["packageManager"] =~ /^yarn@$/,
         add_chromium: cli.ask.yes?(label: "Add packages for Chromium", default: ->(_, _) { "n" }),
         database_packages: database_packages,
         includes_active_storage: active_storage?,

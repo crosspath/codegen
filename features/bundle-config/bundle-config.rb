@@ -13,6 +13,9 @@ module Features
       puts "Update .gitignore file..."
       update_ignore_file(".gitignore", add: IGNORE_FILE_ENTRIES)
 
+      puts "Update .dockerignore file..."
+      update_ignore_file(".dockerignore", add: IGNORE_FILE_ENTRIES)
+
       puts "Update bin/setup file..."
       update_bin_setup
     end

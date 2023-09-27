@@ -8,7 +8,7 @@ FROM $BASE_IMAGE AS base
 
 ARG PACKAGES="build-essential cmake git libjemalloc2 pkg-config ssmtp"
 ARG PACKAGES="${PACKAGES} iproute2 less net-tools nano screen telnet tmux vim"
-<% if yarn_version %>
+<% if includes_yarn %>
 ARG PACKAGES="${PACKAGES} curl nodejs npm"
 <% end %>
 <% if includes_bun %>
@@ -17,7 +17,7 @@ ARG PACKAGES="${PACKAGES} unzip"
 <%
 # Use it if you want to build Node.js from sources, not to use binaries from APT repos.
 # And add build step for Node.js.
-# if yarn_version
+# if includes_yarn
 # ARG PACKAGES="${PACKAGES} node-gyp python-is-python3"
 # end
 %>
@@ -43,22 +43,21 @@ ARG SSMTP_RELAY_HOST_PORT
 RUN sed -i "s/mailhub=mail/mailhub=${SSMTP_RELAY_HOST_PORT}/" /etc/ssmtp/ssmtp.conf
 
 # Russian CAs
-RUN wget --quiet https://gu-st.ru/content/lending/russian_trusted_root_ca_pem.crt -O /usr/local/share/ca-certificates/russian_trusted_root_ca_pem.crt && \
+RUN wget --quiet https://gu-st.ru/content/lending/russian_trusted_root_ca_pem.crt \
+    -O /usr/local/share/ca-certificates/russian_trusted_root_ca_pem.crt && \
     /usr/sbin/update-ca-certificates
 
 RUN groupadd -g 1000 app && \
     useradd -u 1000 -g 1000 -m app --shell /bin/bash
 
 # Application directory.
-RUN mkdir /rails && chown app:app /rails && chmod 0755 /rails
+RUN mkdir -p -m 0755 /rails/vendor/bundle /rails/.bundle && chown -R app:app /rails
 
-<% if yarn_version %>
+<% if includes_yarn %>
 RUN --mount=type=cache,uid=1000,target=/rails \
     npm install -g corepack && \
-    corepack enable && \
-    yarn set version <%= yarn_version %>
+    corepack enable
 <% end %>
-
 <% if includes_bun %>
 ENV BUN_INSTALL=/usr/local/bun
 ENV PATH=/usr/local/bun/bin:$PATH
@@ -79,8 +78,9 @@ COPY .bundle/config.production .bundle/config
 RUN --mount=type=secret,id=ssh_prv_key_file,target=/root/.ssh/id_rsa \
     mkdir -p /root/.ssh && \
     chmod 0700 /root/.ssh && \
-    ssh-keyscan github.com >> /root/.ssh/known_hosts && \
-    bundle install
+    ssh-keyscan github.com >> /root/.ssh/known_hosts
+
+RUN bundle install
 
 <% if includes_frontend %>
 #==================
@@ -89,7 +89,7 @@ FROM base AS front_end
 
 WORKDIR /rails
 
-<% if yarn_version %>
+<% if includes_yarn %>
 COPY package.json yarn.lock ./
 RUN yarn install --frozen-lockfile
 <% end %>
@@ -108,10 +108,11 @@ WORKDIR /rails
 USER app
 
 COPY --chown=app:app . /rails
+COPY .bundle/config.production .bundle/config
 COPY --chown=app:app --from=gems /usr/local/bundle/ /usr/local/bundle/
 COPY --chown=app:app --from=gems /rails/vendor/bundle /rails/vendor/bundle
-<% if yarn_version %>
-COPY --chown=app:app --from=front_end /rails/.yarn /rails/
+<% if includes_yarn %>
+COPY --chown=app:app --from=front_end /rails/.yarn /rails/.yarn
 <% if has_node_modules %>COPY --chown=app:app --from=front_end /rails/node_modules /rails/<% end %>
 <% end %>
 
