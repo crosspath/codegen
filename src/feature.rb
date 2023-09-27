@@ -108,4 +108,8 @@ class Feature
 
     write_project_file(file_name, entries.join("\n"))
   end
+
+  def run_command_in_project_dir(cmd)
+    system("cd #{cli.app_path} && #{cmd}")
+  end
 end

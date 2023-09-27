@@ -20,7 +20,7 @@ module Features
     private
 
     IGNORE_FILE_ENTRIES = [
-      "/.bundle",
+      "/.bundle/*",
       "!/.bundle/config.development",
       "!/.bundle/config.production",
     ].freeze

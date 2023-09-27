@@ -5,22 +5,17 @@ module Features
     register_as "yarn", before: "docker"
 
     def call
-      # @see https://yarnpkg.com/getting-started/install
-      # @see https://nodejs.org/api/corepack.html
-      res = `corepack enable`
-      if res.include?("permission denied")
-        puts "Corepack (part of NPM) requires sudo privileges for creating symlinks."
-        raise "Cannot enable Corepack that is required for Yarn." unless system("sudo corepack enable")
-      end
+      enable_corepack
 
       puts "Installing the latest stable version of Yarn..."
-      raise "Installation failed" unless system("cd #{cli.app_path} && yarn set version stable")
+      raise "Installation failed" unless run_command_in_project_dir("yarn set version stable")
 
       puts "Adding \"packageManager\" entry to \"package.json\"..."
-      version = `cd #{cli.app_path} && yarn --version`
-      system("cd #{cli.app_path} && npm pkg set packageManager=yarn@#{version}")
+      add_yarn_to_project
 
-      if cli.ask.yes?(label: "Use Plug'n'Play in Yarn - it should not be used with React Native", default: ->(_, _) { "y" })
+      use_plug_and_play = use_plug_and_play?
+
+      if use_plug_and_play
         yarnrc_yml_changes = {}
 
         # @see https://yarnpkg.com/migration/pnp#enabling-yarn-pnp
@@ -29,7 +24,7 @@ module Features
         # @see https://yarnpkg.com/advanced/lexicon#local-cache
         # @see https://yarnpkg.com/features/caching#zero-installs
         # Not recommended for projects with many dependencies.
-        if cli.ask.yes?(label: "Use Zero-installs - store packages (.yarn/cache) in project repo", default: ->(_, _) { "n" })
+        if use_zero_installs?
           yarnrc_yml_changes["enableGlobalCache"] = "false"
           puts warning(
             "You may be interested in using git submodule for .yarn/cache directory. See more:\n"\
@@ -43,19 +38,62 @@ module Features
         # @see https://yarnpkg.com/getting-started/qa#which-files-should-be-gitignored
         puts "Updating .gitignore file..."
         update_gitignore_for_yarn(yarnrc_yml)
-
-        # @see https://yarnpkg.com/getting-started/editor-sdks#tools-currently-supported
-        puts "Adding Yarn Plug'n'Play support to VS Code..."
-        system("cd #{cli.app_path} && yarn dlx @yarnpkg/sdks vscode")
       else
         update_yarnrc_yml(add: {"nodeLinker" => "node-modules"})
       end
 
       puts "Downloading front-end packages for your application..."
-      system("cd #{cli.app_path} && yarn install")
+      run_command_in_project_dir("yarn install")
+
+      # Should be called after installing packages. If we call it before `yarn install`, we get:
+      #     Internal Error: This tool can only be used with projects using Yarn Plug'n'Play
+      if use_plug_and_play
+        # @see https://yarnpkg.com/getting-started/editor-sdks#tools-currently-supported
+        puts "Adding Yarn Plug'n'Play support to VS Code..."
+        run_command_in_project_dir("yarn dlx @yarnpkg/sdks vscode")
+      end
     end
 
     private
+
+    def enable_corepack
+      # @see https://yarnpkg.com/getting-started/install
+      # @see https://nodejs.org/api/corepack.html
+      res = `corepack enable`
+      if res.include?("permission denied")
+        puts "Corepack (part of NPM) requires sudo privileges for creating symlinks."
+        unless system("sudo corepack enable")
+          raise "Cannot enable Corepack that is required for Yarn."
+        end
+      end
+    end
+
+    def add_yarn_to_project
+      version = `cd #{cli.app_path} && yarn --version`.strip
+
+      if project_file_exist?("package.json")
+        run_command_in_project_dir("npm pkg set packageManager=yarn@#{version}")
+      else
+        json = <<~JSON
+          {"packageManager": "yarn@#{version}"}
+        JSON
+        write_project_file("package.json", json)
+      end
+    end
+
+    def use_plug_and_play?
+      cli.ask.yes?(
+        label: "Use Plug'n'Play in Yarn - it should not be used with React Native",
+        default: ->(_, _) { "y" }
+      )
+    end
+
+    def use_zero_installs?
+      cli.ask.yes?(
+        label: "Use Zero-installs - store packages (.yarn/cache) in project repo",
+        default: ->(_, _) { "n" }
+      )
+    end
 
     def update_yarnrc_yml(add: {})
       lines = project_file_exist?(".yarnrc.yml") ? read_project_file(".yarnrc.yml").split("\n") : []
