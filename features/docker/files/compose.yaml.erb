@@ -14,10 +14,12 @@ x-app-service: &app-service
   stdin_open: true
   tty: true
   environment:
-  - RAILS_ENV=development
+    RAILS_ENV: development
+<% if includes_redis %>
+    REDIS_URL: "redis://service_redis:6379/0"
+<% end %>
 <% if includes_sidekiq %>
-    - REDIS_URL=redis://service_redis:6379/0
-    - SIDEKIQ_REDIS_URL=redis://service_redis:6379/2
+    SIDEKIQ_REDIS_URL: "redis://service_redis:6379/2"
 <% end %>
   networks:
     - internal
@@ -32,16 +34,16 @@ services:
       secrets:
         - ssh_prv_key_file
       args:
-        - VERSION_BUILD_DATE=${VERSION_BUILD_DATE:-'no date'}
-        - VERSION_BUILD_JOB_NUMBER=${VERSION_BUILD_JOB_NUMBER:-'0'}
-        - VERSION_BRANCH=${VERSION_BRANCH:-'0'}
-        - VERSION_TAG=${VERSION_TAG:-'0'}
-        - VERSION_SHA=${VERSION_SHA:-'0'}
+        VERSION_BUILD_DATE: ${VERSION_BUILD_DATE:-'no date'}
+        VERSION_BUILD_JOB_NUMBER: ${VERSION_BUILD_JOB_NUMBER:-'0'}
+        VERSION_BRANCH: ${VERSION_BRANCH:-'0'}
+        VERSION_TAG: ${VERSION_TAG:-'0'}
+        VERSION_SHA: ${VERSION_SHA:-'0'}
     container_name: service_rails
     <% if database %>depends_on: ["<%= database[:dbms] %>"]<% end %>
     ports:
       - 3000:3000
-    command: bash -c "rm -f tmp/pids/server.pid && bin/rails s -p 3000"
+    command: bash -c "rm -f tmp/pids/server.pid && bin/rails s -p 3000 -b '0.0.0.0'"
 
 <% if database %>
   <%= database[:dbms] %>:
@@ -53,7 +55,7 @@ services:
     restart: always
     environment:
 <% database[:env].each do |key, value| %>
-      - <%= key %>=<%= value %>
+      <%= key %>: <%= value %>
 <% end %>
     volumes:
       - database:<%= database[:data_path] %>
@@ -70,7 +72,9 @@ services:
     profiles:
       - sidekiq
     # depends_on: ["redis"]
+<% end %>
 
+<% if includes_redis %>
   redis:
     container_name: service_redis
     image: redis:7

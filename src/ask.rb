@@ -1,3 +1,7 @@
+# frozen_string_literal: true
+
+require "io/console"
+
 class Ask
   Interrupt = Class.new(RuntimeError)
 

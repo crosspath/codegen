@@ -20,8 +20,10 @@ services:
     <% if database %>depends_on: ["<%= database[:dbms] %>"]<% end %>
     environment:
       - RAILS_ENV=development
-<% if includes_sidekiq %>
+<% if includes_redis %>
       - REDIS_URL=redis://service_redis:6379/0
+<% end %>
+<% if includes_sidekiq %>
       - SIDEKIQ_REDIS_URL=redis://service_redis:6379/2
 <% end %>
       - SSH_AUTH_SOCK=/ssh-agent # Forward local machine SSH key to docker
@@ -40,7 +42,7 @@ services:
       - database:<%= database[:data_path] %>
 <% end %>
 
-<% if includes_sidekiq %>
+<% if includes_redis %>
   redis:
     container_name: service_redis
     image: redis:7

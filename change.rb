@@ -7,8 +7,6 @@
 # ./change.rb project-directory feature-name
 # ./change.rb project-directory feature-1 feature-2 feature-3 ...
 
-require "erubi"
-require "io/console"
 require_relative "src/ask"
 require_relative "src/feature"
 

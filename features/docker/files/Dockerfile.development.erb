@@ -28,7 +28,7 @@ RUN apt-get update -qq && \
 # Application directory: /rails
 RUN mkdir -m 0755 /rails
 WORKDIR /rails
-RUN mkdir -p -m 0755 tmp/pids tmp/storage log storage
+RUN mkdir -p -m 0755 .bundle tmp/pids tmp/storage log storage
 
 <% if includes_yarn %>
 RUN --mount=type=cache,uid=1000,target=/rails \
@@ -52,14 +52,12 @@ RUN yarn install --frozen-lockfile
 COPY package.json bun.lockb ./
 RUN bun install --frozen-lockfile
 <% end %>
-<% end %>
 
 COPY Gemfile Gemfile.lock ./
+COPY .bundle/config.development .bundle/config
 RUN bundle install
 
 COPY . /rails
-COPY .bundle/config.development .bundle/config
 
 EXPOSE 3000
-
-CMD ["bin/rails", "server", "-p", "3000" ,"-b", "0.0.0.0"]
+CMD bin/rails s -p 3000 -b '0.0.0.0'

@@ -6,7 +6,6 @@
 # ./new.rb file-name-with-options
 # NO_SAVE=1 ./new.rb file-name-with-options
 
-require "io/console"
 require_relative "src/ask"
 
 # Types:

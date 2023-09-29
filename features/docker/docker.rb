@@ -2,6 +2,27 @@
 
 require "json"
 
+# Build Docker image:
+#     docker build -t project-tag .
+#     docker build -t project-tag -f Dockerfile.development .
+#     (Placeholders: project-tag)
+# Run bash console within Docker image:
+#     docker run -it project-tag bash
+#     docker exec -it container-id bash
+#     (Placeholders: project-tag, container-id)
+# Start service:
+#     docker run -d --cidfile tmp/docker.cid -p 127.0.0.1:3000:3000 project-tag
+#     (Placeholders: project-tag)
+# Stop service:
+#     docker kill $(cat tmp/docker.cid); rm -f tmp/docker.cid; docker container prune
+# Easy way to start container if it does not repond to HTTP requests when using commands above:
+#     docker run -d --cidfile tmp/docker.cid --network host project-tag
+# Start with `docker compose` feature:
+#     docker compose pull; docker compose build; docker compose up -d
+#     docker compose -f compose.development.yaml pull; ...
+# Stop with `docker compose` feature:
+#     docker compose down
+#     docker compose -f compose.development.yaml down
 module Features
   # @see Dockerfile syntax: https://docs.docker.com/engine/reference/builder/
   # @see https://github.com/rails/rails/blob/main/railties/lib/rails/generators/app_base.rb
@@ -71,7 +92,17 @@ module Features
       "/public/assets",
     ].freeze
 
-    attr_reader :active_storage, :bundler_version, :config_database_yml, :dbms_adapter, :gemfile_lock, :package_json, :ruby_version, :sidekiq
+    attr_reader(
+      :active_storage,
+      :bundler_version,
+      :config_database_yml,
+      :dbms_adapter,
+      :gemfile_lock,
+      :package_json,
+      :redis,
+      :ruby_version,
+      :sidekiq
+    )
 
     def read_project_files
       @gemfile_lock = read_project_file("Gemfile.lock").split("\n")
@@ -88,6 +119,7 @@ module Features
       @bundler_version = read_bundler_version
       @dbms_adapter = read_dbms_adapter
       @active_storage = active_storage?
+      @redis = !@gemfile_lock.grep(/^\s*redis\s/).empty?
       @sidekiq = !@gemfile_lock.grep(/^\s*sidekiq\s/).empty?
     end
 
@@ -97,7 +129,7 @@ module Features
         bundler_version:,
         includes_frontend: !package_json.nil?,
         includes_bun: !package_json.nil? && project_file_exist?("bun.config.js"),
-        includes_yarn: !package_json.nil? && package_json["packageManager"] =~ /^yarn@$/,
+        includes_yarn: !package_json.nil? && package_json["packageManager"] =~ /^yarn@/,
         add_chromium: cli.ask.yes?(label: "Add packages for Chromium", default: ->(_, _) { "n" }),
         database_packages: DBMS_PACKAGES[dbms_adapter],
         includes_active_storage: active_storage,
@@ -111,6 +143,7 @@ module Features
 
     def create_compose_files
       locals = {
+        includes_redis: redis,
         includes_sidekiq: sidekiq,
         database: DBMS_IMAGES[dbms_adapter],
       }

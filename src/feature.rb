@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+require "erubi"
+
 class Feature
   module Registry
     extend self

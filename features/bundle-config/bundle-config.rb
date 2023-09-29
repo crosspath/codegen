@@ -7,7 +7,7 @@ module Features
 
     def call
       puts "Copy files to .bundle directory..."
-      copy_files_to_project("", ".bundle")
+      copy_files_to_project("*", ".bundle")
       copy_files_to_project("config.development", ".bundle/config")
 
       puts "Updating .gitignore file..."
