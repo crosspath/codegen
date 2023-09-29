@@ -1,0 +1,100 @@
+version: "3.7"
+
+x-app-service: &app-service
+  image: application:1.0
+  platform: linux/amd64
+  volumes:
+    - .:/rails
+    - vendor_bundle:/rails/vendor/bundle
+    - type: bind
+      source: ${SSH_KEY_PATH:-~/.ssh/id_rsa}
+      target: /home/app/.ssh/id_rsa
+      read_only: true
+  privileged: true
+  stdin_open: true
+  tty: true
+  environment:
+  - RAILS_ENV=development
+<% if includes_sidekiq %>
+    - REDIS_URL=redis://service_redis:6379/0
+    - SIDEKIQ_REDIS_URL=redis://service_redis:6379/2
+<% end %>
+  networks:
+    - internal
+    - external
+
+services:
+  app:
+    <<: *app-service
+    build:
+      context: .
+      dockerfile: Dockerfile
+      secrets:
+        - ssh_prv_key_file
+      args:
+        - VERSION_BUILD_DATE=${VERSION_BUILD_DATE:-'no date'}
+        - VERSION_BUILD_JOB_NUMBER=${VERSION_BUILD_JOB_NUMBER:-'0'}
+        - VERSION_BRANCH=${VERSION_BRANCH:-'0'}
+        - VERSION_TAG=${VERSION_TAG:-'0'}
+        - VERSION_SHA=${VERSION_SHA:-'0'}
+    container_name: service_rails
+    <% if database %>depends_on: ["<%= database[:dbms] %>"]<% end %>
+    ports:
+      - 3000:3000
+    command: bash -c "rm -f tmp/pids/server.pid && bin/rails s -p 3000"
+
+<% if database %>
+  <%= database[:dbms] %>:
+    container_name: service_<%= database[:dbms] %>
+    image: <%= database[:image] %>
+    ports:
+      - <%= database[:port] %>:<%= database[:port] %>
+    platform: linux/amd64
+    restart: always
+    environment:
+<% database[:env].each do |key, value| %>
+      - <%= key %>=<%= value %>
+<% end %>
+    volumes:
+      - database:<%= database[:data_path] %>
+    networks:
+      - internal
+      - external
+<% end %>
+
+<% if includes_sidekiq %>
+  sidekiq:
+    <<: *app-service
+    container_name: service_sidekiq
+    command: bundle exec sidekiq -C /rails/config/sidekiq.yml
+    profiles:
+      - sidekiq
+    # depends_on: ["redis"]
+
+  redis:
+    container_name: service_redis
+    image: redis:7
+    command: redis-server
+    ports:
+      - 6379:6379
+    networks:
+      - internal
+<% end %>
+
+networks:
+  internal:
+    driver: bridge
+    internal: true
+  external:
+    driver: bridge
+
+volumes:
+  vendor_bundle:
+    driver: local
+<% if database %>
+  database: null
+<% end %>
+
+secrets:
+  ssh_prv_key_file:
+    file: ${SSH_KEY_PATH:-~/.ssh/id_rsa}

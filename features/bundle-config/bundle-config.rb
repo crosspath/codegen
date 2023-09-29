@@ -10,13 +10,13 @@ module Features
       copy_files_to_project("", ".bundle")
       copy_files_to_project("config.development", ".bundle/config")
 
-      puts "Update .gitignore file..."
+      puts "Updating .gitignore file..."
       update_ignore_file(".gitignore", add: IGNORE_FILE_ENTRIES)
 
-      puts "Update .dockerignore file..."
+      puts "Updating .dockerignore file..."
       update_ignore_file(".dockerignore", add: IGNORE_FILE_ENTRIES)
 
-      puts "Update bin/setup file..."
+      puts "Updating bin/setup file..."
       update_bin_setup
     end
 

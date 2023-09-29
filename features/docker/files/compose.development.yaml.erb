@@ -1,0 +1,53 @@
+version: "3.7"
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile.development
+    image: application:1.0
+    container_name: service_rails
+    privileged: true
+    command: bash -c "rm -f tmp/pids/server.pid && bin/rails s -p 3000 -b '0.0.0.0'"
+    volumes:
+      - ~/.ssh:/root/.ssh
+      - .:/rails
+      - $SSH_AUTH_SOCK:/ssh-agent
+    ports:
+      - 3000:3000
+    stdin_open: true
+    tty: true
+    <% if database %>depends_on: ["<%= database[:dbms] %>"]<% end %>
+    environment:
+      - RAILS_ENV=development
+<% if includes_sidekiq %>
+      - REDIS_URL=redis://service_redis:6379/0
+      - SIDEKIQ_REDIS_URL=redis://service_redis:6379/2
+<% end %>
+      - SSH_AUTH_SOCK=/ssh-agent # Forward local machine SSH key to docker
+
+<% if database %>
+  <%= database[:dbms] %>:
+    container_name: service_<%= database[:dbms] %>
+    image: <%= database[:image] %>
+    ports:
+      - <%= database[:port] %>:<%= database[:port] %>
+    environment:
+<% database[:env].each do |key, value| %>
+      - <%= key %>=<%= value %>
+<% end %>
+    volumes:
+      - database:<%= database[:data_path] %>
+<% end %>
+
+<% if includes_sidekiq %>
+  redis:
+    container_name: service_redis
+    image: redis:7
+    command: redis-server
+    ports:
+      - 6379:6379
+<% end %>
+
+volumes:
+  database: null

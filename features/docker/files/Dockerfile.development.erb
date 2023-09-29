@@ -6,7 +6,7 @@ ARG BASE_IMAGE=ruby:<%= ruby_version %>
 FROM $BASE_IMAGE AS base
 
 ARG PACKAGES="build-essential cmake pkg-config"
-<% if yarn_version %>
+<% if includes_yarn %>
 ARG PACKAGES="${PACKAGES} curl nodejs npm"
 <% end %>
 <% if includes_bun %>
@@ -15,6 +15,9 @@ ARG PACKAGES="${PACKAGES} unzip"
 <% if database_packages %>
 ARG PACKAGES="${PACKAGES} <%= database_packages %>"
 <% end %>
+<% if includes_active_storage %>
+ARG PACKAGES="${PACKAGES} libvips"
+<% end %>
 
 RUN apt-get update -qq && \
     apt-get install --no-install-recommends -y ${PACKAGES} && \
@@ -22,12 +25,16 @@ RUN apt-get update -qq && \
     apt-get autoremove && \
     rm -rf /var/lib/apt/lists/*
 
-<% if yarn_version %>
-RUN --mount=type=cache,uid=1000 \
-    corepack enable && \
-    yarn set version <%= yarn_version %>
-<% end %>
+# Application directory: /rails
+RUN mkdir -m 0755 /rails
+WORKDIR /rails
+RUN mkdir -p -m 0755 tmp/pids tmp/storage log storage
 
+<% if includes_yarn %>
+RUN --mount=type=cache,uid=1000,target=/rails \
+    npm install -g corepack && \
+    corepack enable
+<% end %>
 <% if includes_bun %>
 ENV BUN_INSTALL=/usr/local/bun
 ENV PATH=/usr/local/bun/bin:$PATH
@@ -37,9 +44,7 @@ curl -fsSL https://bun.sh/install | bash
 
 RUN gem install bundler:<%= bundler_version %>
 
-WORKDIR /rails
-
-<% if yarn_version %>
+<% if includes_yarn %>
 COPY package.json yarn.lock ./
 RUN yarn install --frozen-lockfile
 <% end %>
@@ -53,6 +58,7 @@ COPY Gemfile Gemfile.lock ./
 RUN bundle install
 
 COPY . /rails
+COPY .bundle/config.development .bundle/config
 
 EXPOSE 3000
 

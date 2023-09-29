@@ -50,8 +50,10 @@ RUN wget --quiet https://gu-st.ru/content/lending/russian_trusted_root_ca_pem.cr
 RUN groupadd -g 1000 app && \
     useradd -u 1000 -g 1000 -m app --shell /bin/bash
 
-# Application directory.
-RUN mkdir -p -m 0755 /rails/vendor/bundle /rails/.bundle && chown -R app:app /rails
+# Application directory: /rails
+RUN mkdir -m 0755 /rails
+WORKDIR /rails
+RUN mkdir -p -m 0755 vendor/bundle .bundle tmp/pids tmp/storage log storage && chown -R app:app .
 
 <% if includes_yarn %>
 RUN --mount=type=cache,uid=1000,target=/rails \
