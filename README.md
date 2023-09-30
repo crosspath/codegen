@@ -14,6 +14,14 @@ To apply changes to existing project:
 - run `./change.rb project-directory feature-name`, where `feature-name` is name of desired feature
   (see list of features below). You may pass several feature names separated by space.
 
+## Features
+
+* `bundle-config`: predefined config files for `bundler`
+* `docker`: generate Dockerfile & Docker Compose files
+* `yarn`: install latest version of Yarn and add actual config values for Yarn
+
+... to be continued ...
+
 ## Testing
 
 Run `rake` or `rake test`.
