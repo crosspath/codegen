@@ -2,27 +2,6 @@
 
 require "json"
 
-# Build Docker image:
-#     docker build -t project-tag .
-#     docker build -t project-tag -f Dockerfile.development .
-#     (Placeholders: project-tag)
-# Run bash console within Docker image:
-#     docker run -it project-tag bash
-#     docker exec -it container-id bash
-#     (Placeholders: project-tag, container-id)
-# Start service:
-#     docker run -d --cidfile tmp/docker.cid -p 127.0.0.1:3000:3000 project-tag
-#     (Placeholders: project-tag)
-# Stop service:
-#     docker kill $(cat tmp/docker.cid); rm -f tmp/docker.cid; docker container prune
-# Easy way to start container if it does not repond to HTTP requests when using commands above:
-#     docker run -d --cidfile tmp/docker.cid --network host project-tag
-# Start with `docker compose` feature:
-#     docker compose pull; docker compose build; docker compose up -d
-#     docker compose -f compose.development.yaml pull; ...
-# Stop with `docker compose` feature:
-#     docker compose down
-#     docker compose -f compose.development.yaml down
 module Features
   # @see Dockerfile syntax: https://docs.docker.com/engine/reference/builder/
   # @see https://github.com/rails/rails/blob/main/railties/lib/rails/generators/app_base.rb
@@ -135,6 +114,8 @@ module Features
         includes_active_storage: active_storage,
         includes_sidekiq: sidekiq,
         has_node_modules: Dir.exist?(File.join(cli.app_path, "node_modules")),
+        bundle_config_dev: project_file_exist?(".bundle/config.development"),
+        bundle_config_prod: project_file_exist?(".bundle/config.production"),
       }
 
       erb("Dockerfile", "Dockerfile", **locals)

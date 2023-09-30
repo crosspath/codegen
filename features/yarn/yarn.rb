@@ -69,7 +69,7 @@ module Features
     end
 
     def add_yarn_to_project
-      # WARN: `yarn --version` may return "3.2.0", but directory `tmp/full_7/.yarn/releases`
+      # WARN: `yarn --version` may return "3.2.0", but directory `${project}/.yarn/releases`
       # contains newer release, for example, 3.6.3.
       version = Dir["#{cli.app_path}/.yarn/releases/*.cjs"].sort.last.match(/(\d\.\d\.\d)\.cjs$/)[1]
 

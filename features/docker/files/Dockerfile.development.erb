@@ -54,7 +54,7 @@ RUN bun install --frozen-lockfile
 <% end %>
 
 COPY Gemfile Gemfile.lock ./
-COPY .bundle/config.development .bundle/config
+<% if bundle_config_dev %>COPY .bundle/config.development .bundle/config<% end %>
 RUN bundle install
 
 COPY . /rails

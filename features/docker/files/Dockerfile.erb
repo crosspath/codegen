@@ -75,7 +75,7 @@ FROM base AS gems
 
 WORKDIR /rails
 COPY Gemfile Gemfile.lock ./
-COPY .bundle/config.production .bundle/config
+<% if bundle_config_prod %>COPY .bundle/config.production .bundle/config<% end %>
 
 RUN --mount=type=secret,id=ssh_prv_key_file,target=/root/.ssh/id_rsa \
     mkdir -p /root/.ssh && \
@@ -110,7 +110,7 @@ WORKDIR /rails
 USER app
 
 COPY --chown=app:app . /rails
-COPY .bundle/config.production .bundle/config
+<% if bundle_config_dev %>COPY .bundle/config.production .bundle/config<% end %>
 COPY --chown=app:app --from=gems /usr/local/bundle/ /usr/local/bundle/
 COPY --chown=app:app --from=gems /rails/vendor/bundle /rails/vendor/bundle
 <% if includes_yarn %>
