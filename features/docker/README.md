@@ -7,7 +7,7 @@ This script generates Dockerfile & Docker Compose files:
    `yarn/bun install` and `bundle install`.
 3. Adds instructions and config values for Redis & Sidekiq.
 4. Integrates with `bundle-config` & `yarn` features.
-5. Adds correct entries to `.dockerignore` files.
+5. Adds correct entries to `.dockerignore` file.
 
 No special actions required from other developers or PCs.
 

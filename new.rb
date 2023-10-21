@@ -542,6 +542,7 @@ class PostInstallScript
 
   def add_steps
     add_front_end_libs
+    remove_keeps
   end
 
   def has_steps?
@@ -584,6 +585,25 @@ class PostInstallScript
       puts "Adding front-end libraries..."
       Dir.chdir(File.dirname(__dir__)) do
         #{commands}
+      end
+    TEXT
+  end
+
+  def remove_keeps
+    return if @generator_option_values[:keeps]
+
+    keep_file_path = File.join(@app_path, "vendor/javascript/.keep")
+    return unless File.exist?(keep_file_path)
+
+    @steps << <<~TEXT
+      puts "Remove vendor/javascript/.keep..."
+      Dir.chdir(File.dirname(__dir__)) do
+        File.unlink("vendor/javascript/.keep") if File.exist?("vendor/javascript/.keep")
+        if File.exist?("app/assets/config/manifest.js") && Dir.empty?("vendor/javascript")
+          lines = File.readlines("app/assets/config/manifest.js")
+          lines -= "//= link_tree ../../../vendor/javascript .js\n"
+          File.write("app/assets/config/manifest.js", lines.join)
+        end
       end
     TEXT
   end

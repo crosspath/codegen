@@ -13,13 +13,13 @@ class Ask
   def question(definition)
     case definition[:type]
     when :text
-      Ask.line(definition)
+      line(definition)
     when :boolean
-      Ask.yes?(definition)
+      yes?(definition)
     when :one_of
-      Ask.one_of(definition)
+      one_of(definition)
     when :many_of
-      Ask.many_of(definition)
+      many_of(definition)
     else
       raise ArgumentError, definition[:type].to_s
     end
