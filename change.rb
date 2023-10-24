@@ -39,6 +39,8 @@ class CLI
       puts "", "Using #{feature_name}..."
       Feature.all[feature_name].new(self).call
     end
+
+    puts "Done!"
   end
 end
 

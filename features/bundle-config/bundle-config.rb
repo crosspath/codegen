@@ -7,20 +7,25 @@ module Features
 
     def call
       puts "Copy files to .bundle directory..."
+      Dir.mkdir(".bundle", 0o775) unless Dir.exist?(".bundle")
       copy_files_to_project("*", ".bundle")
       copy_files_to_project("config.development", ".bundle/config")
 
       puts "Updating .gitignore file..."
-      update_ignore_file(".gitignore", add: IGNORE_FILE_ENTRIES)
+      update_ignore_file(".gitignore", add: IGNORE_FILE_ENTRIES, delete: DO_NOT_IGNORE)
 
       puts "Updating .dockerignore file..."
-      update_ignore_file(".dockerignore", add: IGNORE_FILE_ENTRIES)
+      update_ignore_file(".dockerignore", add: IGNORE_FILE_ENTRIES, delete: DO_NOT_IGNORE)
 
       puts "Updating bin/setup file..."
       update_bin_setup
     end
 
     private
+
+    DO_NOT_IGNORE = [
+      "/.bundle",
+    ].freeze
 
     IGNORE_FILE_ENTRIES = [
       "/.bundle/*",
@@ -38,13 +43,16 @@ module Features
         end
       RUBY
 
+      # Add 2 spaces.
+      modified_line = modified_line.lines.map { |x| "  #{x}" }.join
+
       if line_index_with_bundle_call
         file[line_index_with_bundle_call] = modified_line + file[line_index_with_bundle_call]
       else
         file << modified_line
       end
 
-      write_project_file("bin/setup", file.join("\n"))
+      write_project_file("bin/setup", file.join("\n") + "\n")
     end
   end
 end
