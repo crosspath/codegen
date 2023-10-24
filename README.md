@@ -18,6 +18,7 @@ To apply changes to existing project:
 
 * `bundle-config`: predefined config files for `bundler`
 * `docker`: generate Dockerfile & Docker Compose files
+* `remove-comments`: remove unnecessary comments from project files
 * `yarn`: install latest version of Yarn and add actual config values for Yarn
 
 ... to be continued ...
