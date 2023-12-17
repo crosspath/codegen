@@ -93,6 +93,18 @@ class Feature
     File.write(File.join(cli.app_path, file_name), result)
   end
 
+  def remove_project_file(file_name)
+    File.unlink(File.join(cli.app_path, file_name))
+  end
+
+  def remove_project_dir(dir_name)
+    run_command_in_project_dir("rm -r -f #{dir_name}")
+  end
+
+  def project_files(base, search_pattern)
+    Dir.glob(search_pattern, base: File.join(cli.app_path, base))
+  end
+
   # Copy files or directories.
   def copy_files_to_project(read_from, save_to)
     source = File.join(feature_dir, "files", read_from)
@@ -113,5 +125,10 @@ class Feature
 
   def run_command_in_project_dir(cmd)
     system("cd #{cli.app_path} && #{cmd}")
+  end
+
+  def indent(lines, level = 1)
+    spaces = " " * (2 * level)
+    lines.map { |x| "#{spaces}#{x}" }
   end
 end

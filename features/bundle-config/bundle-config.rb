@@ -44,7 +44,7 @@ module Features
       RUBY
 
       # Add 2 spaces.
-      modified_line = modified_line.lines.map { |x| "  #{x}" }.join
+      modified_line = indent(modified_line.lines).join
 
       if line_index_with_bundle_call
         file[line_index_with_bundle_call] = modified_line + file[line_index_with_bundle_call]

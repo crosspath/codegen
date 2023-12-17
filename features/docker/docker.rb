@@ -71,6 +71,9 @@ module Features
       "/public/assets",
     ].freeze
 
+    PACKAGE_JSON = "package.json"
+    DATABASE_YML = "config/database.yml"
+
     attr_reader(
       :active_storage,
       :bundler_version,
@@ -87,10 +90,10 @@ module Features
       @gemfile_lock = read_project_file("Gemfile.lock").split("\n")
 
       @package_json =
-        project_file_exist?("package.json") ? JSON.parse(read_project_file("package.json")) : nil
+        project_file_exist?(PACKAGE_JSON) ? JSON.parse(read_project_file(PACKAGE_JSON)) : nil
 
       @config_database_yml =
-        project_file_exist?("config/database.yml") ? read_project_file("config/database.yml").split("\n") : nil
+        project_file_exist?(DATABASE_YML) ? read_project_file(DATABASE_YML).lines : nil
 
       @config_application_rb = read_project_file("config/application.rb").split("\n")
 
@@ -148,7 +151,9 @@ module Features
     end
 
     def active_storage?
-      @config_application_rb.any? { |line| line.start_with?('require "rails/all"', 'require "active_storage/engine"') }
+      @config_application_rb.any? do |line|
+        line.start_with?('require "rails/all"', 'require "active_storage/engine"')
+      end
     end
   end
 end

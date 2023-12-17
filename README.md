@@ -18,7 +18,10 @@ To apply changes to existing project:
 
 * `bundle-config`: predefined config files for `bundler`
 * `docker`: generate Dockerfile & Docker Compose files
+* `misc`: miscellaneous tasks for changing and removing files and directories within
+  Rails application
 * `remove-comments`: remove unnecessary comments from project files
+* `sort-config`: sort configuration lines in `config/environments/*.rb`
 * `yarn`: install latest version of Yarn and add actual config values for Yarn
 
 ... to be continued ...
