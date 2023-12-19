@@ -7,7 +7,7 @@ module Features
 
     def call
       puts "Copy files to .bundle directory..."
-      Dir.mkdir(".bundle", 0o775) unless Dir.exist?(".bundle")
+      Dir.mkdir(File.join(cli.app_path, ".bundle"), 0o775) unless Dir.exist?(".bundle")
       copy_files_to_project("*", ".bundle")
       copy_files_to_project("config.development", ".bundle/config")
 

@@ -53,7 +53,10 @@ module Features
 
     def update_bin_setup
       bin_setup = read_project_file(BIN_SETUP)
-      bin_setup.sub!(indent(BIN_SETUP_BEFORE).strip, indent(BIN_SETUP_AFTER).strip)
+      text_before = indent(BIN_SETUP_BEFORE.lines).join.strip
+      text_after = indent(BIN_SETUP_AFTER.lines).join.strip
+
+      bin_setup.sub!(text_before, text_after)
       write_project_file(BIN_SETUP, bin_setup)
     end
 
