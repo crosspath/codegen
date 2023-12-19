@@ -1,8 +1,8 @@
 rails_version: 6
 app_path: tmp/full_6
-mode: 1
+mode: full-stack
 active_record: true
-db: 2
+db: postgresql
 js: true
 dev_gems: true
 keeps: false
@@ -15,7 +15,7 @@ action_cable: true
 assets: true
 turbolinks: true
 webpacker: true
-front_end_lib: esc
+front_end_lib: erb, svelte
 spring: true
 jbuilder: true
 bootsnap: true

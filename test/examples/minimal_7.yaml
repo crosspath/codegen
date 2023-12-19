@@ -1,7 +1,8 @@
 rails_version: 7
 app_path: tmp/minimal_7
-mode: 2
+mode: minimal
 active_record: true
+db: postgresql
 js: false
 dev_gems: false
 keeps: false
@@ -11,8 +12,8 @@ active_job: false
 active_storage: false
 action_cable: false
 assets: true
-assets_lib: 1
-css_lib: 1
+assets_lib: sprockets
+css_lib: none
 jbuilder: false
 bootsnap: false
 tests: false

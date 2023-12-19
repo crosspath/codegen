@@ -64,16 +64,16 @@ OPTIONS = {
     label: "Application template",
     type: :one_of,
     variants: {
-      "1" => "Full Stack (Ruby on Rails + front-end + mailers + etc)",
-      "2" => "Minimal (Ruby on Rails + front-end)",
-      "3" => "API-only (no app/assets, app/helpers)",
+      "full-stack" => "Full Stack (Ruby on Rails + front-end + mailers + etc)",
+      "minimal" => "Minimal (Ruby on Rails + front-end)",
+      "api-only" => "API-only (no app/assets, app/helpers)",
     },
-    default: ->(_, _) { "1" },
+    default: ->(_, _) { "full-stack" },
     apply: ->(_gopt, ropt, val) do
       case val
-      when "1" then next
-      when "2" then ropt["minimal"] = true
-      when "3" then ropt["api"] = true
+      when "full-stack" then next
+      when "minimal" then ropt["minimal"] = true
+      when "api-only" then ropt["api"] = true
       end
     end,
   },
@@ -87,21 +87,21 @@ OPTIONS = {
     label: "Database",
     type: :one_of,
     variants: {
-      "1" => "mysql",
-      "2" => "postgresql",
-      "3" => "sqlite3",
-      "4" => "oracle",
-      "5" => "sqlserver",
-      "6" => "jdbcmysql",
-      "7" => "jdbcsqlite3",
-      "8" => "jdbcpostgresql",
-      "9" => "jdbc",
-      "0" => "... other", # Required: gem name.
-      # "trilogy"
+      "mysql" => "MySQL (gem mysql2)",
+      "trilogy" => "MySQL (gem trilogy)",
+      "postgresql" => "PostgreSQL",
+      "sqlite3" => "SQLite3",
+      "oracle" => "Oracle",
+      "sqlserver" => "SQLServer",
+      "jdbcmysql" => "JDBC + Mysql",
+      "jdbcsqlite3" => "JDBC + SQLite3",
+      "jdbcpostgresql" => "JDBC + PostgreSQL",
+      "jdbc" => "JDBC + other",
+      "other" => "... other", # Required: gem name.
     },
-    default: ->(_, _) { "2" },
+    default: ->(_, _) { "postgresql" },
     apply: ->(_gopt, ropt, val) do
-      ropt["database"] = OPTIONS[:db][:variants][val] unless val == "0"
+      ropt["database"] = val if val != "other"
     end,
     skip_if: ->(_gopt, ropt) { ropt["skip-active-record"] },
   },
@@ -109,7 +109,7 @@ OPTIONS = {
     label: "Gem name for database",
     type: :text,
     apply: ->(_gopt, ropt, val) { ropt["database"] = val },
-    skip_if: ->(gopt, ropt) { ropt["skip-active-record"] || gopt[:db] != "0" },
+    skip_if: ->(gopt, ropt) { ropt["skip-active-record"] || gopt[:db] != "other" },
   },
   js: {
     label: "Add JavaScript",
@@ -221,13 +221,11 @@ OPTIONS = {
     label: "Library for asset pipeline",
     type: :one_of,
     variants: {
-      "1" => "Sprockets",
-      "2" => "Propshaft",
+      "sprockets" => "Sprockets",
+      "propshaft" => "Propshaft",
     },
-    default: ->(_, _) { "1" },
-    apply: ->(_gopt, ropt, val) do
-      ropt["asset-pipeline"] = OPTIONS[:assets_lib][:variants][val].downcase
-    end,
+    default: ->(_, _) { "sprockets" },
+    apply: ->(_gopt, ropt, val) { ropt["asset-pipeline"] = val },
     skip_if: ->(gopt, ropt) do
       ropt["api"] || gopt[:rails_version] < 7 || ropt["skip-asset-pipeline"]
     end,
@@ -262,31 +260,30 @@ OPTIONS = {
     label: "Bundler for JavaScript",
     type: :one_of,
     variants: {
-      "e" => "esbuild",
-      "i" => "importmap", # importmap is not a bundler, actually - it doesn't require Node.js
-      "r" => "Rollup",
-      "w" => "Webpack",
+      "bun" => "Bun",
+      "esbuild" => "esbuild",
+      "importmap" => "importmap", # importmap is not a bundler, actually - it doesn't require Node.js
+      "rollup" => "Rollup",
+      "webpack" => "Webpack",
     },
-    default: ->(_, _) { "i" },
-    apply: ->(_gopt, ropt, val) do
-      ropt["javascript"] = OPTIONS[:js_bundler][:variants][val].downcase
-    end,
+    default: ->(_, _) { "importmap" },
+    apply: ->(_gopt, ropt, val) { ropt["javascript"] = val },
     skip_if: ->(gopt, ropt) { gopt[:rails_version] < 7 || ropt["api"] || ropt["skip-javascript"] },
   },
   css_lib: {
     label: "Library for CSS",
     type: :one_of,
     variants: {
-      "1" => "None of these",
-      "2" => "Bootstrap",
-      "3" => "Bulma", # https://bulma.io/documentation/overview/
-      "4" => "PostCSS",
-      "5" => "Sass",
-      "6" => "Tailwind",
+      "none" => "None of these",
+      "bootstrap" => "Bootstrap",
+      "bulma" => "Bulma", # https://bulma.io/documentation/overview/
+      "postcss" => "PostCSS",
+      "sass" => "Sass",
+      "tailwind" => "Tailwind",
     },
-    default: ->(_, _) { "1" },
+    default: ->(_, _) { "none" },
     apply: ->(_gopt, ropt, val) do
-      ropt["css"] = OPTIONS[:css_lib][:variants][val].downcase unless val == "1"
+      ropt["css"] = val if val != "none"
     end,
     skip_if: ->(gopt, ropt) { gopt[:rails_version] < 7 || ropt["api"] || !gopt[:assets] },
   },
@@ -307,18 +304,19 @@ OPTIONS = {
     label: "Libraries for front-end",
     type: :many_of,
     variants: {
-      "a" => "Angular",
-      "c" => "Coffee",
-      "e" => "ERB",
-      "l" => "Elm",
-      "r" => "React",
-      "s" => "Svelte",
-      "t" => "Stimulus",
-      "v" => "Vue",
+      "angular" => "Angular",
+      "coffee" => "CoffeeScript",
+      "elm" => "Elm",
+      "erb" => "ERB",
+      "react" => "React",
+      "stimulus" => "Stimulus",
+      "svelte" => "Svelte",
+      "typescript" => "TypeScript",
+      "vue" => "Vue",
     },
-    default: ->(_, _) { "e" },
+    default: ->(_, _) { ["erb"] },
     apply: ->(gopt, ropt, val) do
-      ropt["webpack"] = OPTIONS[:front_end_lib][:variants][val[0]].downcase # First item only.
+      ropt["webpack"] = val[0] # First item only.
     end,
     skip_if: ->(gopt, ropt) do
       gopt[:rails_version] >= 7 || ropt["api"] || ropt["skip-javascript"] || !gopt[:webpacker]
@@ -416,6 +414,13 @@ OPTIONS = {
   #   default: ->(_, _) { true },
   #   apply: ->(_gopt, ropt, val) { ropt["skip-gemfile"] = !val },
   # },
+  # decrypted_diffs: {
+  #   label: "Configure git to show decrypted diffs of encrypted credentials",
+  #   type: :boolean,
+  #   default: ->(_, _) { true },
+  #   apply: ->(_gopt, ropt, val) { ropt["skip-decrypted-diffs"] = !val },
+  #   skip_if: ->(gopt, _ropt) { gopt[:rails_version] < 7 },
+  # },
 }
 
 class CLI
@@ -434,8 +439,11 @@ class CLI
 
       @generator_option_values[key] =
         if @option_values_from_file.key?(key)
-          if definition[:type] == :boolean
+          case definition[:type]
+          when :boolean
             string_to_boolean(@option_values_from_file[key])
+          when :many_of
+            string_to_array(@option_values_from_file[key])
           else
             @option_values_from_file[key]
           end
@@ -454,6 +462,7 @@ class CLI
     end
 
     results = @generator_option_values.each_with_object("".dup) do |(key, value), acc|
+      value = value.join(", ") if value.is_a?(Array)
       acc << "#{key}: #{value}\n"
     end
 
@@ -476,12 +485,17 @@ class CLI
     end
   end
 
+  def string_to_array(str)
+    str.split(",").map(&:strip)
+  end
+
   def string_to_boolean(str)
     str == "true" ? true : (str == "false" ? false : raise(ArgumentError, str))
   end
 
   def install_railties
     @rails_version = Gem::Requirement.new("~> #{@generator_option_values[:rails_version]}")
+
     # Example: gem install -N --backtrace --version '~> 7' railties
     Gem.install("railties", @rails_version, document: [])
   end
@@ -493,7 +507,9 @@ class CLI
     require "#{railties_path}/lib/rails/ruby_version_check"
     require "#{railties_path}/lib/rails/command"
 
-    $LOAD_PATH << "#{railties_path}/lib"
+    # First item has higher priority than the last one.
+    # Rails application generator uses $LOAD_PATH for autoloading classes and modules.
+    $LOAD_PATH.unshift("#{railties_path}/lib")
 
     # system("#{railties_bin_path} #{args_for_rails_new.join(" ")}")
     Rails::Command.invoke :application, args_for_rails_new
@@ -524,8 +540,8 @@ class CLI
     @postinstall.create
 
     if @generator_option_values[:bundle_install]
-      @postinstall.run
-      @postinstall.remove
+      # Remove script if it succeeds.
+      @postinstall.run && @postinstall.remove
     else
       puts "You should run `bundle install` and then `bin/postinstall` within application directory."
     end
@@ -574,12 +590,14 @@ class PostInstallScript
   private
 
   def add_front_end_libs
-    front_end_libs = (@generator_option_values[:front_end_lib] || "").split("")
+    front_end_libs = @generator_option_values[:front_end_lib] || []
     front_end_libs.shift # First item has been already initialized.
     return if front_end_libs.empty?
 
-    libs = OPTIONS[:front_end_lib][:variants].slice(*front_end_libs).values.map(&:downcase)
-    commands = libs.map { |lib| "system(\"bin/rails webpacker:install:#{lib}\") or exit(1)" }.join("\n  ")
+    commands =
+      front_end_libs
+        .map { |lib| "system(\"bin/rails webpacker:install:#{lib}\") or exit(1)" }
+        .join("\n  ")
 
     @steps << <<~TEXT
       puts "Adding front-end libraries..."
@@ -595,17 +613,20 @@ class PostInstallScript
     keep_file_path = File.join(@app_path, "vendor/javascript/.keep")
     return unless File.exist?(keep_file_path)
 
-    @steps << <<~TEXT
+    @steps << <<~RUBY
       puts "Remove vendor/javascript/.keep..."
       Dir.chdir(File.dirname(__dir__)) do
         File.unlink("vendor/javascript/.keep") if File.exist?("vendor/javascript/.keep")
-        if File.exist?("app/assets/config/manifest.js") && Dir.empty?("vendor/javascript")
-          lines = File.readlines("app/assets/config/manifest.js")
-          lines -= "//= link_tree ../../../vendor/javascript .js\n"
-          File.write("app/assets/config/manifest.js", lines.join)
+        if Dir.empty?("vendor/javascript")
+          Dir.delete("vendor/javascript")
+          if File.exist?("app/assets/config/manifest.js")
+            lines = File.readlines("app/assets/config/manifest.js")
+            lines -= ["//= link_tree ../../../vendor/javascript .js\\n"]
+            File.write("app/assets/config/manifest.js", lines.join)
+          end
         end
       end
-    TEXT
+    RUBY
   end
 end
 

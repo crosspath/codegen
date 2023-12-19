@@ -1,8 +1,8 @@
 rails_version: 7
 app_path: tmp/full_7
-mode: 1
+mode: full-stack
 active_record: true
-db: 2
+db: postgresql
 js: true
 dev_gems: true
 keeps: false
@@ -13,10 +13,10 @@ active_job: true
 active_storage: true
 action_cable: true
 assets: true
-assets_lib: 1
+assets_lib: sprockets
 hotwire: true
-js_bundler: i
-css_lib: 1
+js_bundler: importmap
+css_lib: none
 jbuilder: true
 bootsnap: true
 tests: true

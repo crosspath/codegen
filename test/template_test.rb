@@ -4,8 +4,19 @@ require "minitest/autorun"
 
 # @see https://github.com/excid3/jumpstart/blob/master/test/template_test.rb
 class TemplateTest < Minitest::Test
+  TEST_DIRS = %w[
+    api_6
+    api_7
+    full_6
+    full_7
+    minimal_6
+    minimal_7
+  ].freeze
+
   def setup
-    system("[ -d test_app ] && rm -rf test_app")
+    TEST_DIRS.each do |dir|
+      system("[ -d tmp/#{dir} ] && rm -rf tmp/#{dir}")
+    end
   end
 
   def teardown
@@ -39,7 +50,8 @@ class TemplateTest < Minitest::Test
   protected
 
   def run_generator(name, message)
-    file_name = "test/examples/#{name}.txt"
+    puts "", "Generating #{name}..."
+    file_name = "test/examples/#{name}.yaml"
 
     output, _err =
       capture_subprocess_io { system("DISABLE_SPRING=1 NO_SAVE=1 ./new.rb #{file_name}") }

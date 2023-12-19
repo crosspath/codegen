@@ -1,8 +1,8 @@
 rails_version: 7
 app_path: tmp/api_7
-mode: 3
+mode: api-only
 active_record: true
-db: 2
+db: postgresql
 keeps: false
 mailer: true
 mailbox: true

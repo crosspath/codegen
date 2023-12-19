@@ -5,6 +5,8 @@ require "io/console"
 class Ask
   Interrupt = Class.new(RuntimeError)
 
+  KEYS = (("1".."9").to_a + ("a".."z").to_a).freeze
+
   def initialize(gopt, ropt)
     @gopt = gopt
     @ropt = ropt
@@ -58,41 +60,43 @@ class Ask
   end
 
   def one_of(definition)
-    default_value = default_value_for(definition)
-    default_text = default_text_for(default_value)
+    variants = variants_for_definition(definition)
+    hint = hint_for_variants(variants)
 
-    variants = definition[:variants].transform_keys(&:to_s)
-    hint = variants.map { |k, v| "#{k} - #{v}" }.join("\n")
+    default_value = default_value_for(definition)
+    default_text = default_text_for([default_value], variants)
 
     print definition[:label], default_text, "\n", hint, "\n"
 
     loop do
       print "Choose one -> "
-      answer = get_char || default_value
+      answer = get_char
       puts
 
-      return answer if variants.key?(answer)
+      return default_value if answer.nil?
+      return variants[answer][0] if variants.key?(answer)
 
       puts "Unexpected answer!"
     end
   end
 
   def many_of(definition)
-    default_value = default_value_for(definition)
-    default_text = default_text_for(default_value)
+    variants = variants_for_definition(definition)
+    hint = hint_for_variants(variants)
 
-    variants = definition[:variants].transform_keys(&:to_s)
-    hint = variants.map { |k, v| "#{k} - #{v}" }.join("\n")
+    default_value = default_value_for(definition)
+    default_text = default_text_for(default_value, variants)
 
     print definition[:label], default_text, "\n", hint, "\n"
 
     loop do
       print "Choose one or more and press Enter -> "
       answer = get_string
-      answer = default_value if answer.empty?
-      keys = answer.split("")
 
-      return answer if (variants.keys & keys).size == keys.size
+      return default_value if answer.empty?
+
+      keys = answer.split("")
+      return variants.slice(*keys),map(&:first) if (variants.keys & keys).size == keys.size
 
       puts "Unexpected answer!"
     end
@@ -107,8 +111,18 @@ class Ask
     definition[:type] == :boolean ? (value ? "y" : "n") : value
   end
 
-  def default_text_for(value)
+  def default_text_for(value, variants = nil)
+    value = variants.select { |_, (k, _)| value.include?(k) }.map(&:first).join(", ") if variants
     value ? " (default: #{value})" : nil
+  end
+
+  # => {"1" => ["stored-key", "visible title"], ...}
+  def variants_for_definition(definition)
+    KEYS.take(definition[:variants].size).zip(definition[:variants]).to_h
+  end
+
+  def hint_for_variants(variants)
+    variants.map { |k, (_, v)| "#{k} - #{v}" }.join("\n")
   end
 
   def get_string

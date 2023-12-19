@@ -1,7 +1,8 @@
 rails_version: 6
 app_path: tmp/minimal_6
-mode: 2
+mode: minimal
 active_record: true
+db: postgresql
 js: false
 dev_gems: false
 keeps: false
