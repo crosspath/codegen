@@ -1,49 +1,8 @@
-def base_gitignore
-  $main.append_to_file(
-    '.gitignore',
-    <<-LINE
-
-*.local
-.DS_Store
-.directory
-Thumbs.db
-[Dd]esktop.ini
-~$*
-
-/vendor/*
-    LINE
-  )
-
-  return if $main.options[:api]
-
-  $main.append_to_file(
-    '.gitignore',
-    <<-LINE
-
-# For Heroku
-.yarn/*
-!.yarn/cache
-!.yarn/releases
-!.yarn/plugins
-!.yarn/sdks
-!.yarn/versions
-    LINE
-  )
-end
-
-def base_root
-  d('', 'base-files')
-  d('', 'config/env')
-end
-
 def base_bin
   d('bin', 'base-files/bin')
   $main.run('chmod +x bin/configs bin/setup bin/systemd-service')
 end
 
-def base_dir(dir)
-  d("app/#{dir}", "base-files/#{dir}")
-end
 
 def base_controller(answers)
   $main.inject_into_file(
@@ -126,7 +85,6 @@ def base_scss(answers)
 end
 
 def base_locale_ru
-  d('config/locales', 'config/locales')
   $main.initializer 'i18n.rb', <<~END
     Rails.application.configure do
       config.i18n.available_locales = ['ru']
@@ -181,10 +139,6 @@ def base_data_migrations
   f('app/middlewares/check_data_migration.rb', 'data-migrations/check_data_migration.rb')
 end
 
-def base_lib_assets
-  $main.remove_dir('lib/assets') if empty_dir?('lib/assets')
-end
-
 def base_spring(answers)
   $main.gem_group :development, :test do
     $main.gem 'spring' if answers[:spring]
@@ -207,37 +161,5 @@ def base_vendor
       vendor/* linguist-vendored
     END
     $main.gsub_file('.gitattributes', text, '')
-  end
-end
-
-Generator.add_actions do |answers|
-  next unless answers[:base]
-
-  base_gitignore
-  base_root
-  base_bin
-  base_dir('forms')
-  base_dir('queries')
-  $main.empty_directory('app/serializers')
-  base_dir('services')
-  base_controller(answers)
-  base_locale_ru
-  base_gems(answers)
-  # FIXME: DataMigrate::Migration is not compatible with Rails 7
-  # Current: DataMigrate::Migration < ActiveRecord::Migration
-  # Should be: DataMigrate::Migration < ActiveRecord::Migration[7.0]
-  # base_data_migrations
-  base_lib_assets
-  base_spring(answers) if answers[:spring]
-  base_vendor
-
-  if $main.options[:api]
-    $main.remove_file('Procfile.dev')
-  else
-    base_dir('presenters')
-    base_layout(answers)
-    base_scss(answers)
-    base_debug
-    add_npm_package('turbolinks') if answers[:turbolinks]
   end
 end

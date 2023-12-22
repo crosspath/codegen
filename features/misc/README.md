@@ -7,5 +7,6 @@ This script performs miscellaneous tasks:
 * removes `config/locales/en.yml` if this file contains only comments and an example entry
 * removes `app/helpers` and `test/helpers` directories if they include only example files
 * removes `vendor` directory if it includes only `**/.keep` files
+* adds common local file name patterns to `.gitignore` & `.dockerignore`
 
 No special actions required from other developers or PCs.

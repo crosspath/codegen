@@ -16,11 +16,20 @@ module Features
       puts "Check app/helpers..."
       remove_app_helpers
 
+      puts "Check lib/assets..."
+      remove_lib_assets
+
       puts "Check test/helpers..."
       remove_test_helpers
 
       puts "Check vendor..."
       remove_vendor
+
+      puts "Updating .gitignore file..."
+      update_ignore_file(".gitignore", add: IGNORE_FILE_ENTRIES)
+
+      puts "Updating .dockerignore file..."
+      update_ignore_file(".dockerignore", add: IGNORE_FILE_ENTRIES)
     end
 
     private
@@ -51,6 +60,15 @@ module Features
       end
     RUBY
 
+    IGNORE_FILE_ENTRIES = [
+      "*.local",
+      ".DS_Store",
+      ".directory",
+      "Thumbs.db",
+      "[Dd]esktop.ini",
+      "~$*",
+    ].freeze
+
     def update_bin_setup
       bin_setup = read_project_file(BIN_SETUP)
       text_before = indent(BIN_SETUP_BEFORE.lines).join.strip
@@ -79,15 +97,23 @@ module Features
       read_project_file(File.join("app/helpers", APP_HELPER)).strip == APP_HELPER_TEXT.strip
     end
 
+    def remove_lib_assets
+      remove_project_dir("lib/assets") if dir_exists?("lib/assets") && dir_empty?("lib/assets")
+    end
+
     def remove_test_helpers
-      remove_project_dir("test/helpers") if dir_has_files?("test/helpers")
+      remove_project_dir("test/helpers") if dir_exists?("test/helpers") && dir_empty?("test/helpers")
     end
 
     def remove_vendor
-      remove_project_dir("vendor") if dir_has_files?("vendor")
+      remove_project_dir("vendor") if dir_exists?("vendor") && dir_empty?("vendor")
     end
 
-    def dir_has_files?(dir_name)
+    def dir_exists?(dir_name)
+      Dir.exist?(File.join(cli.app_path, dir_name))
+    end
+
+    def dir_empty?(dir_name)
       project_files(dir_name, "**/*").grep_v(/^\.keep$|\/\.keep$/).empty?
     end
   end
