@@ -32,7 +32,13 @@ module Features
         if line.strip.empty?
           new_lines << line if !new_lines.empty? && !new_lines.last.strip.empty?
         else
-          should_keep_line = block_given? ? yield(line) : line !~ /^\s*#/
+          should_keep_line =
+            if block_given?
+              yield(line)
+            else
+              # Оставить строку, если это не комментарий или если это закомментированный require.
+              line !~ /^\s*#/ || line =~ /^\s*#\s(require|require_relative)\s/
+            end
           new_lines << line if should_keep_line
         end
       end

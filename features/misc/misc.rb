@@ -86,7 +86,7 @@ module Features
     end
 
     def remove_app_helpers
-      remove_project_dir(File.join("app/helpers", APP_HELPER)) if may_delete_app_helpers?
+      remove_project_dir("app/helpers") if may_delete_app_helpers?
     end
 
     def may_delete_app_helpers?

@@ -28,6 +28,8 @@ module Settings
           raise ArgumentError, "Unsupported file extension: #{file_name}"
         end
 
+      raise ArgumentError, "File #{file_name} is empty" if hash.blank?
+
       @values.merge!(hash)
     end
   end

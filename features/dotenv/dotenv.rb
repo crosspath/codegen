@@ -6,7 +6,8 @@ module Features
 
     def call
       puts "Add gem dotenv-rails..."
-      run_command_in_project_dir("bundle add dotenv-rails --skip-install")
+      gemfile = read_project_file("Gemfile") + "\ngem \"dotenv-rails\"\n"
+      write_project_file("Gemfile", gemfile)
 
       puts "Copy example files..."
       copy_files_to_project("configs", "bin/configs")

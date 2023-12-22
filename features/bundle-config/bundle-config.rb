@@ -7,7 +7,7 @@ module Features
 
     def call
       puts "Copy files to .bundle directory..."
-      Dir.mkdir(File.join(cli.app_path, ".bundle"), 0o775) unless Dir.exist?(".bundle")
+      create_dir_bundle
       copy_files_to_project("*", ".bundle")
       copy_files_to_project("config.development", ".bundle/config")
 
@@ -32,6 +32,11 @@ module Features
       "!/.bundle/config.development",
       "!/.bundle/config.production",
     ].freeze
+
+    def create_dir_bundle
+      dir = File.join(cli.app_path, ".bundle")
+      Dir.mkdir(dir, 0o775) unless Dir.exist?(dir)
+    end
 
     def update_bin_setup
       file = read_project_file("bin/setup").split("\n")

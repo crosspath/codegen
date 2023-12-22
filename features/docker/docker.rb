@@ -144,7 +144,7 @@ module Features
     end
 
     def read_dbms_adapter
-      adapter_line = @config_database_yml.find { |line| line.strip.start_with?("adapter:") }
+      adapter_line = @config_database_yml&.find { |line| line.strip.start_with?("adapter:") }
       return unless adapter_line
 
       adapter_line.split(":", 2).last.sub(/#.*/, "").strip
