@@ -14,6 +14,8 @@ To apply changes to existing project:
 - run `./change.rb project-directory feature-name`, where `feature-name` is name of desired feature
   (see list of features below). You may pass several feature names separated by space.
 
+Supported Rails versions: 6.1, 7.1.
+
 ## Features
 
 * `bundle-config`: predefined config files for `bundler`

@@ -64,7 +64,7 @@ RUN --mount=type=cache,uid=1000,target=/rails \
 ENV BUN_INSTALL=/usr/local/bun
 ENV PATH=/usr/local/bun/bin:$PATH
 # TODO: Specify version - `bash -s -- "${BUN_VERSION}"`
-curl -fsSL https://bun.sh/install | bash
+RUN curl -fsSL https://bun.sh/install | bash
 <% end %>
 
 RUN gem install bundler:<%= bundler_version %>
@@ -109,14 +109,15 @@ FROM base
 WORKDIR /rails
 USER app
 
-COPY --chown=app:app . /rails
-<% if bundle_config_dev %>COPY .bundle/config.production .bundle/config<% end %>
+<% if bundle_config_prod %>COPY .bundle/config.production .bundle/config<% end %>
 COPY --chown=app:app --from=gems /usr/local/bundle/ /usr/local/bundle/
 COPY --chown=app:app --from=gems /rails/vendor/bundle /rails/vendor/bundle
 <% if includes_yarn %>
 COPY --chown=app:app --from=front_end /rails/.yarn /rails/.yarn
 <% if has_node_modules %>COPY --chown=app:app --from=front_end /rails/node_modules /rails/<% end %>
 <% end %>
+
+COPY --chown=app:app . /rails
 
 ARG RAILS_ENV
 
