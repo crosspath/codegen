@@ -1,0 +1,24 @@
+# frozen_string_literal: true
+<%
+  commands = []
+  commands << "bin/bundle-leak update" if bundler_leak
+  commands << "bin/bundle-audit update" if bundler_audit
+
+  gems = []
+  gems << "bundle-audit" if bundler_audit
+  gems << "bundle-leak" if bundler_leak
+%>
+
+# Run after updating this file:
+#   bin/overcommit --sign post-checkout
+module Overcommit::Hook::PostCheckout
+  # Update databases for <%= gems.join(', ') %>.
+  class UpdateGemsData < Base
+    def run
+      result = execute("<%= commands.join(' && ') %>")
+      return :fail, result.stdout unless result.success?
+
+      :pass
+    end
+  end
+end

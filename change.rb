@@ -10,7 +10,7 @@
 require_relative "src/ask"
 require_relative "src/feature"
 
-Dir["features/*/*.rb"].sort.each { |f| require_relative(f) }
+Dir["#{__dir__}/features/*/*.rb"].sort.each { |f| require_relative(f) }
 
 class CLI
   attr_reader :app_path, :ask

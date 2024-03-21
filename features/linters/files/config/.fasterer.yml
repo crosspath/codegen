@@ -1,0 +1,22 @@
+# https://github.com/DamirSvrtan/fasterer, v0.11.0
+speedups:
+  hash_merge_bang_vs_hash_brackets: true
+  module_eval: true
+  proc_call_vs_yield: true
+  rescue_vs_respond_to: true
+  sort_vs_sort_by: true
+  # These rules disabled due to developer's preferences:
+  each_with_index_vs_while: false
+  fetch_with_argument_vs_block: false
+  gsub_vs_tr: false
+  # These rules disabled, because RuboCop checks these cases:
+  block_vs_symbol_to_proc: false
+  for_loop_vs_each: false
+  getter_vs_attr_reader: false
+  keys_each_vs_each_key: false
+  map_flatten_vs_flat_map: false
+  reverse_each_vs_reverse_each: false
+  select_first_vs_detect: false
+  select_last_vs_reverse_detect: false
+  setter_vs_attr_writer: false
+  shuffle_first_vs_sample: false

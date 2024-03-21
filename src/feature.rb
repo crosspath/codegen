@@ -76,7 +76,7 @@ class Feature
     locals.each { |k, v| b.local_variable_set(k, v) }
 
     file_name = File.join(feature_dir, "files", "#{read_from}.erb")
-    result = b.eval(Erubi::Engine.new(File.read(file_name)).src)
+    result = b.eval(Erubi::Engine.new(File.read(file_name), trim_mode: "%<>").src)
 
     write_project_file(save_to, result)
   end

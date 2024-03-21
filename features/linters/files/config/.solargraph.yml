@@ -1,0 +1,15 @@
+# Config for Solargraph, v0.50
+
+include:
+- "**/*.rb"
+- .annotate_solargraph_schema
+exclude:
+- docs/**/*
+- spec/**/*
+- test/**/*
+- tmp/**/*
+- vendor/**/*
+- ".bundle/**/*"
+reporters:
+- require_not_found
+- typecheck:strong
