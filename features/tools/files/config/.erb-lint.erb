@@ -1,0 +1,147 @@
+---
+EnableDefaultLinters: false
+linters:
+
+  # Prevents the addition of <script> tags that have type attributes that are not in a white-list
+  # of allowed values.
+  AllowedScriptType:
+    enabled: true
+    # True or false, depending on whether or not the type attribute may be omitted entirely from
+    # a <script> tag.
+    # Default: true
+    allow_blank: true
+    # An array of allowed types.
+    # Default: ["text/javascript"]
+    allowed_types: []
+    # Do not allow inline <script> tags anywhere in ERB templates.
+    # Default: false
+    disallow_inline_scripts: false
+
+  # When `<%` isn't followed by a newline, ensure `%>` isn't preceeded by a newline.
+  # When `%>` is preceeded by a newline, indent it at the same level as the corresponding `<%`.
+  ClosingErbTagIndent:
+    enabled: true
+
+  # Detects bad ERB comment syntax.
+  CommentSyntax:
+    enabled: true
+
+  # Warns about deprecated css classes.
+  DeprecatedClasses:
+    enabled: false
+    # A string to be included at the end of every error message of the rule set.
+    # Default: nil (~)
+    addendum: ~
+    # A list of rules, each with a deprecated and suggestion option.
+    # Each rule is a record `{deprecated: ..., suggestion: ...}`.
+    # `deprecated`: a list of regular expressions which specify the classes deprecated by this rule.
+    # `suggestion`: a string to be included in the rule's error message. Make this informative and
+    # specific to the rule that it is contained in.
+    # Default: []
+    rule_set: []
+
+  # Detects unsafe interpolation of ruby data into various javascript contexts and enforce usage
+  # of safe helpers like .to_json.
+  ErbSafety:
+    enabled: false
+    # Name of the configuration file to use for `better-html`. Valid options and their defaults are
+    # described in better-html's readme (https://github.com/Shopify/better-html#configuration).
+    # Default: nil (~)
+    better_html_config: ~
+
+  # Detects multiple blank lines.
+  ExtraNewline:
+    enabled: true
+
+  # Warns about missing newline at the end of a ERB template.
+  FinalNewline:
+    enabled: true
+    # Whether a final newline should be present.
+    # Default: true
+    present: true
+
+  # Prevents the usage of `javascript_tag` from Rails.
+  NoJavascriptTagHelper:
+    enabled: false
+    # When configured with cdata, adds CDATA markers. When configured with plain, don't add makers.
+    # Default: "cdata"
+    correction_style: "plain"
+
+  # Catch common parser errors.
+  ParserErrors:
+    enabled: true
+
+  # Detects instance variables in partials. File name of partial starts with "_", does not include
+  # spaces and ends on ".html.erb".
+  PartialInstanceVariable:
+    enabled: true
+
+  # Warns about missing `autocomplete` attribute in input tags.
+  RequireInputAutocomplete:
+    enabled: true
+
+  # Warns about missing Content Security Policy nonces
+  # (https://guides.rubyonrails.org/security.html#content-security-policy) in script tags.
+  RequireScriptNonce:
+    enabled: false
+
+  # Enforces trimming at the right of an ERB tag.
+  RightTrim:
+    enabled: true
+    # Which style to enforce, can be either "-" or "=".
+    # Default: "-"
+    enforced_style: "-"
+
+  # Runs RuboCop rules on ruby statements found in ERB templates.
+  Rubocop:
+<% if rubocop %>
+    enabled: true
+    # Only run cops listed in this array instead of all cops.
+    # Default: nil (~)
+    only: ~
+    # A path to a valid rubocop configuration file. When this is provided, `rubocop_config` will be
+    # ignored.
+    # Default: nil (~)
+    config_file_path: ".linters/config/rubocop-in-templates.yml"
+    # A valid rubocop configuration hash. See rubocop's manual entry on Configuration
+    # (https://docs.rubocop.org/rubocop/configuration.html).
+    # Default: {}
+    rubocop_config: {}
+<% else %>
+    enabled: false
+    # Only run cops listed in this array instead of all cops.
+    # Default: nil (~)
+    only: ~
+    # A path to a valid rubocop configuration file. When this is provided, `rubocop_config` will be
+    # ignored.
+    # Default: nil (~)
+    config_file_path: ~
+    # A valid rubocop configuration hash. See rubocop's manual entry on Configuration
+    # (https://docs.rubocop.org/rubocop/configuration.html).
+    # Default: {}
+    rubocop_config: {}
+<% end %>
+
+  # Enforces self closing tag styles for void elements.
+  SelfClosingTag:
+    enabled: true
+    # If we should "always" or "never" expect self closing tags for void elements.
+    # Example: <br/> ("always") or <br> ("never")?
+    # Default: "never"
+    enforced_style: "never"
+
+  # Enforces a single space after "<%" and before "%>".
+  SpaceAroundErbTag:
+    enabled: true
+
+  # Detects indentation with tabs and autocorrect them to spaces.
+  SpaceIndentation:
+    enabled: true
+
+  # Detects extra or missing whitespace in html tags.
+  SpaceInHtmlTag:
+    enabled: true
+
+  # Detects trailing whitespace at the end of a line
+  TrailingWhitespace:
+    enabled: true
