@@ -1,27 +1,34 @@
-# linters
+# tools
 
-This script adds support for different linters that may be useful for Rails applications:
+This script adds support for different linters, formatters and documentation tools that may be
+useful for Rails applications:
 
-1. It creates directory `.linters` with config files for linters only.
-   Your application should work fine without linters, that's why you should not include them in
+1. It creates directory `.tools` with config files for tools only.
+   Your application should work fine without these tools, that's why you should not include them in
    Gemfile of your application.
 2. On your choice:
     - Brakeman
     - Bundler Audit
     - Bundler Leak
+    - ERB Lint
+    - ESLint
     - Fasterer
     - MDL (for Markdown files)
+    - Overcommit (git hooks)
+    - Prettier
     - Rails Best Practices
     - Rubocop and its extensions
+    - SassDoc
     - Slim Lint
-    - Solargraph (check YARD annotations) + gem `rails-annotate-solargraph` (in Gemfile for application)
-3. This script adds custom configs for selected linters.
-4. You may add Overcommit for running selected linters and other operations as git hooks.
-5. This script creates shortcuts for linters in `bin` directory.
+    - Solargraph (linter for types in Ruby) +
+      gem `rails-annotate-solargraph` (in Gemfile for application)
+    - YARD
+3. This script adds custom configs for selected tools.
+4. This script creates shortcuts for linters in `bin` directory.
 
 For other developers or PCs:
 
-1. If you use Overcommit, then you should run in console `bin/overcommit --install`
+1. If you use Overcommit, then you should run in console: `bin/overcommit --install`
 2. This script may suggest you to run some lines in terminal, for example:
 
    ```

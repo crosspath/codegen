@@ -19,8 +19,9 @@ class CLI
     @app_path = argv.shift
     @features = argv
     @ask = Ask.new({}, {})
+    @known_features = FeatureRegistry.all
 
-    not_supported_features = @features - Feature.all.keys
+    not_supported_features = @features - @known_features.keys
     raise ArgumentError, not_supported_features.join(", ") unless not_supported_features.empty?
   end
 
@@ -29,15 +30,15 @@ class CLI
     @app_path = File.expand_path(@app_path, __dir__)
 
     if @features.empty?
-      Feature.all.each_key do |key|
+      @known_features.each_key do |key|
         @features << key if @ask.yes?(label: "Use #{key}", default: ->(_, _) { "y" })
       end
     end
 
-    # Sort by `Feature.all`.
-    (Feature.all.keys & @features).each do |feature_name|
-      puts "", "Using #{feature_name}..."
-      Feature.all[feature_name].new(self).call
+    # Sort by `FeatureRegistry.all`.
+    (@known_features.keys & @features).each do |feature_key|
+      puts "", "Using #{@known_features[feature_key].name}..."
+      @known_features[feature_key].klass.new(self).call
     end
 
     puts "Done!"

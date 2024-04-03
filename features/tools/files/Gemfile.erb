@@ -13,6 +13,7 @@ group :development, :test do
   <% if brakeman %>gem "brakeman", require: false<% end %>
   <% if bundler_audit" %>gem "bundler-audit", require: false<% end %>
   <% if bundler_leak %>gem "bundler-leak", require: false<% end %>
+  <% if erb_lint %>gem "erb_lint", require: false<% end %>
   <% if fasterer %>gem "fasterer", require: false<% end %>
   <% if mdl %>gem "mdl", require: false<% end %>
   <% if rails_best_practices %>gem "rails_best_practices", require: false<% end %>
@@ -31,4 +32,5 @@ group :development, :test do
   <% end %>
   <% if slim_lint %>gem "slim_lint", require: false<% end %>
   <% if solargraph %>gem "solargraph", require: false<% end %>
+  <% if !solargraph && yard %>gem "yard", require: false<% end %>
 end

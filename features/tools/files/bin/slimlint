@@ -2,7 +2,8 @@
 # frozen_string_literal: true
 
 ENV["BUNDLE_GEMFILE"] ||= File.expand_path("../.linters/Gemfile", __dir__)
-ENV["SLIM_LINT_RUBOCOP_CONF"] = File.expand_path("../.linters/config/rubocop.yml", __dir__)
+ENV["SLIM_LINT_RUBOCOP_CONF"] =
+  File.expand_path("../.linters/config/rubocop-in-templates.yml", __dir__)
 
 require "rubygems"
 require "bundler/setup"

@@ -2,46 +2,9 @@
 
 require "erubi"
 
+require_relative "feature_registry"
+
 class Feature
-  module Registry
-    extend self
-
-    attr_reader :all
-
-    def init
-      @all = []
-    end
-
-    def add(klass, feature_name, before = nil)
-      item = {klass:, feature_name:}
-
-      if before
-        index = @all.find_index { |h| h[:feature_name] == before }
-        return @all.insert(index, item) if index
-      end
-
-      @all << item
-    end
-  end
-
-  Feature::Registry.init
-
-  class << self
-    def all
-      Feature::Registry.all.to_h { |item| [item[:feature_name], item[:klass]] }
-    end
-
-    def register_as(feature_name, before: nil)
-      Feature::Registry.add(self, feature_name, before)
-
-      # Instance-level method
-      define_method(:feature_name) { feature_name }
-
-      # Class-level method
-      define_singleton_method(:feature_name) { feature_name }
-    end
-  end
-
   def initialize(cli)
     @cli = cli
   end
@@ -50,7 +13,14 @@ class Feature
     raise NotImplementedError
   end
 
-  protected
+  def self.register_as(name, before: nil)
+    item = FeatureRegistry.add(self, name, before)
+
+    # Instance-level method
+    define_method(:registry_item) { item }
+  end
+
+  private
 
   ROOT_DIR = File.dirname(__dir__)
 
@@ -68,7 +38,7 @@ class Feature
   end
 
   def feature_dir
-    @feature_dir ||= File.join(ROOT_DIR, "features", feature_name)
+    @feature_dir ||= File.join(ROOT_DIR, "features", registry_item.hash_key)
   end
 
   def erb(read_from, save_to, **locals)
