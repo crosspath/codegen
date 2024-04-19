@@ -1,7 +1,6 @@
 # frozen_string_literal: true
 
-require "erubi"
-
+require_relative "erb_eval"
 require_relative "feature_registry"
 
 class Feature
@@ -42,11 +41,8 @@ class Feature
   end
 
   def erb(read_from, save_to, **locals)
-    b = binding
-    locals.each { |k, v| b.local_variable_set(k, v) }
-
     file_name = File.join(feature_dir, "files", "#{read_from}.erb")
-    result = b.eval(Erubi::Engine.new(File.read(file_name), trim_mode: "%<>").src)
+    result = ErbEval.call(File.read(file_name), **locals)
 
     write_project_file(save_to, result)
   end
