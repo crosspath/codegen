@@ -4,9 +4,9 @@ require_relative "../erb_eval"
 
 module NewProject
   class PostInstallScript
-    def initialize(generator_option_values)
+    def initialize(generator_option_values, root_dir)
       @generator_option_values = generator_option_values
-      @app_path = File.expand_path(@generator_option_values[:app_path], __dir__)
+      @app_path = File.expand_path(@generator_option_values[:app_path], root_dir)
       @steps = []
     end
 

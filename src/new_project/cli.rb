@@ -74,6 +74,10 @@ module NewProject
       str == "true" ? true : (str == "false" ? false : raise(ArgumentError, str))
     end
 
+    def root_dir
+      File.expand_path("../..", __dir__)
+    end
+
     def install_railties
       @rails_version = Gem::Requirement.new("~> #{@generator_option_values[:rails_version]}")
 
@@ -97,7 +101,6 @@ module NewProject
     end
 
     def args_for_rails_new
-      root_dir = File.expand_path("../..", __dir__)
       args = ["new", File.expand_path(@generator_option_values[:app_path], root_dir)]
 
       @rails_option_values.each do |k, v|
@@ -110,7 +113,7 @@ module NewProject
     end
 
     def add_postinstall_steps
-      @postinstall = PostInstallScript.new(@generator_option_values)
+      @postinstall = PostInstallScript.new(@generator_option_values, root_dir)
       @postinstall.add_steps
     end
 
