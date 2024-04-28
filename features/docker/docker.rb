@@ -1,7 +1,12 @@
 # frozen_string_literal: true
 
 require "json"
-
+# TODO: Add Node.js from its repo or sources if "full-stack" app.
+# TODO: Skip configuring SMTP if Action Mailer is disabled.
+# TODO: Add bootsnap - bundle exec bootsnap precompile --gemfile (before COPY . .);
+#       bundle exec bootsnap precompile app/ lib/ (and after).
+# TODO: Add ENTRYPOINT ["/rails/bin/docker-entrypoint"]
+# TODO: Add MongoDB (apt-get install gnupg), https://www.mongodb.com/docs/manual/tutorial/install-mongodb-on-ubuntu/
 module Features
   # @see Dockerfile syntax: https://docs.docker.com/engine/reference/builder/
   # @see https://github.com/rails/rails/blob/main/railties/lib/rails/generators/app_base.rb

@@ -1,5 +1,17 @@
 # Project templates for Rails
 
+Minimal supported versions:
+
+- Ruby 3.1 (with YJIT)
+- Rails 6.1
+- Node.js 20
+- Yarn 4
+- MySQL 8
+- PostgreSQL 16
+- Docker 26
+- Vue 3
+- Svelte 4
+
 To create project:
 
 - run `./new.rb` and choose options in interactive mode;

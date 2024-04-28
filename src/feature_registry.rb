@@ -14,14 +14,18 @@ class FeatureRegistry < Registry
   # @return [RegistryItem]
   def self.add(klass, name, before)
     item = RegistryItem.new(klass, name, feature_dir(klass.name))
-    instance_variable_get(:@instance).add(item, before)
+    @instance.add(item, before)
 
     item
   end
 
+  def self.all
+    @instance.all
+  end
+
   # @param class_name [String]
   # @return [String]
-  def self.feature_dir(klass)
+  def self.feature_dir(class_name)
     res =
       class_name
         .match(/^Features::([^:]+)/)[1]

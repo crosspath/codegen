@@ -4,14 +4,32 @@ This script generates Dockerfile & Docker Compose files:
 
 1. It creates general and lite ("development") versions of `Dockerfile` and `compose.yaml`.
 2. Generated Dockerfiles include instructions for installing required system packages,
-   `yarn/bun install` and `bundle install`.
-3. Adds instructions and config values for Redis & Sidekiq.
-4. Integrates with `bundle-config` & `yarn` features.
-5. Adds correct entries to `.dockerignore` file.
+   `yarn install` (or `bun install`) and `bundle install`.
+3. It adds instructions and config values for Redis & Sidekiq.
+4. It integrates with `bundle-config` & `yarn` features.
+5. It adds correct entries to `.dockerignore` file.
 
 No special actions required from other developers or PCs.
 
-Cheat-sheet for Docker:
+## Additional information
+
+Generated Dockerfile does not require installation of "required" & "important" packages, because
+they are included in base image. You may get list of them via these commands:
+
+```sh
+aptitude search ~prequired -F"%p"
+aptitude search ~pimportant -F"%p"
+```
+
+Note:
+You may use command `dpkg -S %(which COMMAND)` to get package name that provides this COMMAND. Example:
+
+```sh
+$ dpkg -S $(which cut)  # Your input.
+coreutils: /usr/bin/cut # Output.
+```
+
+## Cheat-sheet for Docker
 
 1. Build Docker image:
 

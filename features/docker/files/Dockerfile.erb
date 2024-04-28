@@ -1,15 +1,26 @@
 # syntax = docker/dockerfile:1
 
-ARG BASE_IMAGE=ruby:<%= ruby_version %>
+# Based on Dockerfile:
+# https://github.com/docker-library/buildpack-deps/blob/master/debian/trixie/Dockerfile
 
 #==================
-# Intermediate image that has needed packages
-FROM $BASE_IMAGE AS base
+# Install packages.
+FROM buildpack-deps:trixie-curl AS base
 
-ARG PACKAGES="build-essential cmake git libjemalloc2 pkg-config ssmtp"
-ARG PACKAGES="${PACKAGES} iproute2 less net-tools nano screen telnet tmux vim"
-<% if includes_yarn %>
-ARG PACKAGES="${PACKAGES} curl nodejs npm"
+https://github.com/nodejs/node/blob/main/BUILDING.md#building-nodejs-on-supported-platforms
+https://docs.ruby-lang.org/en/master/yjit/yjit_md.html
+
+postgresql:
+libreadline-dev
+zlib1g-dev
+libcurl4-openssl-dev
+uuid-dev
+icu-devtools
+libicu-dev
+
+ARG PACKAGES="build-essential cmake libjemalloc2 libssl-dev nano pkg-config" # cmake? pkg-config?
+<% if includes_smtp %>
+ARG PACKAGES="${PACKAGES} ssmtp"
 <% end %>
 <% if includes_bun %>
 ARG PACKAGES="${PACKAGES} unzip"
@@ -25,18 +36,28 @@ ARG PACKAGES="${PACKAGES} unzip"
 ARG PACKAGES="${PACKAGES} <%= database_packages %>"
 <% end %>
 <% if add_chromium %>
-ARG PACKAGES="${PACKAGES} libasound2 libatk1.0-0 libatk-bridge2.0-0 libatspi2.0-0 libcups2 libdbus-1-3 libgtk-3-0 libnspr4 libnss3 libx11-xcb1 libxcomposite1 libxcursor1 libxdamage1 libxfixes3 libxi6 libxrandr2 libxss1 libxtst6"
+ARG PACKAGES="${PACKAGES} libasound2 libatk1.0-0 libatk-bridge2.0-0 libatspi2.0-0 libcups2 libgtk-3-0 libnspr4 libnss3 libx11-xcb1 libxcomposite1 libxcursor1 libxdamage1 libxfixes3 libxi6 libxrandr2 libxss1 libxtst6"
 <% end %>
 <% if includes_active_storage %>
 ARG PACKAGES="${PACKAGES} libvips"
 <% end %>
 
 RUN --mount=type=cache,uid=1000,target=/var/cache/apt \
-    apt-get update -qq && \
-    apt-get install --no-install-recommends -y ${PACKAGES} && \
-    apt-get autoclean && \
-    apt-get autoremove && \
+    set -eu; \
+    apt-get update -qq; \
+    apt-get install --no-install-recommends -y ${PACKAGES}; \
+    apt-get autoremove; \
+    apt-get clean; \
     rm -rf /var/lib/apt/lists/*
+
+# Use libjemalloc to reduce memory usage in Ruby scripts.
+ENV LD_PRELOAD=/usr/lib/x86_64-linux-gnu/libjemalloc.so.2
+
+<% if includes_yarn %>
+# Use NVM to install Node.js.
+RUN curl -o- https://github.com/nvm-sh/nvm/raw/master/install.sh | bash
+RUN nvm install --lts && nvm use --lts
+<% end %>
 
 # Sendmail
 ARG SSMTP_RELAY_HOST_PORT
@@ -84,6 +105,8 @@ RUN --mount=type=secret,id=ssh_prv_key_file,target=/root/.ssh/id_rsa \
 
 RUN bundle install
 
+RUN rm -rf /usr/local/bundle/cache/*
+
 <% if includes_frontend %>
 #==================
 # Install front-end packages
@@ -127,6 +150,8 @@ RUN bin/rails sidekiq:merge_configs
 <% if includes_frontend %>
 RUN echo "Pre-compiling assets with RAILS_ENV=$RAILS_ENV" && \
     bin/rails assets:precompile --silent
+
+RUN rm -rf node_modules
 <% end %>
 
 ### build version args

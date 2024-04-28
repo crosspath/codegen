@@ -57,6 +57,12 @@ PreCommit:
     description: 'https://github.com/Shopify/erb-lint'
     enabled: true
 <% end %>
+<% if es_lint %>
+  EsLint:
+    command: 'bin/eslint'
+    description: 'http://eslint.org'
+    enabled: true
+<% end %>
 <% if fasterer %>
   Fasterer:
     command: 'bin/fasterer'
