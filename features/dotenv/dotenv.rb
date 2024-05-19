@@ -5,8 +5,8 @@ module Features
     register_as "dotenv"
 
     def call
-      puts "Add gem dotenv-rails..."
-      gemfile = read_project_file("Gemfile") + "\ngem \"dotenv-rails\"\n"
+      puts "Add gem dotenv..."
+      gemfile = read_project_file("Gemfile") + "\ngem \"dotenv\"\n"
       write_project_file("Gemfile", gemfile)
 
       puts "Copy example files..."
