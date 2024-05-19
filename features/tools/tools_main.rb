@@ -12,11 +12,14 @@ module Features::Tools
 
       gems = application_gems
       registry = Features::Tools::ToolRegistry.all
+
+      # => {"brakeman" => #<Features::Tools::KnownTools::Brakeman>, ...}
       tools = registry.to_h { |key, item| [key, item.klass.new(cli, gems)] }
 
       tools.each { |key, inst| registry[key].selected = inst.use? }
 
-      use_tools = registry.to_h { |key, item| [key.to_sym, item.selected] }
+      # => {brakeman: true, ...}
+      use_tools = registry.to_h { |key, item| [key, item.selected] }
 
       if use_tools.values.all?(false)
         puts "Nothing to do!"
@@ -25,19 +28,19 @@ module Features::Tools
 
       add_configs = registry.any? { |_key, item| item.selected && item.adds_config }
 
-      run_command_in_project_dir("mkdir -m 0755 -p #{DIR_CONFIG}") if add_configs
-      run_command_in_project_dir("mkdir -m 0755 -p #{DIR_HOOKS}") if use_tools[:overcommit]
+      create_project_dir(KnownTool::DIR_CONFIG) if add_configs
+      create_project_dir(KnownTool::DIR_HOOKS) if use_tools["overcommit"]
 
-      use_tools.each_key { |key| tools[key].call }
+      use_tools.each { |key, selected| tools[key].call(use_tools) if selected }
 
       puts "Create Gemfile for directory `#{KnownTool::DIR}`..."
 
-      erb("Gemfile", File.join(KnownTool::DIR, "Gemfile"), **use_tools, **gems)
+      erb("Gemfile", File.join(KnownTool::DIR, "Gemfile"), **use_tools, gems:)
     end
 
     private
 
-    # @return [Set<String>]
+    # @return [Hash<String, Boolean>]
     def application_gems
       gemfile_lock = read_project_file("Gemfile.lock").split("\n")
       lines = gemfile_lock
@@ -55,7 +58,7 @@ module Features::Tools
       raise "Cannot find 'GEM' section in Gemfile.lock" if result.empty?
 
       result.map! { |line| line[/\S+/] }
-      result.to_set
+      result.to_h { |item| [item, true] }
     end
   end
 end

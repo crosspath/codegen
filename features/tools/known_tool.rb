@@ -11,12 +11,14 @@ module Features::Tools
     # @param name [String] Visible text in CLI
     # @param adds_config [Boolean]
     def self.register_as(name, adds_config: false)
-      Features::Tools::ToolRegistry.add(self, name, adds_config)
+      item = Features::Tools::ToolRegistry.add(self, name, adds_config)
 
       # Instance-level method
       define_method(:registry_item) { item }
     end
 
+    # @param cli [ChangeProject::CLI]
+    # @param gems [Hash<String, Boolean>]
     def initialize(cli, gems)
       super(cli)
 

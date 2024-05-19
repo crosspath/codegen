@@ -63,6 +63,10 @@ class Feature
     File.unlink(File.join(cli.app_path, file_name))
   end
 
+  def create_project_dir(dir_name)
+    run_command_in_project_dir("mkdir -m 0755 -p #{dir_name}")
+  end
+
   def remove_project_dir(dir_name)
     run_command_in_project_dir("rm -r -f #{dir_name}")
   end

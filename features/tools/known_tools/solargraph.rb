@@ -26,7 +26,7 @@ module Features::Tools::KnownTools
 
       puts "Add documentation schema file to `.gitignore`..."
 
-      update_ignore_file(".gitignore", add: ".annotate_solargraph_schema")
+      update_ignore_file(".gitignore", add: [".annotate_solargraph_schema"])
 
       puts "Copy documentation schema file..."
 
@@ -35,8 +35,8 @@ module Features::Tools::KnownTools
 
     private
 
-    def merge_jsons(*files)
-      result = file_paths.map { |f| JSON.parse(f) }.reduce(&:merge)
+    def merge_jsons(*file_contents)
+      result = file_contents.map { |f| JSON.parse(f) }.reduce(&:merge)
       JSON.pretty_generate(result)
     end
   end

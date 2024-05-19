@@ -12,7 +12,7 @@ module Features::Tools::KnownTools
     end
 
     def use?
-      @gems.include?("slim") && super
+      @gems["slim"] && super
     end
   end
 end

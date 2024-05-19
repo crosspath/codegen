@@ -9,7 +9,7 @@ module Features::Tools::KnownTools
     def call(_use_tools)
       puts "Add Rubocop..."
 
-      gems = GEMS.to_h { |x| [x, @gems.include?(x)] }
+      gems = GEMS.to_h { |x| [x, @gems[x]] }
 
       erb("config/rubocop", File.join(DIR_CONFIG, "rubocop.yml"), **gems)
       copy_files_to_project("config/rubocop-in-templates.yml", DIR_CONFIG)

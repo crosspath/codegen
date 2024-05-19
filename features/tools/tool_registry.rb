@@ -21,9 +21,13 @@ module Features::Tools
       item
     end
 
+    def self.all
+      @instance.all
+    end
+
     # @param class_name [String]
     # @return [String]
-    def self.tool_name(klass)
+    def self.tool_name(class_name)
       res =
         class_name
           .match(/::([^:]+)$/)[1]

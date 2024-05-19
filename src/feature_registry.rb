@@ -19,9 +19,13 @@ class FeatureRegistry < Registry
     item
   end
 
+  def self.all
+    @instance.all
+  end
+
   # @param class_name [String]
   # @return [String]
-  def self.feature_dir(klass)
+  def self.feature_dir(class_name)
     res =
       class_name
         .match(/^Features::([^:]+)/)[1]
