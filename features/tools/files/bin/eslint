@@ -2,7 +2,7 @@
 # frozen_string_literal: true
 
 unless ARGV.include?("-c")
-  file_path = File.expand_path("../.linters/config/eslint.config.js", __dir__)
+  file_path = File.expand_path("../.tools/config/eslint.config.js", __dir__)
   ARGV.unshift("-c", file_path)
 end
 

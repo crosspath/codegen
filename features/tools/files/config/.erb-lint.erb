@@ -17,8 +17,8 @@ linters:
     # Default: false
     disallow_inline_scripts: false
 
-  # When `<%` isn't followed by a newline, ensure `%>` isn't preceeded by a newline.
-  # When `%>` is preceeded by a newline, indent it at the same level as the corresponding `<%`.
+  # When `<%%` isn't followed by a newline, ensure `%>` isn't preceeded by a newline.
+  # When `%>` is preceeded by a newline, indent it at the same level as the corresponding `<%%`.
   ClosingErbTagIndent:
     enabled: true
 
@@ -102,7 +102,7 @@ linters:
     # A path to a valid rubocop configuration file. When this is provided, `rubocop_config` will be
     # ignored.
     # Default: nil (~)
-    config_file_path: ".linters/config/rubocop-in-templates.yml"
+    config_file_path: ".tools/config/rubocop-in-templates.yml"
     # A valid rubocop configuration hash. See rubocop's manual entry on Configuration
     # (https://docs.rubocop.org/rubocop/configuration.html).
     # Default: {}

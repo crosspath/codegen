@@ -1,7 +1,7 @@
 #!/usr/bin/env ruby
 # frozen_string_literal: true
 
-ENV["BUNDLE_GEMFILE"] ||= File.expand_path("../.linters/Gemfile", __dir__)
+ENV["BUNDLE_GEMFILE"] ||= File.expand_path("../.tools/Gemfile", __dir__)
 
 require "rubygems"
 require "bundler/setup"
@@ -9,7 +9,7 @@ require "bundler/setup"
 ARGV.unshift("--cache", "--cache-dir", File.expand_path("../tmp/erblint", __dir__))
 
 unless ARGV.include?("--config")
-  file_path = File.expand_path("../.linters/config/.erb-lint.yml", __dir__)
+  file_path = File.expand_path("../.tools/config/.erb-lint.yml", __dir__)
   ARGV.unshift("--config", file_path)
 end
 

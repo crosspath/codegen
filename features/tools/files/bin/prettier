@@ -2,7 +2,7 @@
 # frozen_string_literal: true
 
 unless ARGV.include?("--config")
-  file_path = File.expand_path("../.linters/config/.prettierrc", __dir__)
+  file_path = File.expand_path("../.tools/config/.prettierrc", __dir__)
   ARGV.unshift("--config", file_path)
 end
 

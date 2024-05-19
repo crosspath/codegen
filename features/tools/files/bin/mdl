@@ -7,13 +7,13 @@
 #   bin/mdl directory # check files in this directory
 #   bin/mdl -s default directory # check files in this directory with default settings
 
-ENV["BUNDLE_GEMFILE"] ||= File.expand_path("../.linters/Gemfile", __dir__)
+ENV["BUNDLE_GEMFILE"] ||= File.expand_path("../.tools/Gemfile", __dir__)
 
 require "rubygems"
 require "bundler/setup"
 
 unless ARGV.include?("-s")
-  file_path = File.expand_path("../.linters/config/mdl_style.rb", __dir__)
+  file_path = File.expand_path("../.tools/config/mdl_style.rb", __dir__)
   ARGV.unshift("-s", file_path)
 end
 

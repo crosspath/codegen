@@ -24,17 +24,14 @@ inherit_gem:
     - sequel.yml
 <% end %>
     - thread_safety.yml
-<% end %>
 
 AllCops:
   TargetRubyVersion: <%= Gem.ruby_version.segments[0..1].join(".") %>
 
-# https://github.com/airbnb/ruby/tree/main/rubocop-airbnb
-
 Naming/FileName:
   Exclude:
-    - .linters/Gemfile
+    - .tools/Gemfile
 
 Style/ClassAndModuleChildren:
   Exclude:
-    - '.linters/**/*.rb'
+    - '.tools/**/*.rb'
