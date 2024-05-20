@@ -57,6 +57,12 @@ PreCommit:
     description: 'https://github.com/Shopify/erb-lint'
     enabled: true
 <% end %>
+<% if es_lint %>
+  EsLint:
+    command: 'bin/eslint'
+    description: 'http://eslint.org'
+    enabled: true
+<% end %>
 <% if fasterer %>
   Fasterer:
     command: 'bin/fasterer'
@@ -73,6 +79,16 @@ PreCommit:
     command: 'bin/mdl'
     description: 'https://github.com/mivok/markdownlint'
     enabled: true
+<% end %>
+<% if prettier %>
+  Prettier:
+    command: 'bin/prettier'
+    description: 'http://prettier.io'
+    enabled: true
+    exclude:
+      - '*.rb'
+    include:
+      - '*.js'
 <% end %>
 <% if rails_best_practices %>
   RailsBestPractices:
