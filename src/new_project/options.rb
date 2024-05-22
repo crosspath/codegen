@@ -32,6 +32,17 @@ module NewProject
         label: "Application path",
         type: :text,
       },
+      name: {
+        label: "Application name",
+        type: :text,
+        default: ->(gopt, _ropt) do
+          File.basename(gopt[:app_path])
+        rescue StandardError
+          ""
+        end,
+        apply: ->(_gopt, ropt, val) { ropt["name"] = val },
+        skip_if: ->(gopt, ropt) { gopt[:rails_version] < 7 },
+      },
       mode: {
         # @see railties/lib/rails/generators/rails/app/app_generator.rb
         # Minimal:
@@ -384,6 +395,18 @@ module NewProject
         default: ->(_, _) { true },
         apply: ->(_gopt, ropt, val) { ropt["skip-bundle"] = !val },
       },
+      # namespace: {
+      #   label: "Skip namespace",
+      #   type: :boolean,
+      #   default: ->(_, _) { false },
+      #   apply: ->(_gopt, ropt, val) { ropt["skip-namespace"] = !val },
+      # },
+      # collision_check: {
+      #   label: "Skip collision check",
+      #   type: :boolean,
+      #   default: ->(_, _) { false },
+      #   apply: ->(_gopt, ropt, val) { ropt["skip-collision-check"] = !val },
+      # },
       # listen: {
       #   label: "Add `listen` gem",
       #   type: :boolean,
@@ -401,6 +424,12 @@ module NewProject
       #   type: :boolean,
       #   default: ->(_, _) { true },
       #   apply: ->(_gopt, ropt, val) { ropt["skip-git"] = !val },
+      # },
+      # docker: {
+      #   label: "Create files for Docker",
+      #   type: :boolean,
+      #   default: ->(_, _) { true },
+      #   apply: ->(_gopt, ropt, val) { ropt["skip-docker"] = !val },
       # },
       # gemfile: {
       #   label: "Add Gemfile",
