@@ -89,6 +89,9 @@ module NewProject
       railties_bin_path = Gem.bin_path("railties", "rails", @rails_version)
       railties_path = railties_bin_path.delete_suffix("/exe/rails")
 
+      # Fix for error "uninitialized constant Bundler::SharedHelpers"
+      require "bundler/setup"
+
       require "#{railties_path}/lib/rails/ruby_version_check"
       require "#{railties_path}/lib/rails/command"
 

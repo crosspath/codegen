@@ -14,7 +14,7 @@ class FeatureRegistry < Registry
   # @return [RegistryItem]
   def self.add(klass, name, before)
     item = RegistryItem.new(klass, name, feature_dir(klass.name))
-    instance_variable_get(:@instance).add(item, before)
+    @instance.add(item, before)
 
     item
   end
