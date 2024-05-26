@@ -1,0 +1,6 @@
+inherit_gem:
+  rubocop-configs:
+    - _all_cops.yml
+    - _ruby.yml
+    - performance.yml
+    - rake.yml
