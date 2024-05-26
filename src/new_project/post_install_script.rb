@@ -4,6 +4,9 @@ require_relative "../erb_eval"
 
 module NewProject
   class PostInstallScript
+    POSTINSTALL_MESSAGE =
+      "You should run `bundle install` and then `bin/postinstall` within application directory."
+
     def initialize(generator_option_values, root_dir)
       @generator_option_values = generator_option_values
       @app_path = File.expand_path(@generator_option_values[:app_path], root_dir)
@@ -15,7 +18,7 @@ module NewProject
       remove_keeps
     end
 
-    def has_steps?
+    def any_steps?
       !@steps.empty?
     end
 
@@ -38,6 +41,8 @@ module NewProject
 
     private
 
+    # rubocop:disable Layout/ClassStructure Keep constants in private section to show that they're
+    # not intended to be used outside of this file.
     FILE_NAME = "bin/postinstall"
 
     FILE_TEMPLATE = <<~ERB
@@ -70,6 +75,7 @@ module NewProject
         end
       end
     RUBY
+    # rubocop:enable Layout/ClassStructure
 
     def add_front_end_libs
       front_end_libs = @generator_option_values[:front_end_lib] || []

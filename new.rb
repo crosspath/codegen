@@ -22,7 +22,7 @@ begin
   cli.generate_app
   cli.add_postinstall_steps
 
-  if cli.has_postinstall_steps?
+  if cli.any_postinstall_steps?
     puts "Run postinstall script..."
     cli.run_postinstall_script
   end

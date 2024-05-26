@@ -4,6 +4,13 @@ require_relative "erb_eval"
 require_relative "feature_registry"
 
 class Feature
+  def self.register_as(name, before: nil)
+    item = FeatureRegistry.add(self, name, before)
+
+    # Instance-level method
+    define_method(:registry_item) { item }
+  end
+
   def initialize(cli)
     @cli = cli
   end
@@ -12,16 +19,12 @@ class Feature
     raise NotImplementedError
   end
 
-  def self.register_as(name, before: nil)
-    item = FeatureRegistry.add(self, name, before)
-
-    # Instance-level method
-    define_method(:registry_item) { item }
-  end
-
   private
 
-  ROOT_DIR = File.dirname(__dir__)
+  # rubocop:disable Layout/ClassStructure Keep constants in private section to show that they're
+  # not intended to be used outside of this file.
+  ROOT_DIR = File.dirname(__dir__).freeze
+  # rubocop:enable Layout/ClassStructure
 
   attr_reader :cli
 

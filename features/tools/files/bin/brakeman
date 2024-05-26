@@ -11,4 +11,4 @@ unless ARGV.include?("-c")
   ARGV.unshift("-c", file_path)
 end
 
-load Gem.bin_path("brakeman", "brakeman")
+load(Gem.bin_path("brakeman", "brakeman"))

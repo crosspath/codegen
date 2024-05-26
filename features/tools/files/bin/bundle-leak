@@ -6,21 +6,19 @@ ENV["BUNDLE_GEMFILE"] ||= File.expand_path("../.tools/Gemfile", __dir__)
 require "rubygems"
 require "bundler/setup"
 
-def run
-  load Gem.bin_path("bundler-leak", "bundle-leak")
+def run # rubocop:disable Style/TopLevelMethodDefinition
+  load(Gem.bin_path("bundler-leak", "bundle-leak"))
 end
 
 begin
   run
 rescue ArgumentError => e
-  if e.message.include?("is not a directory")
-    # Load data into directory `gems/bundler-leak/data/ruby-mem-advisory-db`.
-    ARGV << "update"
-    run
-    # Retry check.
-    ARGV.pop
-    run
-  else
-    raise e
-  end
+  raise e unless e.message.include?("is not a directory")
+
+  # Load data into directory `gems/bundler-leak/data/ruby-mem-advisory-db`.
+  ARGV << "update"
+  run
+  # Retry check.
+  ARGV.pop
+  run
 end

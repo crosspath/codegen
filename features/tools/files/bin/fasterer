@@ -7,7 +7,7 @@ require "rubygems"
 require "bundler/setup"
 
 # Default:
-# load Gem.bin_path("fasterer", "fasterer")
+# load(Gem.bin_path("fasterer", "fasterer"))
 
 # Override Fasterer::Config#file_location to pass config file path:
 require "fasterer/config"

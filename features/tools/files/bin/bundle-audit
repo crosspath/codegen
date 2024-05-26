@@ -6,4 +6,4 @@ ENV["BUNDLE_GEMFILE"] ||= File.expand_path("../.tools/Gemfile", __dir__)
 require "rubygems"
 require "bundler/setup"
 
-load Gem.bin_path("bundler-audit", "bundle-audit")
+load(Gem.bin_path("bundler-audit", "bundle-audit"))

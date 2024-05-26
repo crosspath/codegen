@@ -17,4 +17,4 @@ unless ARGV.include?("-s")
   ARGV.unshift("-s", file_path)
 end
 
-load Gem.bin_path("mdl", "mdl")
+load(Gem.bin_path("mdl", "mdl"))

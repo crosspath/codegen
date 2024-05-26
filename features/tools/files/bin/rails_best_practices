@@ -11,4 +11,4 @@ if ARGV.empty?
   ARGV.push(".", "-c", file_path)
 end
 
-load Gem.bin_path("rails_best_practices", "rails_best_practices")
+load(Gem.bin_path("rails_best_practices", "rails_best_practices"))

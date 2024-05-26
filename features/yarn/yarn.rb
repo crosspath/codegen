@@ -26,10 +26,7 @@ module Features
         # Not recommended for projects with many dependencies.
         if use_zero_installs?
           yarnrc_yml_changes["enableGlobalCache"] = "false"
-          puts warning(
-            "You may be interested in using git submodule for .yarn/cache directory. See more:\n"\
-            "https://github.com/yarnpkg/berry/discussions/4845#discussioncomment-3637094"
-          )
+          puts warning(WARN_CACHE)
         end
 
         puts "Updating .yarnrc.yml file..."
@@ -45,33 +42,44 @@ module Features
       puts "Downloading front-end packages for your application..."
       run_command_in_project_dir("yarn install")
 
-      # Should be called after installing packages. If we call it before `yarn install`, we get:
-      #     Internal Error: This tool can only be used with projects using Yarn Plug'n'Play
-      if use_plug_and_play
-        # @see https://yarnpkg.com/getting-started/editor-sdks#tools-currently-supported
-        puts "Adding Yarn Plug'n'Play support to VS Code..."
-        run_command_in_project_dir("yarn dlx @yarnpkg/sdks vscode")
-      end
+      add_plug_and_play if use_plug_and_play
     end
 
     private
+
+    # rubocop:disable Layout/ClassStructure Keep constants in private section to show that they're
+    # not intended to be used outside of this file.
+    WARN_CACHE =
+      <<~TEXT
+        You may be interested in using git submodule for .yarn/cache directory. See more:
+        https://github.com/yarnpkg/berry/discussions/4845#discussioncomment-3637094
+      TEXT
+    # rubocop:enable Layout/ClassStructure
+
+    def add_plug_and_play
+      # Should be called after installing packages. If we call it before `yarn install`, we get:
+      #     Internal Error: This tool can only be used with projects using Yarn Plug'n'Play
+      # @see https://yarnpkg.com/getting-started/editor-sdks#tools-currently-supported
+      puts "Adding Yarn Plug'n'Play support to VS Code..."
+      run_command_in_project_dir("yarn dlx @yarnpkg/sdks vscode")
+    end
 
     def enable_corepack
       # @see https://yarnpkg.com/getting-started/install
       # @see https://nodejs.org/api/corepack.html
       res = `corepack enable`
-      if res.include?("permission denied")
-        puts "Corepack (part of NPM) requires sudo privileges for creating symlinks."
-        unless system("sudo corepack enable")
-          raise "Cannot enable Corepack that is required for Yarn."
-        end
-      end
+      return if res.exclude?("permission denied")
+
+      puts "Corepack (part of NPM) requires sudo privileges for creating symlinks."
+      return if system("sudo corepack enable")
+
+      raise "Cannot enable Corepack that is required for Yarn."
     end
 
     def add_yarn_to_project
       # WARN: `yarn --version` may return "3.2.0", but directory `${project}/.yarn/releases`
       # contains newer release, for example, 3.6.3.
-      version = Dir["#{cli.app_path}/.yarn/releases/*.cjs"].sort.last.match(/(\d\.\d\.\d)\.cjs$/)[1]
+      version = Dir["#{cli.app_path}/.yarn/releases/*.cjs"].max.match(/(\d\.\d\.\d)\.cjs$/)[1]
 
       if project_file_exist?("package.json")
         run_command_in_project_dir("npm pkg set packageManager=yarn@#{version}")
@@ -141,11 +149,7 @@ module Features
         "!.yarn/versions",
       ]
 
-      if yarnrc_yml["enableGlobalCache"] == "false"
-        entries << "!.yarn/cache"
-      else
-        entries << ".pnp.*"
-      end
+      entries << (yarnrc_yml["enableGlobalCache"] == "false" ? "!.yarn/cache" : ".pnp.*")
 
       update_ignore_file(".gitignore", add: entries)
     end

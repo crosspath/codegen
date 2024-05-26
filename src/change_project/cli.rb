@@ -2,6 +2,7 @@
 
 require_relative "../ask"
 require_relative "../feature"
+require_relative "../hash"
 
 module ChangeProject
   class CLI

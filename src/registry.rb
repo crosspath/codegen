@@ -2,6 +2,10 @@
 
 # @abstract
 class Registry
+  def initialize
+    @all = []
+  end
+
   # @param item [#hash_key] Struct-like object
   def add(item, before = nil)
     if before
@@ -14,11 +18,5 @@ class Registry
 
   def all
     @all.to_h { |item| [item.hash_key, item] }
-  end
-
-  private
-
-  def initialize
-    @all = []
   end
 end

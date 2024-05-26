@@ -11,4 +11,4 @@ if !ARGV.include?("-c") && !ARGV.include?("--config")
   ARGV.unshift("-c", file_path)
 end
 
-load Gem.bin_path("rubocop", "rubocop")
+load(Gem.bin_path("rubocop", "rubocop"))

@@ -41,7 +41,7 @@ module NewProject
           ""
         end,
         apply: ->(_gopt, ropt, val) { ropt["name"] = val },
-        skip_if: ->(gopt, ropt) { gopt[:rails_version] < 7 },
+        skip_if: ->(gopt, _ropt) { gopt[:rails_version] < 7 },
       },
       mode: {
         # @see railties/lib/rails/generators/rails/app/app_generator.rb
@@ -246,7 +246,9 @@ module NewProject
             ropt["skip-hotwire"] = true unless val
           end
         end,
-        skip_if: ->(gopt, ropt) { gopt[:rails_version] < 7 || ropt["api"] || ropt["skip-javascript"] },
+        skip_if: ->(gopt, ropt) do
+          gopt[:rails_version] < 7 || ropt["api"] || ropt["skip-javascript"]
+        end,
       },
       turbolinks: {
         label: "Add Turbolinks",
@@ -259,7 +261,9 @@ module NewProject
             ropt["skip-turbolinks"] = true unless val
           end
         end,
-        skip_if: ->(gopt, ropt) { gopt[:rails_version] >= 7 || ropt["api"] || ropt["skip-javascript"] },
+        skip_if: ->(gopt, ropt) do
+          gopt[:rails_version] >= 7 || ropt["api"] || ropt["skip-javascript"]
+        end,
       },
       js_bundler: {
         label: "Bundler for JavaScript",
@@ -267,13 +271,16 @@ module NewProject
         variants: {
           "bun" => "Bun",
           "esbuild" => "esbuild",
-          "importmap" => "importmap", # importmap is not a bundler, actually - it doesn't require Node.js
+          # importmap is not a bundler, actually - it doesn't require Node.js
+          "importmap" => "importmap",
           "rollup" => "Rollup",
           "webpack" => "Webpack",
         },
         default: ->(_, _) { "importmap" },
         apply: ->(_gopt, ropt, val) { ropt["javascript"] = val },
-        skip_if: ->(gopt, ropt) { gopt[:rails_version] < 7 || ropt["api"] || ropt["skip-javascript"] },
+        skip_if: ->(gopt, ropt) do
+          gopt[:rails_version] < 7 || ropt["api"] || ropt["skip-javascript"]
+        end,
       },
       css_lib: {
         label: "Library for CSS",
@@ -303,7 +310,9 @@ module NewProject
             ropt["skip-webpack-install"] = true unless val
           end
         end,
-        skip_if: ->(gopt, ropt) { gopt[:rails_version] >= 7 || ropt["api"] || ropt["skip-javascript"] },
+        skip_if: ->(gopt, ropt) do
+          gopt[:rails_version] >= 7 || ropt["api"] || ropt["skip-javascript"]
+        end,
       },
       front_end_lib: {
         label: "Libraries for front-end",
@@ -320,7 +329,7 @@ module NewProject
           "vue" => "Vue",
         },
         default: ->(_, _) { ["erb"] },
-        apply: ->(gopt, ropt, val) do
+        apply: ->(_gopt, ropt, val) do
           ropt["webpack"] = val[0] # First item only.
         end,
         skip_if: ->(gopt, ropt) do
@@ -444,6 +453,6 @@ module NewProject
       #   apply: ->(_gopt, ropt, val) { ropt["skip-decrypted-diffs"] = !val },
       #   skip_if: ->(gopt, _ropt) { gopt[:rails_version] < 7 },
       # },
-    }
+    }.freeze
   end
 end

@@ -13,4 +13,4 @@ unless ARGV.include?("-c")
   ARGV.unshift("-c", file_path)
 end
 
-load Gem.bin_path("slim_lint", "slim-lint")
+load(Gem.bin_path("slim_lint", "slim-lint"))

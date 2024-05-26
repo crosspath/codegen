@@ -5,7 +5,82 @@ inherit_gem:
     - performance.yml
     - rake.yml
 
+# Do not lint old code.
 AllCops:
   Exclude:
     - "generators/**/*"
     - "templates/**/*"
+    - codegen.rb
+    - functions.rb
+
+Layout/EmptyComment:
+  # Allow empty comment line between paragraphs in comment section.
+  AllowMarginComment: true
+
+# Keep disabled until Rubocop or Prism fixed some parser issues.
+Layout/RedundantLineBreak:
+  Enabled: false
+
+# Set default value in Rubocop.
+Layout/SpaceAroundEqualsInParameterDefault:
+  EnforcedStyle: space
+
+Lint/Debugger:
+  DebuggerMethods:
+    # Exclude methods `puts` and `warn`.
+    Kernel: [binding.irb, p, Kernel.binding.irb]
+
+# Keep disabled until Rubocop or Prism fixed some parser issues.
+Lint/ImplicitStringConcatenation:
+  Enabled: false
+
+# TODO: Refactoring.
+Metrics:
+  Enabled: false
+
+# We don't use Zeitwerk loader in this repo, that's why `nested` style is preferred.
+Style/ClassAndModuleChildren:
+  Exclude:
+    - "features/tools/files/hooks/**/*"
+    - "features/tools/known_tools/*"
+  EnforcedStyle: nested
+
+# TODO: Add code documentation.
+Style/DocumentationMethod:
+  Enabled: false
+
+# TODO: Add code documentation.
+Style/Documentation:
+  Enabled: false
+
+# Keep disabled in bin-scripts, because method `exclude?` is not included into Ruby core.
+Style/InverseMethods:
+  Exclude:
+    - 'features/tools/files/bin/*'
+
+# Keep disabled in bin-scripts, because method `exclude?` is not included into Ruby core.
+Style/InvertibleUnlessCondition:
+  Exclude:
+    - 'features/tools/files/bin/*'
+
+# Add `require` and `require_relative` to AllowedMethods (allow to call them without
+# parentheses).
+Style/MethodCallWithArgsParentheses:
+  AllowedMethods:
+    # Ruby core:
+    - p
+    - pp
+    - print
+    - puts
+    - raise
+    - require
+    - require_relative
+    - sleep
+    - warn
+    - yield
+
+# Keep disabled in bin-scripts, because order of `require` lines in bin-scripts are significant for
+# running operations.
+Style/RequireOrder:
+  Exclude:
+    - 'features/tools/files/bin/*'

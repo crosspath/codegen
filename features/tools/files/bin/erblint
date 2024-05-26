@@ -13,4 +13,4 @@ unless ARGV.include?("--config")
   ARGV.unshift("--config", file_path)
 end
 
-load Gem.bin_path("erb_lint", "erblint")
+load(Gem.bin_path("erb_lint", "erblint"))
