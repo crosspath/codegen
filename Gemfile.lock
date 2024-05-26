@@ -1,8 +1,8 @@
 GIT
   remote: https://github.com/crosspath/rubocop-configs.git
-  revision: 9012f4baf11caa1c4f4518389af66b5b25e45388
+  revision: 681fb371ed2b0ffd147f7504ce5cae6e090158ab
   specs:
-    rubocop-configs (0.12.0)
+    rubocop-configs (0.12.1)
       rake (>= 13.0)
 
 GEM
@@ -15,6 +15,7 @@ GEM
     parser (3.3.1.0)
       ast (~> 2.4.1)
       racc
+    prism (0.29.0)
     racc (1.8.0)
     rainbow (3.1.1)
     rake (13.2.1)
@@ -48,6 +49,7 @@ PLATFORMS
   x86_64-linux-gnu
 
 DEPENDENCIES
+  prism
   rubocop (~> 1.63)
   rubocop-configs!
   rubocop-performance (~> 1.20)
