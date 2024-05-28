@@ -21,10 +21,6 @@ Layout/EmptyComment:
 Layout/RedundantLineBreak:
   Enabled: false
 
-# Set default value in Rubocop.
-Layout/SpaceAroundEqualsInParameterDefault:
-  EnforcedStyle: space
-
 Lint/Debugger:
   DebuggerMethods:
     # Exclude methods `puts` and `warn`.
@@ -62,22 +58,6 @@ Style/InverseMethods:
 Style/InvertibleUnlessCondition:
   Exclude:
     - 'features/tools/files/bin/*'
-
-# Add `require` and `require_relative` to AllowedMethods (allow to call them without
-# parentheses).
-Style/MethodCallWithArgsParentheses:
-  AllowedMethods:
-    # Ruby core:
-    - p
-    - pp
-    - print
-    - puts
-    - raise
-    - require
-    - require_relative
-    - sleep
-    - warn
-    - yield
 
 # Keep disabled in bin-scripts, because order of `require` lines in bin-scripts are significant for
 # running operations.
