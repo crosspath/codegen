@@ -1,0 +1,9 @@
+#!/usr/bin/env ruby
+# frozen_string_literal: true
+
+unless ARGV.include?("-c")
+  file_path = File.expand_path("../.tools/config/eslint.config.js", __dir__)
+  ARGV.unshift("-c", file_path)
+end
+
+system("yarn run eslint", "--no-config-lookup", *ARGV)

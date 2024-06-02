@@ -1,0 +1,14 @@
+#!/usr/bin/env ruby
+# frozen_string_literal: true
+
+ENV["BUNDLE_GEMFILE"] ||= File.expand_path("../.tools/Gemfile", __dir__)
+ENV["SOLARGRAPH_GLOBAL_CONFIG"] ||= File.expand_path("../.tools/config/.solargraph.yml", __dir__)
+
+require "rubygems"
+require "bundler/setup"
+
+if ARGV[0] == "typecheck" && !ARGV.intersect?(%w[--level --mode -l -m])
+  ARGV.insert(1, "--level", "strong")
+end
+
+load(Gem.bin_path("solargraph", "solargraph"))

@@ -60,6 +60,7 @@ module Features
       # "jdbc"
     }.freeze
 
+    # For Debian.
     DBMS_PACKAGES = {
       "mysql" => "default-libmysqlclient-dev default-mysql-client",
       "postgresql" => "libpq-dev postgresql-client",
@@ -75,6 +76,7 @@ module Features
     # @see https://github.com/rails/rails/blob/main/railties/lib/rails/generators/rails/app/templates/dockerignore.tt
     IGNORE_FILE_ENTRIES = [
       "/.git/",
+      "/app/assets/builds/*",
       "/config/master.key",
       "/config/credentials/*.key",
       "/log/*",
@@ -83,7 +85,6 @@ module Features
 
     IGNORE_FILE_ENTRIES_FOR_ASSETS = [
       "/node_modules/",
-      "/app/assets/builds/*",
       "/public/assets",
     ].freeze
 

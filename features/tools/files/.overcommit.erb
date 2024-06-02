@@ -1,0 +1,138 @@
+# Config for Overcommit, v0.63.0
+#
+# @see https://github.com/sds/overcommit
+#
+# Install:
+#   bin/overcommit --install
+# Run pre-commit actions now, not on git hook:
+#   bin/overcommit -r
+# Commit without Overcommit's checks:
+#   OVERCOMMIT_DISABLE=1 git commit -m 'Commit message'
+gemfile: .tools/Gemfile
+plugin_directory: .tools/hooks
+
+CommitMsg:
+  CapitalizedSubject:
+    enabled: false
+  HardTabs:
+    enabled: true
+  TextWidth:
+    enabled: false
+  TrailingPeriod:
+    enabled: false
+
+PostCheckout:
+  BundleInstall:
+    enabled: true
+<% if bundler_audit || bundler_leak %>
+<%
+  gems = []
+  gems << "bundle-audit" if bundler_audit
+  gems << "bundle-leak" if bundler_leak
+%>
+  UpdateGemsData:
+    description: 'Update databases for <%= gems.join(", ") %>'
+    enabled: true
+<% end %>
+
+PreCommit:
+<% if bundler_audit %>
+  BundleAudit:
+    command: 'bin/bundle-audit'
+    description: 'https://github.com/rubysec/bundler-audit'
+    enabled: true
+<% end %>
+  BundleCheck:
+    enabled: true
+    parallelize: false
+<% if bundler_leak %>
+  BundleLeak:
+    command: 'bin/bundle-leak'
+    description: 'Make sure memory leaks are not in your gem dependencies'
+    enabled: true
+<% end %>
+<% if erb_lint %>
+  ErbLint:
+    command: 'bin/erblint'
+    description: 'https://github.com/Shopify/erb-lint'
+    enabled: true
+<% end %>
+<% if es_lint %>
+  EsLint:
+    command: 'bin/eslint'
+    description: 'http://eslint.org'
+    enabled: true
+<% end %>
+<% if fasterer %>
+  Fasterer:
+    command: 'bin/fasterer'
+    description: 'https://github.com/DamirSvrtan/fasterer'
+    enabled: true
+<% end %>
+  FileSize:
+    enabled: true
+    size_limit_bytes: 1048576 # 1 megabyte
+  HardTabs:
+    enabled: true
+<% if mdl %>
+  Mdl:
+    command: 'bin/mdl'
+    description: 'https://github.com/mivok/markdownlint'
+    enabled: true
+<% end %>
+<% if prettier %>
+  Prettier:
+    command: 'bin/prettier'
+    description: 'http://prettier.io'
+    enabled: true
+    exclude:
+      - '*.rb'
+    include:
+      - '*.js'
+<% end %>
+<% if rails_best_practices %>
+  RailsBestPractices:
+    command: 'bin/rails_best_practices'
+    description: 'https://github.com/flyerhzm/rails_best_practices'
+    enabled: true
+<% end %>
+  RailsSchemaUpToDate:
+    enabled: true
+<% if rubocop %>
+  RuboCop:
+    command: 'bin/rubocop'
+    description: 'https://rubocop.org'
+    enabled: true
+    on_warn: fail # Treat all warnings as failures
+<% end %>
+<% if slim_lint %>
+  SlimLint:
+    command: 'bin/slimlint'
+    description: 'https://github.com/sds/slim-lint'
+    enabled: true
+<% end %>
+  TrailingWhitespace:
+    enabled: true
+    exclude:
+      - '**/*.md'
+      - '**/*.markdown'
+      - '**/*.rb'
+  # Use one of: YamlLint, YamlSyntaxChecker.
+  # YamlLint:
+  #   description: 'https://github.com/adrienverge/yamllint' # Requires Python 3.
+  #   enabled: true
+  YamlSyntaxChecker:
+    enabled: true
+    description: 'Check YAML syntax. Based on hook YamlSyntax.'
+    required_library: 'yaml'
+    include:
+      - '**/*.yaml'
+      - '**/*.yml'
+
+<% if brakeman %>
+PrePush:
+  Brakeman:
+    command: 'bin/brakeman'
+    description: 'http://brakemanscanner.org'
+    enabled: true
+<% end %>

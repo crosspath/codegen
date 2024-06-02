@@ -15,12 +15,12 @@ module Features
     private
 
     def copy_lib_file
-      run_command_in_project_dir("mkdir -p app/lib")
+      create_project_dir("app/lib")
       copy_files_to_project("settings.rb", "app/lib/settings.rb")
     end
 
     def copy_example_files
-      run_command_in_project_dir("mkdir -p config/initializers")
+      create_project_dir("config/initializers")
       copy_files_to_project("initializer.rb", "config/initializers/settings.rb")
       copy_files_to_project("settings.yml", "config/settings.yml")
     end

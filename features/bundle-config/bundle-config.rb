@@ -34,8 +34,7 @@ module Features
     ].freeze
 
     def create_dir_bundle
-      dir = File.join(cli.app_path, ".bundle")
-      Dir.mkdir(dir, 0o775) unless Dir.exist?(dir)
+      create_project_dir(".bundle")
     end
 
     def update_bin_setup

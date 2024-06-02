@@ -3,7 +3,7 @@
 require "io/console"
 
 class Ask
-  Interrupt = Class.new(RuntimeError)
+  Interrupt = Class.new(RuntimeError).freeze
 
   KEYS = (("1".."9").to_a + ("a".."z").to_a).freeze
 
@@ -95,8 +95,8 @@ class Ask
 
       return default_value if answer.empty?
 
-      keys = answer.split("")
-      return variants.slice(*keys),map(&:first) if (variants.keys & keys).size == keys.size
+      keys = answer.chars
+      return variants.slice(*keys).map(&:first) if (variants.keys & keys).size == keys.size
 
       puts "Unexpected answer!"
     end
@@ -107,12 +107,18 @@ class Ask
   def default_value_for(definition)
     value = definition[:default]&.call(@gopt, @ropt)
     return if value.nil?
+    return (value ? "y" : "n") if definition[:type] == :boolean
 
-    definition[:type] == :boolean ? (value ? "y" : "n") : value
+    value
   end
 
   def default_text_for(value, variants = nil)
-    value = variants.select { |_, (k, _)| value.include?(k) }.map(&:first).join(", ") if variants
+    if variants
+      value =
+        variants
+          .filter_map { |vis_key, (stor_key, _title)| vis_key if value.include?(stor_key) }
+          .join(", ")
+    end
     value ? " (default: #{value})" : nil
   end
 
@@ -125,17 +131,18 @@ class Ask
     variants.map { |k, (_, v)| "#{k} - #{v}" }.join("\n")
   end
 
-  def get_string
-    Signal.trap('INT') { raise Interrupt } # Ctrl+C
-    result = STDIN.gets # nil if Ctrl+D
+  def get_string # rubocop:disable Naming/AccessorMethodName
+    Signal.trap("INT") { raise Interrupt } # Ctrl+C
+    result = $stdin.gets # nil if Ctrl+D
     raise Interrupt unless result
 
     result.chomp
   end
 
-  def get_char
-    c = STDIN.getch
+  def get_char # rubocop:disable Naming/AccessorMethodName
+    c = $stdin.getch
     raise Interrupt if ["\u0003", "\u0004"].include?(c) # Ctrl+C, Ctrl+D
+
     print c # Inserted character is hidden by default.
     ["\r", "\n"].include?(c) ? nil : c
   end

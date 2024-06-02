@@ -1,0 +1,163 @@
+# Config for Slim Lint, v0.24.0
+# Run in console:
+#   bin/slimlint app/views
+
+skip_frontmatter: false
+
+linters:
+  CommentControlStatement:
+    enabled: true
+    # Default values:
+    # enabled: true
+
+  ConsecutiveControlStatements:
+    enabled: true
+    max_consecutive: 2
+    # Default values:
+    # enabled: true
+    # max_consecutive: 2
+
+  ControlStatementSpacing:
+    enabled: true
+
+  # @see https://github.com/slim-template/slim#embedded-engines-markdown
+  EmbeddedEngines:
+    enabled: true
+    forbidden_engines: [less, textile]
+    # Default values:
+    # enabled: false
+    # forbidden_engines: []
+
+  EmptyControlStatement:
+    enabled: true
+    # Default values:
+    # enabled: true
+
+  EmptyLines:
+    enabled: true
+    # Default values:
+    # enabled: true
+
+  FileLength:
+    enabled: true
+    max: 150
+    # Default values:
+    # enabled: false
+    # max: 300
+
+  LineLength:
+    enabled: true
+    max: 120
+    # Default values:
+    # enabled: true
+    # max: 80
+
+  RedundantDiv:
+    enabled: true
+    # Default values:
+    # enabled: true
+
+  RuboCop:
+    enabled: true
+    ignored_cops:
+      - Layout/ArgumentAlignment
+      - Layout/ArrayAlignment
+      - Layout/BlockAlignment
+      - Layout/ClosingParenthesisIndentation
+      - Layout/EmptyLineAfterGuardClause
+      - Layout/EndAlignment
+      - Layout/FirstArgumentIndentation
+      - Layout/FirstArrayElementIndentation
+      - Layout/FirstHashElementIndentation
+      - Layout/FirstParameterIndentation
+      - Layout/HashAlignment
+      - Layout/IndentationConsistency
+      - Layout/IndentationWidth
+      - Layout/InitialIndentation
+      - Layout/LineEndStringConcatenationIndentation
+      - Layout/LineLength
+      - Layout/MultilineArrayBraceLayout
+      - Layout/MultilineAssignmentLayout
+      - Layout/MultilineHashBraceLayout
+      - Layout/MultilineMethodCallBraceLayout
+      - Layout/MultilineMethodCallIndentation
+      - Layout/MultilineMethodDefinitionBraceLayout
+      - Layout/MultilineOperationIndentation
+      - Layout/ParameterAlignment
+      - Layout/TrailingEmptyLines
+      - Layout/TrailingWhitespace
+      - Lint/Void
+      - Metrics/BlockLength
+      - Metrics/BlockNesting
+      - Naming/FileName
+      - Style/FrozenStringLiteralComment
+      - Style/IdenticalConditionalBranches
+      - Style/IfUnlessModifier
+      - Style/Next
+      - Style/RedundantLineContinuation
+      - Style/WhileUntilDo
+      - Style/WhileUntilModifier
+    # Default values:
+    # enabled: true
+    # ignored_cops:
+    #   - Layout/ArgumentAlignment
+    #   - Layout/ArrayAlignment
+    #   - Layout/BlockAlignment
+    #   - Layout/ClosingParenthesisIndentation
+    #   - Layout/EmptyLineAfterGuardClause
+    #   - Layout/EndAlignment
+    #   - Layout/FirstArgumentIndentation
+    #   - Layout/FirstArrayElementIndentation
+    #   - Layout/FirstHashElementIndentation
+    #   - Layout/FirstParameterIndentation
+    #   - Layout/HashAlignment
+    #   - Layout/IndentationConsistency
+    #   - Layout/IndentationWidth
+    #   - Layout/InitialIndentation
+    #   - Layout/LineEndStringConcatenationIndentation
+    #   - Layout/LineLength
+    #   - Layout/MultilineArrayBraceLayout
+    #   - Layout/MultilineAssignmentLayout
+    #   - Layout/MultilineHashBraceLayout
+    #   - Layout/MultilineMethodCallBraceLayout
+    #   - Layout/MultilineMethodCallIndentation
+    #   - Layout/MultilineMethodDefinitionBraceLayout
+    #   - Layout/MultilineOperationIndentation
+    #   - Layout/ParameterAlignment
+    #   - Layout/TrailingEmptyLines
+    #   - Layout/TrailingWhitespace
+    #   - Lint/Void
+    #   - Metrics/BlockLength
+    #   - Metrics/BlockNesting
+    #   - Naming/FileName
+    #   - Style/FrozenStringLiteralComment
+    #   - Style/IdenticalConditionalBranches
+    #   - Style/IfUnlessModifier
+    #   - Style/Next
+    #   - Style/WhileUntilDo
+    #   - Style/WhileUntilModifier
+
+  Tab:
+    enabled: true
+    # Default values:
+    # enabled: true
+
+  TagCase:
+    enabled: true
+    # Default values:
+    # enabled: true
+
+  TrailingBlankLines:
+    enabled: true
+    # Default values:
+    # enabled: true
+
+  TrailingWhitespace:
+    enabled: true
+    # Default values:
+    # enabled: true
+
+  Zwsp:
+    enabled: false
+    # Default values:
+    # enabled: false

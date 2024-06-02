@@ -1,0 +1,37 @@
+# Config for Rubocop.
+
+inherit_gem:
+  rubocop-configs:
+    - _all_cops.yml
+    - _ruby.yml
+    - bundler.yml
+<% if capybara %>
+    - capybara.yml
+<% end %>
+<% if factory_bot %>
+    - factory_bot.yml
+<% end %>
+<% if graphql %>
+    - graphql.yml
+<% end %>
+    - performance.yml
+    - rails.yml
+    - rake.yml
+<% if rspec %>
+    - rspec.yml
+<% end %>
+<% if sequel %>
+    - sequel.yml
+<% end %>
+    - thread_safety.yml
+
+AllCops:
+  TargetRubyVersion: <%= Gem.ruby_version.segments[0..1].join(".") %>
+
+Naming/FileName:
+  Exclude:
+    - .tools/Gemfile
+
+Style/ClassAndModuleChildren:
+  Exclude:
+    - '.tools/**/*.rb'

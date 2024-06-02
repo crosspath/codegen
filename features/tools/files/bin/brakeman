@@ -1,0 +1,14 @@
+#!/usr/bin/env ruby
+# frozen_string_literal: true
+
+ENV["BUNDLE_GEMFILE"] ||= File.expand_path("../.tools/Gemfile", __dir__)
+
+require "rubygems"
+require "bundler/setup"
+
+unless ARGV.include?("-c")
+  file_path = File.expand_path("../.tools/config/brakeman.yml", __dir__)
+  ARGV.unshift("-c", file_path)
+end
+
+load(Gem.bin_path("brakeman", "brakeman"))

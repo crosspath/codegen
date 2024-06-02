@@ -21,6 +21,7 @@ Supported Rails versions: 6.1, 7.1.
 * `bundle-config`: predefined config files for `bundler`
 * `docker`: generate Dockerfile & Docker Compose files
 * `dotenv`: add gem `dotenv` and example files for configuration via ENV
+* `linters`: add linters for Ruby and its ecosystem
 * `misc`: miscellaneous tasks for changing and removing files and directories within
   Rails application
 * `remove-comments`: remove unnecessary comments from project files

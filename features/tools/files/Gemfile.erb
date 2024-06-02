@@ -1,0 +1,36 @@
+# frozen_string_literal: true
+
+source "https://rubygems.org"
+
+<% if overcommit %>
+group :development do
+  gem "overcommit", require: false
+end
+<% end %>
+
+# CI uses `test` environment by default.
+group :development, :test do
+  <% if brakeman %>gem "brakeman", require: false<% end %>
+  <% if bundler_audit %>gem "bundler-audit", require: false<% end %>
+  <% if bundler_leak %>gem "bundler-leak", require: false<% end %>
+  <% if erb_lint %>gem "erb_lint", require: false<% end %>
+  <% if fasterer %>gem "fasterer", require: false<% end %>
+  <% if mdl %>gem "mdl", require: false<% end %>
+  <% if rails_best_practices %>gem "rails_best_practices", require: false<% end %>
+  <% if rubocop %>
+  gem "rubocop", "~> 1.60", require: false
+  <% if gems["capybara"] %>gem "rubocop-capybara", "~> 2.20", require: false<% end %>
+  gem "rubocop-configs", require: false, git: "https://github.com/crosspath/rubocop-configs.git"
+  <% if gems["factory_bot"] %>gem "rubocop-factory_bot", "~> 2.25", require: false<% end %>
+  <% if gems["graphql"] %>gem "rubocop-graphql", "~> 1.5", require: false<% end %>
+  gem "rubocop-performance", "~> 1.20", require: false
+  gem "rubocop-rails", "~> 2.23", require: false
+  gem "rubocop-rake", "~> 0.6", require: false
+  <% if gems["rspec"] %>gem "rubocop-rspec", "~> 2.26", require: false<% end %>
+  <% if gems["sequel"] %>gem "rubocop-sequel", "~> 0.3", require: false<% end %>
+  gem "rubocop-thread_safety", "~> 0.5", require: false
+  <% end %>
+  <% if slim_lint %>gem "slim_lint", require: false<% end %>
+  <% if solargraph %>gem "solargraph", require: false<% end %>
+  <% if !solargraph && yard %>gem "yard", require: false<% end %>
+end
