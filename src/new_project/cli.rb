@@ -12,7 +12,7 @@ module NewProject
       GEM_HOME,
       "#{GEM_HOME}/bundler/gems",
       "#{GEM_HOME}/cache",
-      "#{GEM_HOME}/extensions/x86_64-linux-gnu/#{BASE_RUBY_VERSION}",
+      *Dir["#{GEM_HOME}/extensions/*/#{BASE_RUBY_VERSION}"],
       "#{GEM_HOME}/gems",
       "#{GEM_HOME}/plugins",
       "#{GEM_HOME}/specifications",

@@ -7,7 +7,7 @@ module Features::Tools::KnownTools
     def call(use_tools)
       puts "Add Overcommit..."
 
-      warnings = ["bin/overcommit --sign pre-commit"]
+      warnings = ["bin/overcommit --sign", "bin/overcommit --sign pre-commit"]
 
       copy_files_to_project("bin/overcommit", DIR_BIN)
 

@@ -37,6 +37,11 @@ module Features
         puts "Create Gemfile for directory `#{KnownTool::DIR}`..."
 
         erb("Gemfile", File.join(KnownTool::DIR, "Gemfile"), **use_tools, gems:)
+
+        if project_file_exist?(".bundle")
+          puts "Copy .bundle directory into .tools..."
+          run_command_in_project_dir("cp -r .bundle .tools")
+        end
       end
 
       private
