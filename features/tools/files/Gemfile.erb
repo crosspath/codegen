@@ -18,6 +18,7 @@ group :development, :test do
   <% if mdl %>gem "mdl", require: false<% end %>
   <% if rails_best_practices %>gem "rails_best_practices", require: false<% end %>
   <% if rubocop %>
+  gem "prism", require: false
   gem "rubocop", "~> 1.60", require: false
   <% if gems["capybara"] %>gem "rubocop-capybara", "~> 2.20", require: false<% end %>
   gem "rubocop-configs", require: false, git: "https://github.com/crosspath/rubocop-configs.git"
