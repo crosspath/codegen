@@ -28,9 +28,7 @@ if Rails.env.development?
       next unless Rake::Task.task_defined?(task)
 
       # Invoke this task after migration/rollback.
-      Rake::Task[task].enhance do
-        Rake::Task["annotate:solargraph:generate"].invoke
-      end
+      Rake::Task[task].enhance { Rake::Task["annotate:solargraph:generate"].invoke }
     end
   end
 end

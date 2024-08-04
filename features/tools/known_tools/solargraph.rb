@@ -9,7 +9,7 @@ module Features::Tools::KnownTools
 
       copy_files_to_project("config/.solargraph.yml", DIR_CONFIG)
       copy_files_to_project("bin/solargraph", DIR_BIN)
-      copy_files_to_project("tasks", "lib/tasks")
+      copy_files_to_project("tasks", "lib")
 
       puts "Update settings for integration between Solargraph and VS Code..."
 
