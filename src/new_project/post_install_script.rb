@@ -14,6 +14,7 @@ module NewProject
     end
 
     def add_steps
+      add_core_gems_for_ruby_3_3 if Gem.ruby_version >= Gem::Version.new("3.3.0")
       add_front_end_libs
       remove_keeps
     end
@@ -52,6 +53,13 @@ module NewProject
       <%= steps.join("\n\n") %>
     ERB
 
+    STEP_CORE_GEMS = <<~RUBY
+      puts "Add core gems for Ruby 3.3 to Gemfile..."
+      Dir.chdir(File.dirname(__dir__)) do
+        File.open("Gemfile", "a") { |f| f << %(\ngem "base64"\ngem "bigdecimal"\ngem "mutex_m"\n) }
+      end
+    RUBY
+
     STEP_WEBPACKER = <<~ERB
       puts "Adding front-end libraries..."
       Dir.chdir(File.dirname(__dir__)) do
@@ -76,6 +84,24 @@ module NewProject
       end
     RUBY
     # rubocop:enable Layout/ClassStructure
+
+    # Fix for warnings:
+    #   active_support/message_encryptor.rb:4: warning: base64 was loaded from the standard library,
+    #   but will no longer be part of the default gems since Ruby 3.4.0. Add base64 to your Gemfile
+    #   or gemspec. Also contact author of activesupport-7.1.3.4 to add base64 into its gemspec.
+    #
+    #   active_support/core_ext/object/json.rb:5: warning: bigdecimal was loaded from the standard
+    #   library, but will no longer be part of the default gems since Ruby 3.4.0. Add bigdecimal to
+    #   your Gemfile or gemspec. Also contact author of activesupport-7.1.3.4 to add bigdecimal into
+    #   its gemspec.
+    #
+    #   active_support/notifications/fanout.rb:3: warning: mutex_m was loaded from the standard
+    #   library, but will no longer be part of the default gems since Ruby 3.4.0. Add mutex_m to
+    #   your Gemfile or gemspec. Also contact author of activesupport-7.1.3.4 to add mutex_m into
+    #   its gemspec.
+    def add_core_gems_for_ruby_3_3
+      @steps << STEP_CORE_GEMS
+    end
 
     def add_front_end_libs
       front_end_libs = @generator_option_values[:front_end_lib] || []

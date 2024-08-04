@@ -15,12 +15,14 @@ begin
   puts "Press Ctrl+C to stop anytime."
   cli.call
 
-  puts "Installing railties gem..."
-  cli.install_railties
+  cli.ensure_gem_path_is_writable do
+    puts "Installing railties gem..."
+    cli.install_railties
 
-  puts "Generating application..."
-  cli.generate_app
-  cli.add_postinstall_steps
+    puts "Generating application..."
+    cli.generate_app
+    cli.add_postinstall_steps
+  end
 
   if cli.any_postinstall_steps?
     puts "Run postinstall script..."
