@@ -19,6 +19,10 @@ inherit_gem:
     - rake.yml
 <% if rspec %>
     - rspec.yml
+    - rspec_rails.yml
+<% end %>
+<% if rswag %>
+    - rswag.yml
 <% end %>
 <% if sequel %>
     - sequel.yml
@@ -35,3 +39,9 @@ Naming/FileName:
 Style/ClassAndModuleChildren:
   Exclude:
     - '.tools/**/*.rb'
+
+<% if factory_bot %>
+Layout/RedundantLineBreak:
+  Exclude:
+    - 'factories/**/*.rb'
+<% end %>

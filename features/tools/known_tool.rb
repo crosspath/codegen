@@ -40,9 +40,7 @@ module Features
 
       def add_gem_for_development(name)
         puts "Add gem #{name}..."
-
-        gemfile = read_project_file("Gemfile") + "\ngem \"#{name}\", group: :development\n"
-        write_project_file("Gemfile", gemfile)
+        add_gem(name, group: :development)
       end
     end
   end

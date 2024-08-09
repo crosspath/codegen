@@ -8,12 +8,12 @@
   gems << "bundle-audit" if bundler_audit
   gems << "bundle-leak" if bundler_leak
 %>
-
 # Run after updating this file:
 #   bin/overcommit --sign post-checkout
 module Overcommit::Hook::PostCheckout
   # Update databases for <%= gems.join(', ') %>.
   class UpdateGemsData < Base
+    # Main action of this hook.
     def run
       result = execute("<%= commands.join(' && ') %>")
       return :fail, result.stdout unless result.success?

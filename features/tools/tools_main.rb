@@ -53,7 +53,7 @@ module Features
         result = []
 
         loop do
-          # +1 means "skip lines 'GEM', 'remote', 'specs'"
+          # +3 means "skip lines 'GEM', 'remote', 'specs'"
           gem_list_index = lines.find_index { |line| line == "GEM" }&.+(3)
           break unless gem_list_index
 

@@ -6,8 +6,7 @@ module Features
 
     def call
       puts "Add gem dotenv..."
-      gemfile = read_project_file("Gemfile") + "\ngem \"dotenv\"\n"
-      write_project_file("Gemfile", gemfile)
+      add_gem("dotenv")
 
       puts "Copy example files..."
       copy_files_to_project("configs", "bin/configs")

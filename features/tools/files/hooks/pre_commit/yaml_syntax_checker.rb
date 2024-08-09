@@ -5,11 +5,11 @@
 require "overcommit/hook/pre_commit/yaml_syntax"
 
 module Overcommit::Hook::PreCommit
-  # Такой же класс для проверки синтаксиса файлов YAML, как встроенный в Overcommit.
+  # Same class for checking syntax in YAML files, as bundled in Overcommit.
   class YamlSyntaxChecker < YamlSyntax
     private
 
-    # Встроенный класс пытается прочитать переименованные и удалённые файлы. Пропускаем их.
+    # Class in Overcommit tries to read renamed & removed files. We should skip them.
     def applicable_files
       super.select { |file| File.exist?(file) }
     end

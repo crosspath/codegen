@@ -17,19 +17,23 @@ group :development, :test do
   <% if fasterer %>gem "fasterer", require: false<% end %>
   <% if mdl %>gem "mdl", require: false<% end %>
   <% if rails_best_practices %>gem "rails_best_practices", require: false<% end %>
+  <% if gems["rswag-specs"] %>gem "rswag-specs"<% end %>
   <% if rubocop %>
   gem "prism", require: false
-  gem "rubocop", "~> 1.60", require: false
-  <% if gems["capybara"] %>gem "rubocop-capybara", "~> 2.20", require: false<% end %>
+  gem "rubocop", require: false
+  <% if gems["capybara"] %>gem "rubocop-capybara", require: false<% end %>
   gem "rubocop-configs", require: false, git: "https://github.com/crosspath/rubocop-configs.git"
-  <% if gems["factory_bot"] %>gem "rubocop-factory_bot", "~> 2.25", require: false<% end %>
-  <% if gems["graphql"] %>gem "rubocop-graphql", "~> 1.5", require: false<% end %>
-  gem "rubocop-performance", "~> 1.20", require: false
-  gem "rubocop-rails", "~> 2.23", require: false
-  gem "rubocop-rake", "~> 0.6", require: false
-  <% if gems["rspec"] %>gem "rubocop-rspec", "~> 2.26", require: false<% end %>
-  <% if gems["sequel"] %>gem "rubocop-sequel", "~> 0.3", require: false<% end %>
-  gem "rubocop-thread_safety", "~> 0.5", require: false
+  <% if gems["factory_bot"] %>gem "rubocop-factory_bot", require: false<% end %>
+  <% if gems["graphql"] %>gem "rubocop-graphql", require: false<% end %>
+  gem "rubocop-performance", require: false
+  gem "rubocop-rails", require: false
+  gem "rubocop-rake", require: false
+  <% if gems["rspec"] %>
+  gem "rubocop-rspec", require: false
+  gem "rubocop-rspec_rails", require: false
+  <% end %>
+  <% if gems["sequel"] %>gem "rubocop-sequel", require: false<% end %>
+  gem "rubocop-thread_safety", require: false
   <% end %>
   <% if slim_lint %>gem "slim_lint", require: false<% end %>
   <% if solargraph %>gem "solargraph", require: false<% end %>

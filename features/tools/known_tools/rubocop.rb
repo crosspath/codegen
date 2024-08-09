@@ -10,6 +10,7 @@ module Features::Tools::KnownTools
       puts "Add Rubocop..."
 
       gems = GEMS.to_h { |x| [x, @gems[x]] }
+      gems[:rswag] = @gems["rswag-specs"]
 
       erb("config/rubocop", File.join(DIR_CONFIG, "rubocop.yml"), **gems)
       copy_files_to_project("config/rubocop-in-templates.yml", DIR_CONFIG)

@@ -31,6 +31,7 @@ Supported Rails versions: 6.1, 7.1.
 ## Features
 
 * `bundle-config`: predefined config files for `bundler`
+* `crud`: default implementation of CRUD actions
 * `docker`: generate Dockerfile & Docker Compose files
 * `dotenv`: add gem `dotenv` and example files for configuration via ENV
 * `linters`: add linters for Ruby and its ecosystem
@@ -39,6 +40,7 @@ Supported Rails versions: 6.1, 7.1.
 * `remove-comments`: remove unnecessary comments from project files
 * `settings`: store project configuration in YAML or JSON format
 * `sort-config`: sort configuration lines in `config/environments/*.rb`
+* `testing`: add gems and default configuration for testing
 * `yarn`: install latest version of Yarn and add actual config values for Yarn
 
 ... to be continued ...

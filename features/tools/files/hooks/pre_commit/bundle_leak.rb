@@ -9,6 +9,7 @@ module Overcommit::Hook::PreCommit
     LOCK_FILE = "Gemfile.lock"
     COMMAND = (%w[git ls-files -o -i --exclude-standard --] + [LOCK_FILE]).freeze
 
+    # Main action of this hook.
     def run
       # Ignore if Gemfile.lock is not tracked by git
       ignored_files = execute(COMMAND).stdout.split("\n")

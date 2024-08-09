@@ -30,6 +30,14 @@ module Features
 
       puts "Updating .dockerignore file..."
       update_ignore_file(".dockerignore", add: IGNORE_FILE_ENTRIES)
+
+      unless use_web_sockets?
+        puts "Removing app/channels directory..."
+        remove_app_channels
+      end
+
+      puts "Updating bin scripts if needed..."
+      update_bin_scripts
     end
 
     private
@@ -69,6 +77,9 @@ module Features
       "~$*",
     ].freeze
 
+    DEFAULT_HASH_BANG_LINE = "#!/usr/bin/env ruby"
+    RE_FROZEN_STRING_LITERAL = /\A\s*\#\s*frozen[_-]string[_-]literal:/i
+
     def update_bin_setup
       bin_setup = read_project_file(BIN_SETUP)
       text_before = indent(BIN_SETUP_BEFORE.lines).join.strip
@@ -107,6 +118,40 @@ module Features
 
     def remove_vendor
       remove_project_dir("vendor") if dir_exists?("vendor") && dir_empty?("vendor")
+    end
+
+    def use_web_sockets?
+      cli.ask.yes?(label: "Keep WebSockets support", default: ->(_, _) { "n" })
+    end
+
+    def remove_app_channels
+      remove_project_dir("app/channels")
+    end
+
+    def update_bin_scripts
+      project_files("bin", "*").each do |file_name|
+        file_changed = false
+        lines = read_project_file(file_name).split("\n")
+        first_line = lines.first
+        second_line = lines[1]
+
+        if first_line =~ /\A\s*\#!.*ruby/
+          if first_line != DEFAULT_HASH_BANG_LINE
+            lines.first.replace(DEFAULT_HASH_BANG_LINE)
+            file_changed = true
+          end
+
+          if second_line !~ RE_FROZEN_STRING_LITERAL
+            lines.insert(1, "# frozen_string_literal: true")
+            file_changed = true
+          end
+        end
+
+        if file_changed
+          puts "Updating #{file_name} file..."
+          write_project_file(file_name, lines.join("\n"))
+        end
+      end
     end
 
     def dir_exists?(dir_name)
