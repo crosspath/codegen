@@ -3,31 +3,6 @@ def base_bin
   $main.run('chmod +x bin/configs bin/setup bin/systemd-service')
 end
 
-
-def base_controller(answers)
-  $main.inject_into_file(
-    'app/controllers/application_controller.rb',
-    before: "\nend"
-  ) do
-    <<-END.rstrip
-
-  protected
-
-  def render_json_errors(errors)
-    render json: { errors: errors }, status: 422
-  end
-
-  def with_form(form)
-    if form.success
-      yield form
-    else
-      render_json_errors(form.errors)
-    end
-  end
-    END
-  end
-end
-
 def base_layout(answers)
   if answers[:slim]
     base_layout_slim(answers)
@@ -95,33 +70,14 @@ def base_locale_ru
 end
 
 def base_gems(answers)
-  use_sass = !answers[:webpack]
-
-  puts '      reset required gem versions'
-  gems = %w[pg puma]
-  gems.each do |name|
-    $main.gsub_file('Gemfile', /^#[^\n]*\ngem ['"]#{name}['"].*$/, "gem '#{name}'")
-  end
-
-  gems = %w[web-console]
-  puts "      remove    #{gems.join(', ')}"
-  gems.each do |name|
-    $main.gsub_file('Gemfile', /\n\s*#[^\n]*\n\s*gem ['"]#{name}['"].*$/, '')
-  end
-
   $main.gem 'slim-rails' if answers[:slim]
   $main.gem 'rails-i18n'
-
-  $main.gem_group :development, :test do
-    $main.gem 'dotenv-rails'
-  end
 end
 
 def base_debug
   $main.gem_group :development do
     $main.gem 'better_errors'
     $main.gem 'binding_of_caller'
-    $main.gem 'pry-rails' if RUBY_VERSION < '2.7'
   end
 end
 
