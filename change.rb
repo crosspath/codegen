@@ -9,6 +9,6 @@
 
 require_relative "src/change_project/cli"
 
-Dir["#{__dir__}/features/*/*.rb"].sort.each { |f| require_relative(f) }
+Dir.glob("#{__dir__}/features/*/*.rb", sort: true).each { |f| require_relative(f) }
 
 ChangeProject::CLI.new(ARGV.dup).call

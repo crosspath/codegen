@@ -7,13 +7,13 @@ module Features
     def call
       use_rswag = add_rswag?
 
+      puts "Add gems to Gemfile..."
+
       if use_rswag
-        puts "Add gems to Gemfile..."
         add_gem("rswag-api", "rswag-ui")
-        add_gem("factory_bot_rails", "rspec-rails", "rswag-specs", group: [:development, :test])
+        add_gem("factory_bot_rails", "rspec-rails", "rswag-specs", group: GROUP_DEV_TEST)
       else
-        puts "Add gems to Gemfile..."
-        add_gem("factory_bot_rails", "rspec-rails", group: [:development, :test])
+        add_gem("factory_bot_rails", "rspec-rails", group: GROUP_DEV_TEST)
       end
 
       puts "Copy configuration files..."
@@ -32,6 +32,8 @@ module Features
     end
 
     private
+
+    GROUP_DEV_TEST = %i[development test].freeze
 
     CMD_RSPEC = "bin/rails g rspec:install"
     CMD_RSWAG = [

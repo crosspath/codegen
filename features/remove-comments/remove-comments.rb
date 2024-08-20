@@ -21,6 +21,7 @@ module Features
     private
 
     GEM_REQUIREMENT = /^\s*#?\s*gem/
+    GEM_REQUIREMENT_OR_END = /#{GEM_REQUIREMENT}|^\s*end/
 
     def remove_comments_from_ruby_file(project_file_name)
       return unless project_file_exist?(project_file_name)
@@ -50,15 +51,17 @@ module Features
       return unless project_file_exist?(project_file_name)
 
       old_lines = read_project_file(project_file_name).lines
-      new_lines = old_lines.select.with_index do |line, index|
-        if line.strip.empty?
-          prev_line = old_lines[index - 1] || ""
-          next_line = old_lines[index + 1] || ""
-          yield(prev_line, next_line)
-        else
-          true
+
+      new_lines =
+        old_lines.select.with_index do |line, index|
+          if line.strip.empty?
+            prev_line = old_lines[index - 1] || ""
+            next_line = old_lines[index + 1] || ""
+            yield(prev_line, next_line)
+          else
+            true
+          end
         end
-      end
 
       write_project_file(project_file_name, new_lines.join) unless new_lines.size == old_lines.size
     end
@@ -72,7 +75,7 @@ module Features
 
       # Remove blank lines between gem requirements.
       remove_blank_lines_from_ruby_file("Gemfile") do |prev_line, next_line|
-        prev_line !~ GEM_REQUIREMENT || next_line !~ /#{GEM_REQUIREMENT}|^\s*end/
+        prev_line !~ GEM_REQUIREMENT || next_line !~ GEM_REQUIREMENT_OR_END
       end
     end
 

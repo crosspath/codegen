@@ -56,7 +56,7 @@ module Features
         file << modified_line
       end
 
-      write_project_file("bin/setup", file.join("\n") + "\n")
+      write_project_file("bin/setup", "#{file.join("\n")}\n")
     end
   end
 end

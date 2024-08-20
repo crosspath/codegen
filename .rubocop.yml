@@ -30,8 +30,13 @@ Lint/Debugger:
 Lint/ImplicitStringConcatenation:
   Enabled: false
 
-# TODO: Refactoring.
-Metrics:
+# This repo does not use rules for RuboCop Rails, but includes files which may be checked with them.
+Lint/RedundantCopDisableDirective:
+  Exclude:
+    - "features/**/files/**/*.rb"
+
+# Use format "name-with-dashes" for features/* and format "name_with_underscores" for other directories.
+Naming/FileName:
   Enabled: false
 
 # We don't use Zeitwerk loader in this repo, that's why `nested` style is preferred.
@@ -41,26 +46,19 @@ Style/ClassAndModuleChildren:
     - "features/tools/known_tools/*"
   EnforcedStyle: nested
 
-# TODO: Add code documentation.
-Style/DocumentationMethod:
-  Enabled: false
-
-# TODO: Add code documentation.
-Style/Documentation:
-  Enabled: false
-
 # Keep disabled in bin-scripts, because method `exclude?` is not included into Ruby core.
 Style/InverseMethods:
   Exclude:
-    - 'features/tools/files/bin/*'
+    - "bin/*"
+    - "features/**/files/bin/*"
 
 # Keep disabled in bin-scripts, because method `exclude?` is not included into Ruby core.
 Style/InvertibleUnlessCondition:
   Exclude:
-    - 'features/tools/files/bin/*'
+    - "features/**/files/bin/*"
 
 # Keep disabled in bin-scripts, because order of `require` lines in bin-scripts are significant for
 # running operations.
 Style/RequireOrder:
   Exclude:
-    - 'features/tools/files/bin/*'
+    - "features/**/files/bin/*"

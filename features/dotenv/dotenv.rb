@@ -26,7 +26,7 @@ module Features
 
     DATABASE_URL = "postgres://myuser:mypass@localhost/somedatabase"
 
-    ENV_FILE_TEXT = "DATABASE_URL=#{DATABASE_URL}\n"
+    ENV_FILE_TEXT = "DATABASE_URL=#{DATABASE_URL}\n".freeze
 
     ENV_FILES = %w[.env.template .env.test].freeze
 

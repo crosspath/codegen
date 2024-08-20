@@ -109,15 +109,18 @@ module Features
     end
 
     def remove_lib_assets
-      remove_project_dir("lib/assets") if dir_exists?("lib/assets") && dir_empty?("lib/assets")
+      dir = "lib/assets"
+      remove_project_dir(dir) if dir_exists?(dir) && dir_empty?(dir)
     end
 
     def remove_test_helpers
-      remove_project_dir("test/helpers") if dir_exists?("test/helpers") && dir_empty?("test/helpers")
+      dir = "test/helpers"
+      remove_project_dir(dir) if dir_exists?(dir) && dir_empty?(dir)
     end
 
     def remove_vendor
-      remove_project_dir("vendor") if dir_exists?("vendor") && dir_empty?("vendor")
+      dir = "vendor"
+      remove_project_dir(dir) if dir_exists?(dir) && dir_empty?(dir)
     end
 
     def use_web_sockets?
@@ -135,13 +138,13 @@ module Features
         first_line = lines.first
         second_line = lines[1]
 
-        if first_line =~ /\A\s*\#!.*ruby/
+        if first_line.match?(/\A\s*\#!.*ruby/)
           if first_line != DEFAULT_HASH_BANG_LINE
             lines.first.replace(DEFAULT_HASH_BANG_LINE)
             file_changed = true
           end
 
-          if second_line !~ RE_FROZEN_STRING_LITERAL
+          if !second_line.match?(RE_FROZEN_STRING_LITERAL)
             lines.insert(1, "# frozen_string_literal: true")
             file_changed = true
           end
@@ -159,7 +162,7 @@ module Features
     end
 
     def dir_empty?(dir_name)
-      project_files(dir_name, "**/*").grep_v(/^\.keep$|\/\.keep$/).empty?
+      project_files(dir_name, "**/*").grep_v(%r{^\.keep$|/\.keep$}).empty?
     end
   end
 end

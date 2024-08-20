@@ -26,10 +26,7 @@ module Features
       create_compose_files
 
       puts "Updating .dockerignore file..."
-      ignore_entries = IGNORE_FILE_ENTRIES
-      ignore_entries += IGNORE_FILE_ENTRIES_FOR_ASSETS if dockerfile_variables[:includes_frontend]
-      ignore_entries += IGNORE_FILE_ENTRIES_FOR_STORAGE if dockerfile_variables[:includes_active_storage]
-      update_ignore_file(".dockerignore", add: ignore_entries)
+      update_dockerignore
     end
 
     private
@@ -120,6 +117,8 @@ module Features
             corepack enable
       DOCKERFILE
 
+    SPACE = " "
+
     attr_reader(
       :config_database_yml,
       :dbms_adapter,
@@ -167,7 +166,7 @@ module Features
 
       add_packages_after = dockerfile.find_index { |line| line.start_with?("FROM") }
       unless add_packages_after
-        raise RuntimeError, "Cannot find \"FROM\" statement in Dockerfile. Is this file corrupted?"
+        raise "Cannot find \"FROM\" statement in Dockerfile. Is this file corrupted?"
       end
 
       dockerfile.insert(add_packages_after + 1, *preparation_entries, "", APPEND_LINES.rstrip)
@@ -185,16 +184,19 @@ module Features
       # The second line with "apt-get install" relates to "deploy" stage (not changed here).
       apt_install_index = dockerfile.find_index { |line| line.include?("apt-get install") }
       parts = dockerfile[apt_install_index].split("apt-get install --no-install-recommends -y", 2)
-      packages = parts[1].strip.split(" ")
+      packages = parts[1].strip.split(SPACE)
 
       # Do not build Node.js from source.
       packages -= ["node-gyp", "python-is-python3"]
       packages << "${PACKAGES}"
-      dockerfile[apt_install_index] = [parts[0], packages.join(" ")].join("apt-get install --no-install-recommends -y ")
+
+      dockerfile[apt_install_index] =
+        [parts[0], packages.join(" ")].join("apt-get install --no-install-recommends -y ")
 
       node_version_index = dockerfile.find_index { |line| line.start_with?("ARG NODE_VERSION") }
       if node_version_index
-        node_install_last_index = dockerfile[(node_version_index + 1)..].find_index(&:empty?) + node_version_index
+        next_empty_line_index = dockerfile[(node_version_index + 1)..].find_index(&:empty?)
+        node_install_last_index = next_empty_line_index + node_version_index
         node_install_last_index.downto(node_version_index) { |index| dockerfile.delete_at(index) }
         dockerfile.insert(node_version_index, USE_COREPACK.rstrip)
       end
@@ -213,26 +215,34 @@ module Features
       last_from_index -= 1 if dockerfile[last_from_index - 1].start_with?("#")
 
       extract_lines = dockerfile[(copy_project_tree_index + 1)...last_from_index]
-      (last_from_index - 1).downto(copy_project_tree_index - (has_copy_project_comment ? 1 : 0)) { |index| dockerfile.delete_at(index) }
+      top_index = copy_project_tree_index - (has_copy_project_comment ? 1 : 0)
+      (last_from_index - 1).downto(top_index) { |index| dockerfile.delete_at(index) }
 
       copy_from_build_index = dockerfile.find_index { |line| line.start_with?("COPY --from=build") }
       dockerfile.insert(copy_from_build_index, "COPY . .")
-      dockerfile.insert(copy_from_build_index + 1, "COPY --from=build /rails/vendor/bundle /rails/vendor/bundle")
 
-      last_copy_from_build_index = dockerfile.size - dockerfile.reverse.find_index { |line| line.start_with?("COPY --from=build") }
+      copy_vendor_bundle = "COPY --from=build /rails/vendor/bundle /rails/vendor/bundle"
+      dockerfile.insert(copy_from_build_index + 1, copy_vendor_bundle)
+
+      rev_index = dockerfile.reverse.find_index { |line| line.start_with?("COPY --from=build") }
+      last_copy_from_build_index = dockerfile.size - rev_index
 
       entrypoint_index = dockerfile.find_index { |line| line.start_with?("ENTRYPOINT") }
       entrypoint_index -= 1 if dockerfile[entrypoint_index - 1].start_with?("#")
 
-      chown = dockerfile.find { |line| line.lstrip.start_with?("chown -R rails:rails") }.sub("rails:rails", "app:app").strip
+      line_with_chown = dockerfile.find { |line| line.lstrip.start_with?("chown -R rails:rails") }
+      chown = line_with_chown.sub("rails:rails", "app:app").strip
 
-      (entrypoint_index - 1).downto(last_copy_from_build_index + 1) { |index| dockerfile.delete_at(index) }
+      (entrypoint_index - 1).downto(last_copy_from_build_index + 1) do |index|
+        dockerfile.delete_at(index)
+      end
 
       if dockerfile_variables[:includes_sidekiq]
         extract_lines.unshift("RUN bin/rails sidekiq:merge_configs")
       end
 
-      dockerfile.insert(last_copy_from_build_index + 1, *(extract_lines + ["", "RUN #{chown}", "", "USER app", ""]))
+      as_user = ["", "RUN #{chown}", "", "USER app", ""]
+      dockerfile.insert(last_copy_from_build_index + 1, *(extract_lines + as_user))
 
       # Change more than 1 sequential empty lines to 1 empty line.
       index = 0
@@ -299,9 +309,7 @@ module Features
         'ARG PACKAGES="${PACKAGES} iproute2 less net-tools nano screen telnet tmux vim"',
       ]
 
-      if dockerfile_variables[:includes_yarn]
-        entries << 'ARG PACKAGES="${PACKAGES} nodejs npm"'
-      end
+      entries << 'ARG PACKAGES="${PACKAGES} nodejs npm"' if dockerfile_variables[:includes_yarn]
 
       # Use it if you want to build Node.js from sources, not to use binaries from APT repos.
       # And add build step for Node.js.
@@ -310,7 +318,10 @@ module Features
       # end
 
       if dockerfile_variables[:add_chromium]
-        entries << 'ARG PACKAGES="${PACKAGES} libasound2 libatk1.0-0 libatk-bridge2.0-0 libatspi2.0-0 libcups2 libdbus-1-3 libgtk-3-0 libnspr4 libnss3 libx11-xcb1 libxcomposite1 libxcursor1 libxdamage1 libxfixes3 libxi6 libxrandr2 libxss1 libxtst6"'
+        entries <<
+          'ARG PACKAGES="${PACKAGES} libasound2 libatk1.0-0 libatk-bridge2.0-0 libatspi2.0-0 ' \
+            'libcups2 libdbus-1-3 libgtk-3-0 libnspr4 libnss3 libx11-xcb1 libxcomposite1 ' \
+            'libxcursor1 libxdamage1 libxfixes3 libxi6 libxrandr2 libxss1 libxtst6"'
       end
 
       if dockerfile_variables[:includes_active_storage]
@@ -322,9 +333,20 @@ module Features
 
     def after_workdir
       entries = ["RUN mkdir -p -m 0755 .bundle log tmp/pids vendor/bundle && \\"]
-      entries << "    mkdir -p -m 0755 storage tmp/storage && \\" if dockerfile_variables[:includes_active_storage]
+
+      if dockerfile_variables[:includes_active_storage]
+        entries << "    mkdir -p -m 0755 storage tmp/storage && \\"
+      end
+
       entries << "    chown -R app:app ."
       entries
+    end
+
+    def update_dockerignore
+      entries = IGNORE_FILE_ENTRIES
+      entries += IGNORE_FILE_ENTRIES_FOR_ASSETS if dockerfile_variables[:includes_frontend]
+      entries += IGNORE_FILE_ENTRIES_FOR_STORAGE if dockerfile_variables[:includes_active_storage]
+      update_ignore_file(".dockerignore", add: entries)
     end
   end
 end
