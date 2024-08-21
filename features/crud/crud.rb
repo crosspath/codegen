@@ -43,6 +43,9 @@ module Features
       ActiveSupport::Inflector.inflections(:en) { |inflect| inflect.acronym("API") }
     RUBY
 
+    private_constant :ROUTES_FILE, :RE_END, :EXAMPLE_ROUTE, :CONTROLLER_FILE, :RE_CONTROLLER, :MIXIN
+    private_constant :INFLECTIONS_FILE, :INFLECTIONS_EXAMPLE
+
     def update_config_routes
       assert_file_exists(ROUTES_FILE)
       lines = read_project_file(ROUTES_FILE).split("\n")

@@ -20,50 +20,65 @@ module Features
 
     private
 
+    COMMENT = /^\s*#/
+    COMMENTED_REQUIRE = /^\s*#\s(require|require_relative)\s/
+
     GEM_REQUIREMENT = /^\s*#?\s*gem/
     GEM_REQUIREMENT_OR_END = /#{GEM_REQUIREMENT}|^\s*end/
 
-    def remove_comments_from_ruby_file(project_file_name)
+    private_constant :COMMENT, :COMMENTED_REQUIRE, :GEM_REQUIREMENT, :GEM_REQUIREMENT_OR_END
+
+    def remove_comments_from_ruby_file(project_file_name, &)
       return unless project_file_exist?(project_file_name)
 
       old_lines = read_project_file(project_file_name).lines
+      new_lines = remove_comment_lines(old_lines, &)
+
+      write_project_file(project_file_name, new_lines.join) unless new_lines.size == old_lines.size
+    end
+
+    def remove_comment_lines(old_lines, &)
       new_lines = []
 
       old_lines.each do |line|
         if line.strip.empty?
           new_lines << line if !new_lines.empty? && !new_lines.last.strip.empty?
         else
-          should_keep_line =
-            if block_given?
-              yield(line)
-            else
-              # Оставить строку, если это не комментарий или если это закомментированный require.
-              line !~ /^\s*#/ || line =~ /^\s*#\s(require|require_relative)\s/
-            end
-          new_lines << line if should_keep_line
+          new_lines << line if should_keep_line?(line, &)
         end
       end
 
-      write_project_file(project_file_name, new_lines.join) unless new_lines.size == old_lines.size
+      new_lines
+    end
+
+    def should_keep_line?(line)
+      if block_given?
+        yield(line)
+      else
+        # Оставить строку, если это не комментарий или если это закомментированный require.
+        !line.match?(COMMENT) || line.match?(COMMENTED_REQUIRE)
+      end
     end
 
     def remove_blank_lines_from_ruby_file(project_file_name)
       return unless project_file_exist?(project_file_name)
 
       old_lines = read_project_file(project_file_name).lines
-
-      new_lines =
-        old_lines.select.with_index do |line, index|
-          if line.strip.empty?
-            prev_line = old_lines[index - 1] || ""
-            next_line = old_lines[index + 1] || ""
-            yield(prev_line, next_line)
-          else
-            true
-          end
-        end
+      new_lines = remove_blank_lines(old_lines)
 
       write_project_file(project_file_name, new_lines.join) unless new_lines.size == old_lines.size
+    end
+
+    def remove_blank_lines(old_lines)
+      old_lines.select.with_index do |line, index|
+        if line.strip.empty?
+          prev_line = old_lines[index - 1] || ""
+          next_line = old_lines[index + 1] || ""
+          yield(prev_line, next_line)
+        else
+          true
+        end
+      end
     end
 
     def remove_comments_from_gemfile

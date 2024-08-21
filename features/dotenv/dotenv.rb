@@ -9,11 +9,7 @@ module Features
       add_gem("dotenv")
 
       puts "Copy example files..."
-      copy_files_to_project("configs", "bin/configs")
-
-      ENV_FILES.each do |env_file|
-        write_project_file(env_file, ENV_FILE_TEXT) unless project_file_exist?(env_file)
-      end
+      copy_example_files
 
       puts "Updating .gitignore file..."
       update_ignore_file(".gitignore", delete: DO_NOT_IGNORE)
@@ -34,5 +30,15 @@ module Features
       "/.env*",
       "!/.env*.erb",
     ].freeze
+
+    private_constant :DATABASE_URL, :ENV_FILE_TEXT, :ENV_FILES, :DO_NOT_IGNORE
+
+    def copy_example_files
+      copy_files_to_project("configs", "bin/configs")
+
+      ENV_FILES.each do |env_file|
+        write_project_file(env_file, ENV_FILE_TEXT) unless project_file_exist?(env_file)
+      end
+    end
   end
 end

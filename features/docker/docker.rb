@@ -119,6 +119,10 @@ module Features
 
     SPACE = " "
 
+    private_constant :DBMS_IMAGES, :DBMS_PACKAGES, :IGNORE_FILE_ENTRIES
+    private_constant :IGNORE_FILE_ENTRIES_FOR_ASSETS, :IGNORE_FILE_ENTRIES_FOR_STORAGE
+    private_constant :PACKAGE_JSON, :DATABASE_YML, :APPEND_LINES, :USE_COREPACK, :SPACE
+
     attr_reader(
       :config_database_yml,
       :dbms_adapter,
@@ -151,7 +155,7 @@ module Features
         includes_frontend: !package_json.nil?,
         includes_bun: !package_json.nil? && project_file_exist?("bun.config.js"),
         includes_yarn: !package_json.nil? && package_json["packageManager"] =~ /^yarn@/,
-        add_chromium: cli.ask.question(type: :boolean, label: "Add packages for Chromium", default: ->(_, _) { "n" }),
+        add_chromium: add_chromium?,
         database_packages: DBMS_PACKAGES[dbms_adapter],
         includes_active_storage: active_storage?,
         includes_sidekiq: sidekiq,
@@ -294,6 +298,14 @@ module Features
       return unless adapter_line
 
       adapter_line.split(":", 2).last.sub(/#.*/, "").strip
+    end
+
+    def add_chromium?
+      cli.ask.question(
+        type: :boolean,
+        label: "Add packages for Chromium",
+        default: ->(_, _) { "n" }
+      )
     end
 
     def active_storage?
