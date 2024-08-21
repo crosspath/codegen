@@ -28,7 +28,7 @@ module Features
 
       # @return [Boolean]
       def use?
-        cli.ask.yes?(label: "Use #{registry_item.name}", default: ->(_, _) { "y" })
+        cli.ask.question(type: :boolean, label: "Use #{registry_item.name}", default: ->(_, _) { "y" })
       end
 
       private

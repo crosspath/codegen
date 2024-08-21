@@ -151,7 +151,7 @@ module Features
         includes_frontend: !package_json.nil?,
         includes_bun: !package_json.nil? && project_file_exist?("bun.config.js"),
         includes_yarn: !package_json.nil? && package_json["packageManager"] =~ /^yarn@/,
-        add_chromium: cli.ask.yes?(label: "Add packages for Chromium", default: ->(_, _) { "n" }),
+        add_chromium: cli.ask.question(type: :boolean, label: "Add packages for Chromium", default: ->(_, _) { "n" }),
         database_packages: DBMS_PACKAGES[dbms_adapter],
         includes_active_storage: active_storage?,
         includes_sidekiq: sidekiq,

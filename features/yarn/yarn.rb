@@ -92,14 +92,16 @@ module Features
     end
 
     def use_plug_and_play?
-      cli.ask.yes?(
+      cli.ask.question(
+        type: :boolean,
         label: "Use Plug'n'Play in Yarn - it should not be used with React Native",
         default: ->(_, _) { "y" }
       )
     end
 
     def use_zero_installs?
-      cli.ask.yes?(
+      cli.ask.question(
+        type: :boolean,
         label: "Use Zero-installs - store packages (.yarn/cache) in project repo",
         default: ->(_, _) { "n" }
       )

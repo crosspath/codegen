@@ -124,7 +124,7 @@ module Features
     end
 
     def use_web_sockets?
-      cli.ask.yes?(label: "Keep WebSockets support", default: ->(_, _) { "n" })
+      cli.ask.question(type: :boolean, label: "Keep WebSockets support", default: ->(_, _) { "n" })
     end
 
     def remove_app_channels

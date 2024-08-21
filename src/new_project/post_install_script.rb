@@ -7,9 +7,9 @@ module NewProject
     POSTINSTALL_MESSAGE =
       "You should run `bundle install` and then `bin/postinstall` within application directory."
 
-    def initialize(generator_option_values, root_dir)
+    def initialize(generator_option_values)
       @generator_option_values = generator_option_values
-      @app_path = File.expand_path(@generator_option_values[:app_path], root_dir)
+      @app_path = File.expand_path(@generator_option_values[:app_path], Env.root_dir)
       @steps = []
     end
 
