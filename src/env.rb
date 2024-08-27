@@ -7,8 +7,10 @@ module Env
     ENV.fetch("NO_SAVE", "0") != "0"
   end
 
-  def root_dir
-    @root_dir ||= File.expand_path("..", __dir__)
+  def system_ruby?
+    return @system_ruby if defined?(@system_ruby)
+
+    @system_ruby = !File.writable?(Gem.paths.home)
   end
 
   def user

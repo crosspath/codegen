@@ -1,5 +1,4 @@
-.DS_Store
-.directory
-!.env.local
+/.bundle/*
+!/.bundle/config.*
 tmp
 !tmp/.keep

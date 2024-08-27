@@ -1,5 +1,6 @@
 rails_version: 7
 app_path: tmp/minimal_7
+name: minimal_7
 mode: minimal
 active_record: true
 db: postgresql

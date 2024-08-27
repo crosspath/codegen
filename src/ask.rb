@@ -23,6 +23,6 @@ class Ask
 
   def question(definition)
     klass = TYPES.fetch(definition[:type]) { raise ArgumentError, definition[:type].to_s }
-    klass.new(definition, gopt, ropt).call
+    klass.new(definition, @gopt, @ropt).call
   end
 end

@@ -1,5 +1,6 @@
 rails_version: 6
 app_path: tmp/full_6
+name: full_6
 mode: full-stack
 active_record: true
 db: postgresql

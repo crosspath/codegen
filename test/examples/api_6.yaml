@@ -1,5 +1,6 @@
 rails_version: 6
 app_path: tmp/api_6
+name: api_6
 mode: api-only
 active_record: true
 db: postgresql

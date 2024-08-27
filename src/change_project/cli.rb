@@ -34,7 +34,7 @@ module ChangeProject
         @app_path = @ask.question(type: :text, label: "Application path")
       end
 
-      @app_path = File.expand_path(@app_path, Env.root_dir)
+      @app_path = File.expand_path(@app_path, Dir.pwd)
     end
 
     def select_features

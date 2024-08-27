@@ -45,7 +45,7 @@ module NewProject
     # Fix for "system" version of Ruby. It's installed with root permissions, therefore we have to
     # change permissions for gem directories temporarily.
     def ensure_gem_path_is_writable
-      return yield if File.writable?(Gem.paths.home)
+      return yield unless Env.system_ruby?
 
       paths = GEM_PATHS.join(" ")
 
@@ -75,11 +75,8 @@ module NewProject
       require "bundler/setup"
 
       add_items_to_load_path(railties_path)
+      load_rails_files(railties_path)
 
-      require "#{railties_path}/lib/rails/ruby_version_check"
-      require "#{railties_path}/lib/rails/command"
-
-      # system("#{railties_bin_path} #{args_for_rails_new.join(" ")}")
       Rails::Command.invoke(:application, args_for_rails_new)
     end
 
@@ -106,7 +103,7 @@ module NewProject
     private
 
     def args_for_rails_new
-      args = ["new", File.expand_path(@generator_option_values[:app_path], Env.root_dir)]
+      args = ["new", File.expand_path(@generator_option_values[:app_path], Dir.pwd)]
 
       @rails_option_values.each do |k, v|
         next if v == false
@@ -157,6 +154,12 @@ module NewProject
 
     def latest_installed_gem_version(gem_name)
       Dir["#{GEM_HOME}/gems/#{gem_name}-*", sort: true].last
+    end
+
+    def load_rails_files(railties_path)
+      rvc = "#{railties_path}/lib/rails/ruby_version_check"
+      require rvc if File.exist?("#{rvc}.rb") # Rails 7.2 does not have this file.
+      require "#{railties_path}/lib/rails/command"
     end
   end
 end

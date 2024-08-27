@@ -26,7 +26,11 @@ module NewProject
 
     def generator_option_value(key, definition)
       res =
-        if @fopt.key?(key)
+        if key == :bundle_install && Env.system_ruby?
+          # Disable calling `bundle install` at the end of `rails new` process, because this process
+          # tries to install gems into system directories without explicit permissions.
+          false
+        elsif @fopt.key?(key)
           convert_string_value(@fopt[key], definition[:type])
         else
           puts

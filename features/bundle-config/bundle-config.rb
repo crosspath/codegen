@@ -7,9 +7,7 @@ module Features
 
     def call
       puts "Copy files to .bundle directory..."
-      create_dir_bundle
-      copy_files_to_project("*", ".bundle")
-      copy_files_to_project("config.development", ".bundle/config")
+      copy_configs
 
       puts "Updating .gitignore file..."
       update_ignore_file(".gitignore", add: IGNORE_FILE_ENTRIES, delete: DO_NOT_IGNORE)
@@ -29,12 +27,17 @@ module Features
 
     IGNORE_FILE_ENTRIES = [
       "/.bundle/*",
-      "!/.bundle/config.development",
-      "!/.bundle/config.production",
+      "!/.bundle/config.*",
     ].freeze
 
-    def create_dir_bundle
+    def copy_configs
       create_project_dir(".bundle")
+
+      copy_files_to_project("config.ci", ".bundle")
+      copy_files_to_project("config.production", ".bundle")
+
+      erb("config.development", ".bundle/config", system_ruby: Env.system_ruby?)
+      erb("config.development", ".bundle/config.development", system_ruby: false)
     end
 
     def update_bin_setup
