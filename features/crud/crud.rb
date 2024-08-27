@@ -9,7 +9,8 @@ module Features
       add_gem("blueprinter")
 
       puts "Copy files..."
-      copy_files_to_project("crud_actions.rb", "app/controllers/concerns")
+      create_project_dir("app/controllers/concerns")
+      copy_files_to_project("crud_actions.rb", "app/controllers/concerns/")
 
       puts "Add example route..."
       update_config_routes

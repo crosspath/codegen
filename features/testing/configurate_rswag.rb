@@ -13,6 +13,8 @@ class ConfigurateRswag < PostInstallScript::Step
     puts "Add RSwag..."
     `bin/rails g rswag:api:install`
     `bin/rails g rswag:ui:install`
+    rswag_ui_file = "config/initializers/rswag_ui.rb"
+    File.write(rswag_ui_file, File.read(rswag_ui_file).sub("swagger_endpoint", "openapi_endpoint"))
     `RAILS_ENV=test bin/rails g rswag:specs:install`
     swagger_helper =
       File.read("spec/swagger_helper.rb")

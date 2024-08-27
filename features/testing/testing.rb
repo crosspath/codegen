@@ -48,7 +48,7 @@ module Features
       cli.post_install_script.add_steps(ConfigurateRspec)
 
       if use_rswag
-        copy_files_to_project("bin", "bin")
+        copy_files_to_project("bin", "")
         cli.post_install_script.add_steps(ConfigurateRswag)
       else
         copy_files_to_project("bin/rspec", "bin/rspec")
@@ -63,7 +63,7 @@ module Features
 
     def copy_spec_support
       create_project_dir("spec/support")
-      copy_files_to_project("custom_test_methods.rb", "spec/support/custom_test_methods.rb")
+      copy_files_to_project("custom_test_methods.rb", "spec/support/")
     end
 
     def update_config_application
@@ -71,7 +71,8 @@ module Features
       two_last_ends = file.rindex(RE_TWO_ENDS)
       raise "Cannot find two last `end`s in `#{CONFIG_APP_FILE}` file" unless two_last_ends
 
-      file.insert(two_last_ends, indent(GENERATORS.split("\n"), 2).join("\n"))
+      new_lines = indent(GENERATORS.split("\n"), 2)
+      file.insert(two_last_ends, "#{new_lines.join("\n")}\n")
       write_project_file(CONFIG_APP_FILE, file)
     end
   end

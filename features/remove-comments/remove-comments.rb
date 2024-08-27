@@ -60,11 +60,11 @@ module Features
       end
     end
 
-    def remove_blank_lines_from_ruby_file(project_file_name)
+    def remove_blank_lines_from_ruby_file(project_file_name, &)
       return unless project_file_exist?(project_file_name)
 
       old_lines = read_project_file(project_file_name).lines
-      new_lines = remove_blank_lines(old_lines)
+      new_lines = remove_blank_lines(old_lines, &)
 
       write_project_file(project_file_name, new_lines.join) unless new_lines.size == old_lines.size
     end
