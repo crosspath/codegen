@@ -16,18 +16,18 @@ module Features
       BIN_SETUP = "bin/setup"
 
       BIN_SETUP_BEFORE = <<~RUBY
-        puts "\n== Preparing database =="
+        puts "\\n== Preparing database =="
         system! "bin/rails db:prepare"
 
-        puts "\n== Removing old logs and tempfiles =="
+        puts "\\n== Removing old logs and tempfiles =="
         system! "bin/rails log:clear tmp:clear"
 
-        puts "\n== Restarting application server =="
+        puts "\\n== Restarting application server =="
         system! "bin/rails restart"
       RUBY
 
       BIN_SETUP_AFTER = <<~RUBY
-        puts "\n== Preparing database =="
+        puts "\\n== Preparing database =="
         system! "bin/rails db:prepare log:clear tmp:clear"
       RUBY
 
@@ -42,15 +42,15 @@ module Features
 
       def update_bin_setup
         bin_setup = read_project_file(BIN_SETUP)
-        text_before = indent(BIN_SETUP_BEFORE.lines).join.strip
-        text_after = indent(BIN_SETUP_AFTER.lines).join.strip
+        text_before = indent(BIN_SETUP_BEFORE.split("\n")).join("\n")
+        text_after = indent(BIN_SETUP_AFTER.split("\n")).join("\n")
 
         bin_setup.sub!(text_before, text_after)
         write_project_file(BIN_SETUP, bin_setup)
       end
 
       def update_bin_scripts
-        project_files("bin", "*").each do |file_name|
+        project_files("", "bin/*").each do |file_name|
           lines = read_project_file(file_name).split("\n")
 
           if change_header_in_bin_script(lines)
@@ -63,7 +63,10 @@ module Features
       def change_header_in_bin_script(lines)
         return false unless lines.first.match?(RE_HASH_BANG_LINE)
 
-        replace_hash_bang_line_if_needed(lines) || add_frozen_string_literal_line_if_needed(lines)
+        first = replace_hash_bang_line_if_needed(lines)
+        second = add_frozen_string_literal_line_if_needed(lines)
+
+        first || second
       end
 
       def replace_hash_bang_line_if_needed(lines)

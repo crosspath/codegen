@@ -59,6 +59,7 @@ class Feature
   end
 
   def write_project_file(file_name, result)
+    result += "\n" unless result.end_with?("\n")
     File.write(File.join(cli.app_path, file_name), result)
   end
 
@@ -110,6 +111,6 @@ class Feature
 
   def indent(lines, level = 1)
     spaces = " " * (2 * level)
-    lines.map { |x| "#{spaces}#{x}" }
+    lines.map { |x| x.empty? ? x : "#{spaces}#{x}" }
   end
 end

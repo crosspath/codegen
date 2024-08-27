@@ -6,11 +6,12 @@ module Features
       def call
         remove_app_helpers
         remove_maybe_empty_dirs
-        remove_app_channels unless use_web_sockets?
+        remove_app_channels if !project_file_exist?(APP_CHANNELS) || !use_web_sockets?
       end
 
       private
 
+      APP_CHANNELS = "app/channels"
       APP_HELPERS = "app/helpers"
 
       APPLICATION_HELPER = "application_helper.rb"
@@ -57,8 +58,8 @@ module Features
       end
 
       def remove_app_channels
-        puts "Removing app/channels directory..."
-        remove_project_dir("app/channels")
+        puts "Removing #{APP_CHANNELS} directory..."
+        remove_project_dir(APP_CHANNELS)
       end
 
       def dir_exists?(dir_name)

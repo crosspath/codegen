@@ -14,11 +14,6 @@ module Features
 
       IGNORE_FILE_ENTRIES = [
         "*.local",
-        ".DS_Store",
-        ".directory",
-        "Thumbs.db",
-        "[Dd]esktop.ini",
-        "~$*",
       ].freeze
 
       private_constant :IGNORE_FILES, :IGNORE_FILE_ENTRIES
