@@ -14,7 +14,6 @@ module NewProject
     end
 
     def add_steps
-      add_front_end_libs
       remove_keeps
     end
 
@@ -41,11 +40,9 @@ module NewProject
 
     private
 
-    # rubocop:disable Layout/ClassStructure Keep constants in private section to show that they're
-    # not intended to be used outside of this file.
     FILE_NAME = "bin/postinstall"
 
-    FILE_TEMPLATE = <<~ERB
+    FILE_TEMPLATE = <<~ERB.freeze
       #!/usr/bin/env ruby
       # frozen_string_literal: true
 
@@ -54,13 +51,6 @@ module NewProject
       end
 
       puts "Now you may delete file #{FILE_NAME}"
-    ERB
-
-    STEP_WEBPACKER = <<~ERB
-      puts "Adding front-end libraries..."
-      <% libs.each do |lib| %>
-      system("bin/rails webpacker:install:<%= lib %>") or exit(1)
-      <% end %>
     ERB
 
     STEP_KEEPS = <<~RUBY
@@ -75,15 +65,8 @@ module NewProject
         end
       end
     RUBY
-    # rubocop:enable Layout/ClassStructure
 
-    def add_front_end_libs
-      front_end_libs = @generator_option_values[:front_end_lib] || []
-      front_end_libs.shift # First item has been already initialized.
-      return if front_end_libs.empty?
-
-      @steps << indent(ErbEval.call(STEP_WEBPACKER, libs: front_end_libs))
-    end
+    private_constant :FILE_NAME, :FILE_TEMPLATE, :STEP_KEEPS
 
     def remove_keeps
       return if @generator_option_values[:keeps]

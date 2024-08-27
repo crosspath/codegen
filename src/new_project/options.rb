@@ -84,9 +84,7 @@ module NewProject
           "other" => "... other", # Required: gem name.
         },
         default: ->(_, _) { "postgresql" },
-        apply: ->(_gopt, ropt, val) do
-          ropt["database"] = val if val != "other"
-        end,
+        apply: ->(_gopt, ropt, val) { ropt["database"] = val if val != "other" },
         skip_if: ->(_gopt, ropt) { ropt["skip-active-record"] },
       },
       db_gem: {
@@ -192,7 +190,7 @@ module NewProject
         label: "Add asset pipeline - if you reject it, you still may add bundler for JavaScript",
         type: :boolean,
         default: ->(_, _) { true },
-        apply: ->(gopt, ropt, val) { ropt["skip-asset-pipeline"] = !val },
+        apply: ->(_gopt, ropt, val) { ropt["skip-asset-pipeline"] = !val },
         skip_if: ->(_gopt, ropt) { ropt["api"] },
       },
       assets_lib: {
@@ -204,9 +202,7 @@ module NewProject
         },
         default: ->(_, _) { "sprockets" },
         apply: ->(_gopt, ropt, val) { ropt["asset-pipeline"] = val },
-        skip_if: ->(gopt, ropt) do
-          ropt["api"] || ropt["skip-asset-pipeline"]
-        end,
+        skip_if: ->(_gopt, ropt) { ropt["api"] || ropt["skip-asset-pipeline"] },
       },
       hotwire: {
         label: "Add Hotwire",
@@ -219,7 +215,7 @@ module NewProject
             ropt["skip-hotwire"] = true unless val
           end
         end,
-        skip_if: ->(gopt, ropt) { ropt["api"] || ropt["skip-javascript"] },
+        skip_if: ->(_gopt, ropt) { ropt["api"] || ropt["skip-javascript"] },
       },
       js_bundler: {
         label: "Bundler for JavaScript",
@@ -234,7 +230,7 @@ module NewProject
         },
         default: ->(_, _) { "importmap" },
         apply: ->(_gopt, ropt, val) { ropt["javascript"] = val },
-        skip_if: ->(gopt, ropt)  { ropt["api"] || ropt["skip-javascript"] },
+        skip_if: ->(_gopt, ropt) { ropt["api"] || ropt["skip-javascript"] },
       },
       css_lib: {
         label: "Library for CSS",
@@ -248,9 +244,7 @@ module NewProject
           "tailwind" => "Tailwind",
         },
         default: ->(_, _) { "none" },
-        apply: ->(_gopt, ropt, val) do
-          ropt["css"] = val if val != "none"
-        end,
+        apply: ->(_gopt, ropt, val) { ropt["css"] = val if val != "none" },
         skip_if: ->(gopt, ropt) { ropt["api"] || !gopt[:assets] },
       },
       jbuilder: {
@@ -305,19 +299,19 @@ module NewProject
       rubocop_omakase: {
         label: "Add RuboCop configration from Rails team (rubocop-rails-omakase)",
         type: :boolean,
-        default: ->(_gopt, ropt) { false },
+        default: ->(_gopt, _ropt) { false },
         apply: ->(_gopt, ropt, val) { ropt["skip-rubocop"] = !val },
       },
       brakeman: {
         label: "Add Brakeman (you can add it later)",
         type: :boolean,
-        default: ->(_gopt, ropt) { false },
+        default: ->(_gopt, _ropt) { false },
         apply: ->(_gopt, ropt, val) { ropt["skip-brakeman"] = !val },
       },
       github_actions: {
         label: "Add configuration for GitHub Actions (CI)",
         type: :boolean,
-        default: ->(_gopt, ropt) { true },
+        default: ->(_gopt, _ropt) { true },
         apply: ->(_gopt, ropt, val) { ropt["skip-ci"] = !val },
       },
       bundle_install: {
