@@ -4,7 +4,7 @@ require_relative "../env"
 require_relative "config_file"
 require_relative "configuration"
 require_relative "options"
-require_relative "post_install_script"
+require_relative "../post_install_script"
 
 module NewProject
   class CLI
@@ -81,12 +81,12 @@ module NewProject
     end
 
     def add_postinstall_steps
-      @postinstall = PostInstallScript.new(@generator_option_values)
-      @postinstall.add_steps
+      @postinstall = PostInstallScript.new(app_path)
+      @postinstall.add_steps(PostInstallSteps::RemoveKeeps) if @generator_option_values[:keeps]
     end
 
     def any_postinstall_steps?
-      @postinstall.any_steps?
+      @postinstall.any_code_blocks?
     end
 
     def run_postinstall_script
@@ -102,8 +102,12 @@ module NewProject
 
     private
 
+    def app_path
+      @app_path ||= File.expand_path(@generator_option_values[:app_path], Dir.pwd)
+    end
+
     def args_for_rails_new
-      args = ["new", File.expand_path(@generator_option_values[:app_path], Dir.pwd)]
+      args = ["new", app_path]
 
       @rails_option_values.each do |k, v|
         next if v == false
