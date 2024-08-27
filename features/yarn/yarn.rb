@@ -5,44 +5,20 @@ module Features
     register_as "yarn", before: "docker"
 
     def call
+      use_plug_and_play = use_plug_and_play?
+
       enable_corepack
 
       puts "Installing the latest stable version of Yarn..."
       raise "Installation failed" unless run_command_in_project_dir("yarn set version stable")
 
       puts "Adding \"packageManager\" entry to \"package.json\"..."
-      add_yarn_to_project
-
-      use_plug_and_play = use_plug_and_play?
-
-      if use_plug_and_play
-        yarnrc_yml_changes = {}
-
-        # @see https://yarnpkg.com/migration/pnp#enabling-yarn-pnp
-        yarnrc_yml_changes["nodeLinker"] = "pnp"
-
-        # @see https://yarnpkg.com/advanced/lexicon#local-cache
-        # @see https://yarnpkg.com/features/caching#zero-installs
-        # Not recommended for projects with many dependencies.
-        if use_zero_installs?
-          yarnrc_yml_changes["enableGlobalCache"] = "false"
-          puts warning(WARN_CACHE)
-        end
-
-        puts "Updating .yarnrc.yml file..."
-        yarnrc_yml = update_yarnrc_yml(add: yarnrc_yml_changes)
-
-        # @see https://yarnpkg.com/getting-started/qa#which-files-should-be-gitignored
-        puts "Updating .gitignore file..."
-        update_gitignore_for_yarn(yarnrc_yml)
-      else
-        update_yarnrc_yml(add: {"nodeLinker" => "node-modules"})
-      end
+      enable_yarn_in_project(use_plug_and_play)
 
       puts "Downloading front-end packages for your application..."
       run_command_in_project_dir("yarn install")
 
-      add_plug_and_play if use_plug_and_play
+      add_plug_and_play_for_vs_code if use_plug_and_play
     end
 
     private
@@ -56,7 +32,39 @@ module Features
       TEXT
     # rubocop:enable Layout/ClassStructure
 
-    def add_plug_and_play
+    def enable_yarn_in_project(use_plug_and_play)
+      add_yarn_to_project
+
+      if use_plug_and_play
+        enable_plug_and_play
+      else
+        update_yarnrc_yml(add: {"nodeLinker" => "node-modules"})
+      end
+    end
+
+    def enable_plug_and_play
+      yarnrc_yml_changes = {}
+
+      # @see https://yarnpkg.com/migration/pnp#enabling-yarn-pnp
+      yarnrc_yml_changes["nodeLinker"] = "pnp"
+
+      # @see https://yarnpkg.com/advanced/lexicon#local-cache
+      # @see https://yarnpkg.com/features/caching#zero-installs
+      # Not recommended for projects with many dependencies.
+      if use_zero_installs?
+        yarnrc_yml_changes["enableGlobalCache"] = "false"
+        puts warning(WARN_CACHE)
+      end
+
+      puts "Updating .yarnrc.yml file..."
+      yarnrc_yml = update_yarnrc_yml(add: yarnrc_yml_changes)
+
+      # @see https://yarnpkg.com/getting-started/qa#which-files-should-be-gitignored
+      puts "Updating .gitignore file..."
+      update_gitignore_for_yarn(yarnrc_yml)
+    end
+
+    def add_plug_and_play_for_vs_code
       # Should be called after installing packages. If we call it before `yarn install`, we get:
       #     Internal Error: This tool can only be used with projects using Yarn Plug'n'Play
       # @see https://yarnpkg.com/getting-started/editor-sdks#tools-currently-supported
@@ -110,15 +118,7 @@ module Features
     def update_yarnrc_yml(add: {})
       lines = project_file_exist?(".yarnrc.yml") ? read_project_file(".yarnrc.yml").split("\n") : []
 
-      lines.each_with_index do |line, index|
-        # Replace options in-line.
-        add.each do |key, value|
-          if line.start_with?("#{key}:")
-            lines[index] = "#{key}: #{value}"
-            add.delete(key)
-          end
-        end
-      end
+      replace_options_in_yarnrc_yml(lines, add)
 
       # Append missing options.
       add.each do |key, value|
@@ -131,6 +131,18 @@ module Features
 
       write_project_file(".yarnrc.yml", lines.join("\n"))
       convert_yarnrc_yml_to_hash(lines)
+    end
+
+    def replace_options_in_yarnrc_yml(lines, add)
+      lines.each_with_index do |line, index|
+        # Replace options in-line.
+        add.each do |key, value|
+          if line.start_with?("#{key}:")
+            lines[index] = "#{key}: #{value}"
+            add.delete(key)
+          end
+        end
+      end
     end
 
     def convert_yarnrc_yml_to_hash(lines)
