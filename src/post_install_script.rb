@@ -7,6 +7,22 @@ class PostInstallScript
     "You should run `bundle install` and then `bin/postinstall` within application directory " \
       "before applying any other changes to project directory."
 
+  class Step
+    def initialize(app_path)
+      @app_path = app_path
+    end
+
+    def self.indent(code)
+      "  #{code.gsub("\n", "\n  ").rstrip}"
+    end
+
+    private
+
+    def indent(code)
+      self.class.indent(code)
+    end
+  end
+
   def initialize(app_path)
     @app_path = app_path
     @code_blocks = []
@@ -46,7 +62,7 @@ class PostInstallScript
     # frozen_string_literal: true
 
     Dir.chdir(File.dirname(__dir__)) do
-      <%= steps.join("\n\n") %>
+    <%= steps.join("\n\n") %>
     end
 
     puts "Now you may delete file #{FILE_NAME}"

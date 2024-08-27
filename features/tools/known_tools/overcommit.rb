@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+require_relative "../sign_scripts_for_overcommit"
+
 module Features::Tools::KnownTools
   class Overcommit < Features::Tools::KnownTool
     register_as "Overcommit (it calls other tools via git hooks)"
@@ -31,9 +33,7 @@ module Features::Tools::KnownTools
 
       add_pre_commit_hook_for_yaml
 
-      cli.post_install_script.add_steps(
-        PostInstallSteps::SignScriptsForOvercommit.with_options(options)
-      )
+      cli.post_install_script.add_steps(SignScriptsForOvercommit.with_options(options))
     end
 
     private

@@ -1,5 +1,8 @@
 # frozen_string_literal: true
 
+require_relative "configurate_rspec"
+require_relative "configurate_rswag"
+
 module Features
   class Testing < Feature
     register_as "testing tools"
@@ -42,11 +45,11 @@ module Features
     end
 
     def copy_configuration_files(use_rswag)
-      cli.post_install_script.add_steps(PostInstallSteps::ConfigurateRspec)
+      cli.post_install_script.add_steps(ConfigurateRspec)
 
       if use_rswag
         copy_files_to_project("bin", "bin")
-        cli.post_install_script.add_steps(PostInstallSteps::ConfigurateRswag)
+        cli.post_install_script.add_steps(ConfigurateRswag)
       else
         copy_files_to_project("bin/rspec", "bin/rspec")
       end

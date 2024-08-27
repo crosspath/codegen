@@ -5,6 +5,7 @@ require_relative "config_file"
 require_relative "configuration"
 require_relative "options"
 require_relative "../post_install_script"
+require_relative "../post_install_steps/remove_keeps"
 
 module NewProject
   class CLI

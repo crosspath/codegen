@@ -1,15 +1,17 @@
+# frozen_string_literal: true
+
 module PostInstallSteps
-  class RemoveKeeps < Base
+  class RemoveKeeps < PostInstallScript::Step
     def call
       keep_file_path = File.join(@app_path, "vendor/javascript/.keep")
       return unless File.exist?(keep_file_path)
 
-      indent(STEP_KEEPS)
+      indent(STEP)
     end
 
     private
 
-    STEP_KEEPS = <<~RUBY
+    STEP = <<~RUBY
       puts "Remove vendor/javascript/.keep..."
       File.unlink("vendor/javascript/.keep") if File.exist?("vendor/javascript/.keep")
       if Dir.empty?("vendor/javascript")
@@ -22,6 +24,6 @@ module PostInstallSteps
       end
     RUBY
 
-    private_constant :STEP_KEEPS
+    private_constant :STEP
   end
 end
