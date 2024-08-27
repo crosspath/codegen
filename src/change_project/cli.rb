@@ -3,17 +3,18 @@
 require_relative "../ask"
 require_relative "../env"
 require_relative "../feature"
-require_relative "../hash"
+require_relative "../post_install_script"
 
 module ChangeProject
   class CLI
-    attr_reader :app_path, :ask
+    attr_reader :app_path, :ask, :post_install_script
 
     def initialize(argv)
       @app_path = argv.shift
       @features = argv
       @ask = Ask.new({}, {})
       @known_features = FeatureRegistry.all
+      @post_install_script = nil
 
       not_supported_features = @features - @known_features.keys
       raise ArgumentError, not_supported_features.join(", ") unless not_supported_features.empty?
@@ -21,8 +22,12 @@ module ChangeProject
 
     def call
       normalize_app_path
+
+      @post_install_script = PostInstallScript.new(@app_path)
+
       select_features if @features.empty?
       apply_selected_features
+      create_post_install_script
 
       puts "Done!"
     end
@@ -53,6 +58,14 @@ module ChangeProject
         puts "", "Using #{@known_features[feature_key].name}..."
         @known_features[feature_key].klass.new(self).call
       end
+    end
+
+    def create_post_install_script
+      return unless @post_install_script.any_code_blocks?
+
+      @post_install_script.create
+
+      puts PostInstallScript::POSTINSTALL_MESSAGE
     end
   end
 end

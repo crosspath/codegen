@@ -9,7 +9,7 @@ module Features::Tools::KnownTools
 
       copy_files_to_project("bin/yard", DIR_BIN)
 
-      warning("Run this line after `bundle install`:\nbin/yard config --gem-install-yri")
+      cli.post_install_script.add_steps(PostInstallSteps::ConfigurateYard)
     end
 
     def use?

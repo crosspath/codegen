@@ -7,8 +7,7 @@ module Features::Tools::KnownTools
     def call(use_tools)
       puts "Add Overcommit..."
 
-      warnings = ["bin/overcommit --sign", "bin/overcommit --sign pre-commit"]
-
+      options = {}
       copy_files_to_project("bin/overcommit", DIR_BIN)
 
       puts "Generate config file for Overcommit..."
@@ -19,7 +18,7 @@ module Features::Tools::KnownTools
       if use_tools["bundler_audit"] || use_tools["bundler_leak"]
         add_hook_for_update_gems_data(use_tools)
 
-        warnings << "bin/overcommit --sign post-checkout"
+        options[:post_checkout] = true
       end
 
       add_pre_commit_hook_for_bundler_leak if use_tools["bundler_leak"]
@@ -27,12 +26,14 @@ module Features::Tools::KnownTools
       if use_tools["prettier"]
         add_pre_commit_hook_for_prettier
 
-        warnings << "bin/overcommit --sign post-commit"
+        options[:post_commit] = true
       end
 
       add_pre_commit_hook_for_yaml
 
-      warning("Run this line after `bundle install`:\n#{warnings.join("; ")}")
+      cli.post_install_script.add_steps(
+        PostInstallSteps::SignScriptsForOvercommit.with_options(options)
+      )
     end
 
     private
