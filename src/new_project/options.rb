@@ -19,15 +19,6 @@ module NewProject
     # }
     # typeof OPTIONS == Hash(Symbol, OptionDefinition)
     OPTIONS = {
-      rails_version: {
-        label: "Rails version",
-        type: :one_of,
-        variants: {
-          "6" => "Rails 6",
-          "7" => "Rails 7",
-        },
-        default: ->(_, _) { "7" },
-      },
       app_path: {
         label: "Application path",
         type: :text,
@@ -41,7 +32,6 @@ module NewProject
           ""
         end,
         apply: ->(_gopt, ropt, val) { ropt["name"] = val },
-        skip_if: ->(gopt, _ropt) { gopt[:rails_version] < 7 },
       },
       mode: {
         # @see railties/lib/rails/generators/rails/app/app_generator.rb
@@ -54,17 +44,12 @@ module NewProject
         #   skip-active-storage: true
         #   skip-bootsnap: true
         #   skip-dev-gems: true
-        #   skip-javascript: true (if webpack is disabled)
+        #   skip-javascript: true
         #   skip-jbuilder: true
-        #   skip-spring: true (Rails 6)
-        #   skip-system-test: true (Rails 6)
-        #   skip-webpack-install: true (if webpack is disabled) (Rails 6)
-        #   skip-turbolinks: true (Rails 6)
-        #   skip-hotwire: true (Rails 7)
+        #   skip-hotwire: true
         # API:
         #   skip-system-test: true (do not add gems: webdriver, selenium, capybara)
-        #   skip-sprockets: true (Rails 6)
-        #   skip-asset-pipeline: true (Rails 7)
+        #   skip-asset-pipeline: true
         #   skip-javascript: true
         label: "Application template",
         type: :one_of,
@@ -96,12 +81,6 @@ module NewProject
           "trilogy" => "MySQL (gem trilogy)",
           "postgresql" => "PostgreSQL",
           "sqlite3" => "SQLite3",
-          "oracle" => "Oracle",
-          "sqlserver" => "SQLServer",
-          "jdbcmysql" => "JDBC + Mysql",
-          "jdbcsqlite3" => "JDBC + SQLite3",
-          "jdbcpostgresql" => "JDBC + PostgreSQL",
-          "jdbc" => "JDBC + other",
           "other" => "... other", # Required: gem name.
         },
         default: ->(_, _) { "postgresql" },
@@ -203,9 +182,9 @@ module NewProject
         default: ->(_gopt, ropt) { !ropt["minimal"] },
         apply: ->(_gopt, ropt, val) do
           if ropt["minimal"]
-            ropt["no-skip-active-cable"] = true if val
+            ropt["no-skip-action-cable"] = true if val
           else
-            ropt["skip-active-cable"] = true unless val
+            ropt["skip-action-cable"] = true unless val
           end
         end,
       },
@@ -213,13 +192,7 @@ module NewProject
         label: "Add asset pipeline - if you reject it, you still may add bundler for JavaScript",
         type: :boolean,
         default: ->(_, _) { true },
-        apply: ->(gopt, ropt, val) do
-          if gopt[:rails_version] < 7
-            ropt["skip-sprockets"] = !val
-          else
-            ropt["skip-asset-pipeline"] = !val
-          end
-        end,
+        apply: ->(gopt, ropt, val) { ropt["skip-asset-pipeline"] = !val },
         skip_if: ->(_gopt, ropt) { ropt["api"] },
       },
       assets_lib: {
@@ -232,7 +205,7 @@ module NewProject
         default: ->(_, _) { "sprockets" },
         apply: ->(_gopt, ropt, val) { ropt["asset-pipeline"] = val },
         skip_if: ->(gopt, ropt) do
-          ropt["api"] || gopt[:rails_version] < 7 || ropt["skip-asset-pipeline"]
+          ropt["api"] || ropt["skip-asset-pipeline"]
         end,
       },
       hotwire: {
@@ -246,24 +219,7 @@ module NewProject
             ropt["skip-hotwire"] = true unless val
           end
         end,
-        skip_if: ->(gopt, ropt) do
-          gopt[:rails_version] < 7 || ropt["api"] || ropt["skip-javascript"]
-        end,
-      },
-      turbolinks: {
-        label: "Add Turbolinks",
-        type: :boolean,
-        default: ->(_gopt, ropt) { !ropt["minimal"] },
-        apply: ->(_gopt, ropt, val) do
-          if ropt["minimal"]
-            ropt["no-skip-turbolinks"] = true if val
-          else
-            ropt["skip-turbolinks"] = true unless val
-          end
-        end,
-        skip_if: ->(gopt, ropt) do
-          gopt[:rails_version] >= 7 || ropt["api"] || ropt["skip-javascript"]
-        end,
+        skip_if: ->(gopt, ropt) { ropt["api"] || ropt["skip-javascript"] },
       },
       js_bundler: {
         label: "Bundler for JavaScript",
@@ -278,9 +234,7 @@ module NewProject
         },
         default: ->(_, _) { "importmap" },
         apply: ->(_gopt, ropt, val) { ropt["javascript"] = val },
-        skip_if: ->(gopt, ropt) do
-          gopt[:rails_version] < 7 || ropt["api"] || ropt["skip-javascript"]
-        end,
+        skip_if: ->(gopt, ropt)  { ropt["api"] || ropt["skip-javascript"] },
       },
       css_lib: {
         label: "Library for CSS",
@@ -297,57 +251,7 @@ module NewProject
         apply: ->(_gopt, ropt, val) do
           ropt["css"] = val if val != "none"
         end,
-        skip_if: ->(gopt, ropt) { gopt[:rails_version] < 7 || ropt["api"] || !gopt[:assets] },
-      },
-      webpacker: {
-        label: "Add Webpacker - Rails wrapper for JavaScript bundler",
-        type: :boolean,
-        default: ->(_gopt, ropt) { !ropt["minimal"] },
-        apply: ->(_gopt, ropt, val) do
-          if ropt["minimal"]
-            ropt["no-skip-webpack-install"] = true if val
-          else
-            ropt["skip-webpack-install"] = true unless val
-          end
-        end,
-        skip_if: ->(gopt, ropt) do
-          gopt[:rails_version] >= 7 || ropt["api"] || ropt["skip-javascript"]
-        end,
-      },
-      front_end_lib: {
-        label: "Libraries for front-end",
-        type: :many_of,
-        variants: {
-          "angular" => "Angular",
-          "coffee" => "CoffeeScript",
-          "elm" => "Elm",
-          "erb" => "ERB",
-          "react" => "React",
-          "stimulus" => "Stimulus",
-          "svelte" => "Svelte",
-          "typescript" => "TypeScript",
-          "vue" => "Vue",
-        },
-        default: ->(_, _) { ["erb"] },
-        apply: ->(_gopt, ropt, val) do
-          ropt["webpack"] = val[0] # First item only.
-        end,
-        skip_if: ->(gopt, ropt) do
-          gopt[:rails_version] >= 7 || ropt["api"] || ropt["skip-javascript"] || !gopt[:webpacker]
-        end,
-      },
-      spring: {
-        label: "Add Spring",
-        type: :boolean,
-        default: ->(_gopt, ropt) { !ropt["minimal"] },
-        apply: ->(_gopt, ropt, val) do
-          if ropt["minimal"]
-            ropt["no-skip-spring"] = true if val
-          else
-            ropt["skip-spring"] = true unless val
-          end
-        end,
-        skip_if: ->(gopt, _ropt) { gopt[:rails_version] >= 7 },
+        skip_if: ->(gopt, ropt) { ropt["api"] || !gopt[:assets] },
       },
       jbuilder: {
         label: "Add jbuilder",
@@ -397,6 +301,24 @@ module NewProject
           end
         end,
         skip_if: ->(gopt, ropt) { ropt["api"] || gopt[:tests] },
+      },
+      rubocop_omakase: {
+        label: "Add RuboCop configration from Rails team (rubocop-rails-omakase)",
+        type: :boolean,
+        default: ->(_gopt, ropt) { false },
+        apply: ->(_gopt, ropt, val) { ropt["skip-rubocop"] = !val },
+      },
+      brakeman: {
+        label: "Add Brakeman (you can add it later)",
+        type: :boolean,
+        default: ->(_gopt, ropt) { false },
+        apply: ->(_gopt, ropt, val) { ropt["skip-brakeman"] = !val },
+      },
+      github_actions: {
+        label: "Add configuration for GitHub Actions (CI)",
+        type: :boolean,
+        default: ->(_gopt, ropt) { true },
+        apply: ->(_gopt, ropt, val) { ropt["skip-ci"] = !val },
       },
       bundle_install: {
         label: "Run `bundle install` at the end of this process",
@@ -451,7 +373,24 @@ module NewProject
       #   type: :boolean,
       #   default: ->(_, _) { true },
       #   apply: ->(_gopt, ropt, val) { ropt["skip-decrypted-diffs"] = !val },
-      #   skip_if: ->(gopt, _ropt) { gopt[:rails_version] < 7 },
+      # },
+      # ruby: {
+      #   label: "Path to the Ruby binary",
+      #   type: :text,
+      #   default: ->(_, _) { `which ruby`.strip },
+      #   apply: ->(_gopt, ropt, val) { ropt["ruby"] = val },
+      # },
+      # template: {
+      #   label: "Path to some application template (can be a filesystem path or URL)",
+      #   type: :text,
+      #   default: ->(_, _) { "" },
+      #   apply: ->(_gopt, ropt, val) { ropt["template"] = val },
+      # },
+      # devcontainer: {
+      #   label: "Add .devcontainer files",
+      #   type: :boolean,
+      #   default: ->(_, _) { false },
+      #   apply: ->(_gopt, ropt, val) { ropt["devcontainer"] = val },
       # },
     }.freeze
   end

@@ -61,7 +61,7 @@ module NewProject
     end
 
     def install_railties
-      @rails_version = Gem::Requirement.new("~> #{@generator_option_values[:rails_version]}")
+      @rails_version = Gem::Requirement.new("~> #{Env::MIN_RAILS_VERSION}")
 
       # Example: gem install -N --backtrace --version '~> 7' railties
       Gem.install("railties", @rails_version, document: [])
@@ -157,8 +157,6 @@ module NewProject
     end
 
     def load_rails_files(railties_path)
-      rvc = "#{railties_path}/lib/rails/ruby_version_check"
-      require rvc if File.exist?("#{rvc}.rb") # Rails 7.2 does not have this file.
       require "#{railties_path}/lib/rails/command"
     end
   end

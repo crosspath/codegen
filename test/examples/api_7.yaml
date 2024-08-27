@@ -1,4 +1,3 @@
-rails_version: 7
 app_path: tmp/api_7
 name: api_7
 mode: api-only

@@ -3,7 +3,7 @@
 Minimal supported versions:
 
 - Ruby 3.1 (with YJIT)
-- Rails 6.1
+- Rails 7.2
 - Node.js 20
 - Yarn 4
 - MySQL 8
@@ -11,6 +11,7 @@ Minimal supported versions:
 - Docker 26
 - Vue 3
 - Svelte 4
+- Docker 26
 
 To create project:
 
@@ -26,7 +27,7 @@ To apply changes to existing project:
 - run `./change.rb project-directory feature-name`, where `feature-name` is name of desired feature
   (see list of features below). You may pass several feature names separated by space.
 
-Supported Rails versions: 6.1, 7.1.
+Supported Rails versions: 7.2.
 
 ## Features
 
@@ -34,13 +35,13 @@ Supported Rails versions: 6.1, 7.1.
 * `crud`: default implementation of CRUD actions
 * `docker`: generate Dockerfile & Docker Compose files
 * `dotenv`: add gem `dotenv` and example files for configuration via ENV
-* `linters`: add linters for Ruby and its ecosystem
 * `misc`: miscellaneous tasks for changing and removing files and directories within
   Rails application
 * `remove-comments`: remove unnecessary comments from project files
 * `settings`: store project configuration in YAML or JSON format
 * `sort-config`: sort configuration lines in `config/environments/*.rb`
 * `testing`: add gems and default configuration for testing
+* `tools`: add linters, code formatters and documentation tools
 * `yarn`: install latest version of Yarn and add actual config values for Yarn
 
 ... to be continued ...
@@ -51,3 +52,8 @@ Run `rake` or `rake test` to run all tests.
 
 Run `rake test TEST=test/template_test.rb TESTOPTS="--name=test_full_6"` or similar keystroke to run
 one specific test.
+
+## Note: general requirements for Rails projects
+
+Required system packages:
+* libyaml-dev / libyaml-devel

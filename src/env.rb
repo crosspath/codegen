@@ -3,6 +3,8 @@
 module Env
   extend self
 
+  MIN_RAILS_VERSION = "7.2"
+
   def no_save?
     ENV.fetch("NO_SAVE", "0") != "0"
   end
