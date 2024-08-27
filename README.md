@@ -50,7 +50,7 @@ Supported Rails versions: 7.2.
 
 Run `rake` or `rake test` to run all tests.
 
-Run `rake test TEST=test/template_test.rb TESTOPTS="--name=test_full_6"` or similar keystroke to run
+Run `rake test TEST=test/template_test.rb TESTOPTS="--name=test_full_7"` or similar keystroke to run
 one specific test.
 
 ## Note: general requirements for Rails projects
