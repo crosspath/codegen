@@ -8,23 +8,10 @@ module Features
       use_rswag = add_rswag?
 
       puts "Add gems to Gemfile..."
-
-      if use_rswag
-        add_gem("rswag-api", "rswag-ui")
-        add_gem("factory_bot_rails", "rspec-rails", "rswag-specs", group: GROUP_DEV_TEST)
-      else
-        add_gem("factory_bot_rails", "rspec-rails", group: GROUP_DEV_TEST)
-      end
+      add_gems_for_testing(use_rswag)
 
       puts "Copy configuration files..."
-      if use_rswag
-        copy_files_to_project("bin", "bin")
-        warning("Run these lines after `bundle install`:\n#{CMD_RSPEC}\n#{CMD_RSWAG}")
-      else
-        copy_files_to_project("bin/rspec", "bin/rspec")
-        warning("Run this line after `bundle install`:\n#{CMD_RSPEC}")
-      end
-      copy_spec_support
+      copy_configuration_files(use_rswag)
 
       puts "Apply configuration..."
       update_config_application
@@ -63,6 +50,31 @@ module Features
     RUBY
     RE_LINE_FOR_REQUIRES_WITHIN_RAILS_HELPER = /^$|^\s*RSpec\.configure\b/
     RE_END = /\A\s*end\b/
+
+    private_constant :GROUP_DEV_TEST, :CMD_RSPEC, :CMD_RSWAG, :CONFIG_APP_FILE, :RE_TWO_ENDS
+    private_constant :GENERATORS, :RAILS_HELPER_FILE, :RAILS_HELPER_REQUIRES, :RAILS_HELPER_INCLUDES
+    private_constant :RE_LINE_FOR_REQUIRES_WITHIN_RAILS_HELPER, :RE_END
+
+    def add_gems_for_testing(use_rswag)
+      if use_rswag
+        add_gem("rswag-api", "rswag-ui")
+        add_gem("factory_bot_rails", "rspec-rails", "rswag-specs", group: GROUP_DEV_TEST)
+      else
+        add_gem("factory_bot_rails", "rspec-rails", group: GROUP_DEV_TEST)
+      end
+    end
+
+    def copy_configuration_files(use_rswag)
+      if use_rswag
+        copy_files_to_project("bin", "bin")
+        warning("Run these lines after `bundle install`:\n#{CMD_RSPEC}\n#{CMD_RSWAG}")
+      else
+        copy_files_to_project("bin/rspec", "bin/rspec")
+        warning("Run this line after `bundle install`:\n#{CMD_RSPEC}")
+      end
+
+      copy_spec_support
+    end
 
     def add_rswag?
       cli.ask.question(type: :boolean, label: "Add rswag (OpenAPI 3.0+)", default: ->(_, _) { "y" })

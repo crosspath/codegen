@@ -57,6 +57,10 @@ Style/InvertibleUnlessCondition:
   Exclude:
     - "features/**/files/bin/*"
 
+Style/MutableConstant:
+  Exclude:
+    - "features/settings/files/initializer.rb"
+
 # Keep disabled in bin-scripts, because order of `require` lines in bin-scripts are significant for
 # running operations.
 Style/RequireOrder:

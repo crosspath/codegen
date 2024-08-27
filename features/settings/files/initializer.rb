@@ -2,6 +2,7 @@
 
 require_relative "../../app/lib/settings"
 
-AppConfig = Settings.configurate do
-  file("config/settings.yml")
-end
+AppConfig =
+  Settings.configurate do
+    file("config/settings.yml")
+  end

@@ -55,19 +55,23 @@ module Settings
     when Array
       value.map { |v| generate_struct(v) }
     when Hash
-      value = value.to_h { |k, v| [k.to_sym, generate_struct(v)] }
-      keys = value.keys.sort
-      matches_with_base_methods = keys & @struct_methods
-
-      unless matches_with_base_methods.empty?
-        error_keys = matches_with_base_methods.join(", ")
-        raise ArgumentError, "These keys should not be present in settings file: #{error_keys}"
-      end
-
-      @struct_cache[keys] ||= Struct.new(*keys, keyword_init: true)
-      @struct_cache[keys].new(value)
+      hash_to_struct(value)
     else
       raise ArgumentError, "Unknown class: #{value.class.name}"
     end
+  end
+
+  def hash_to_struct(value)
+    value = value.to_h { |k, v| [k.to_sym, generate_struct(v)] }
+    keys = value.keys.sort
+    matches_with_base_methods = keys & @struct_methods
+
+    unless matches_with_base_methods.empty?
+      error_keys = matches_with_base_methods.join(", ")
+      raise ArgumentError, "These keys should not be present in settings file: #{error_keys}"
+    end
+
+    @struct_cache[keys] ||= Struct.new(*keys, keyword_init: true)
+    @struct_cache[keys].new(value)
   end
 end
