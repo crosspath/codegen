@@ -76,7 +76,7 @@ module Features
       # @see https://yarnpkg.com/getting-started/install
       # @see https://nodejs.org/api/corepack.html
       res = `corepack enable`
-      return if res.exclude?("permission denied")
+      return unless res.include?("permission denied")
 
       puts "Corepack (part of NPM) requires sudo privileges for creating symlinks."
       return if system("sudo corepack enable")
@@ -87,7 +87,8 @@ module Features
     def add_yarn_to_project
       # WARN: `yarn --version` may return "3.2.0", but directory `${project}/.yarn/releases`
       # contains newer release, for example, 3.6.3.
-      version = Dir["#{cli.app_path}/.yarn/releases/*.cjs"].max.match(/(\d\.\d\.\d)\.cjs$/)[1]
+      yarn_binary = Dir["#{cli.app_path}/.yarn/releases/*.cjs"].max
+      version = yarn_binary ? yarn_binary.match(/(\d\.\d\.\d)\.cjs$/)[1] : `yarn --version`.strip
 
       if project_file_exist?("package.json")
         run_command_in_project_dir("npm pkg set packageManager=yarn@#{version}")

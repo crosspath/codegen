@@ -2,6 +2,8 @@
 
 module Questions
   class Base
+    Interrupt = Class.new(RuntimeError).freeze
+
     def initialize(definition, gopt, ropt)
       @definition = definition
       @gopt = gopt
@@ -10,6 +12,10 @@ module Questions
     end
 
     private
+
+    KEYS = (("1".."9").to_a + ("a".."z").to_a).freeze
+
+    private_constant :KEYS
 
     def default_value_for(definition)
       value = definition[:default]&.call(@gopt, @ropt)

@@ -5,10 +5,6 @@ require "io/console"
 Dir.glob("#{__dir__}/questions/*.rb", sort: true).each { |f| require_relative(f) }
 
 class Ask
-  Interrupt = Class.new(RuntimeError).freeze
-
-  KEYS = (("1".."9").to_a + ("a".."z").to_a).freeze
-
   TYPES = {
     boolean: Questions::Boolean,
     many_of: Questions::ManyOf,

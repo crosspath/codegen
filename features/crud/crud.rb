@@ -62,7 +62,7 @@ module Features
       start_class_line = lines.index { |line| line =~ RE_CONTROLLER }
       raise "Cannot find class definition in `#{CONTROLLER_FILE}` file" unless start_class_line
 
-      lines.insert(start_class_line + 1, indent(MIXIN))
+      lines.insert(start_class_line + 1, indent([MIXIN]))
       write_project_file(CONTROLLER_FILE, lines.join("\n"))
     end
 

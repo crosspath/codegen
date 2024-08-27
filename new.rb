@@ -30,7 +30,7 @@ begin
   end
 
   puts "Done!"
-rescue Ask::Interrupt
+rescue Questions::Base::Interrupt
   exit(2)
 rescue StandardError => e
   warn "Current dir: #{Dir.pwd}", e.message, e.backtrace.grep_v(/ruby|bundle|gems/)
