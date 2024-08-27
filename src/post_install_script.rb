@@ -13,7 +13,7 @@ class PostInstallScript
     end
 
     def self.indent(code)
-      "  #{code.gsub("\n", "\n  ").rstrip}"
+      code.split("\n").map { |x| x.empty? ? x : "  #{x}" }.join("\n").rstrip
     end
 
     private

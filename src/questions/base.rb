@@ -1,9 +1,9 @@
 # frozen_string_literal: true
 
+require_relative "../interrupt"
+
 module Questions
   class Base
-    Interrupt = Class.new(RuntimeError).freeze
-
     def initialize(definition, gopt, ropt)
       @definition = definition
       @gopt = gopt

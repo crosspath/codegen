@@ -317,7 +317,7 @@ module NewProject
       bundle_install: {
         label: "Run `bundle install` at the end of this process",
         type: :boolean,
-        default: ->(_, _) { true },
+        default: ->(_, _) { false },
         apply: ->(_gopt, ropt, val) { ropt["skip-bundle"] = !val },
       },
       # namespace: {

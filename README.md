@@ -46,6 +46,17 @@ Supported Rails versions: 7.2.
 
 ... to be continued ...
 
+## Suggested workflow
+
+1. Create new project directory with `new.rb` (with `bundle_install: false`).
+2. Go to project directory and apply changes from `bundle-config` (replace "project-directory" to
+   actual path):
+```shell
+change.rb project-directory bundle-config
+```
+3. Run `bundle install`.
+4. Apply changes from other features.
+
 ## Testing
 
 Run `rake` or `rake test` to run all tests.

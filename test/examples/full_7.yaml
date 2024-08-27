@@ -20,4 +20,7 @@ css_lib: none
 jbuilder: true
 bootsnap: true
 tests: true
-bundle_install: true
+rubocop_omakase: false
+brakeman: false
+github_actions: true
+bundle_install: false
