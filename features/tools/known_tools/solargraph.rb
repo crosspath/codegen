@@ -1,43 +1,54 @@
 # frozen_string_literal: true
 
-module Features::Tools::KnownTools
-  class Solargraph < Features::Tools::KnownTool
-    register_as "Solargraph (linter for types in Ruby)", adds_config: true
+module Features::Tools
+  module KnownTools
+    class Solargraph < KnownTool
+      register_as "Solargraph (linter for types in Ruby)", adds_config: true
 
-    def call(_use_tools)
-      puts "Add Solargraph..."
+      def call(_use_tools)
+        puts "Add Solargraph..."
+        copy_files_for_solargraph
 
-      copy_files_to_project("config/.solargraph.yml", DIR_CONFIG)
-      copy_files_to_project("bin/solargraph", DIR_BIN)
-      copy_files_to_project("tasks", "lib")
+        puts "Update settings for integration between Solargraph and VS Code..."
+        update_vs_code_settings
+        add_gem_for_development("rails-annotate-solargraph")
 
-      puts "Update settings for integration between Solargraph and VS Code..."
+        puts "Add documentation schema file to .gitignore & .dockerignore files..."
+        update_ignore_files
 
-      if project_file_exist?(".vscode/settings.json")
-        file_path = File.join(feature_dir, "files", "vscode/settings.json")
-        existing_settings = read_project_file(".vscode/settings.json")
-        new_settings = merge_jsons(existing_settings, File.read(file_path))
-        write_project_file(".vscode/settings.json", new_settings)
-      else
-        copy_files_to_project("vscode", ".vscode")
+        puts "Copy documentation schema file..."
+        copy_files_to_project(".annotate_solargraph_schema", "")
       end
 
-      add_gem_for_development("rails-annotate-solargraph")
+      private
 
-      puts "Add documentation schema file to `.gitignore`..."
+      IGNORE_FILES = %w[.gitignore .dockerignore].freeze
+      NEW_VS_CODE_SETTINGS = {"solargraph.commandPath" => "bin/solargraph"}.freeze
+      VS_CODE_SETTINGS_FILE = ".vscode/settings.json"
 
-      update_ignore_file(".gitignore", add: [".annotate_solargraph_schema"])
+      private_constant :NEW_VS_CODE_SETTINGS, :VS_CODE_SETTINGS_FILE
 
-      puts "Copy documentation schema file..."
+      def copy_files_for_solargraph
+        copy_files_to_project("config/.solargraph.yml", DIR_CONFIG)
+        copy_files_to_project("bin/solargraph", DIR_BIN)
+        copy_files_to_project("tasks", "lib")
+      end
 
-      copy_files_to_project(".annotate_solargraph_schema", "")
-    end
+      def update_vs_code_settings
+        existing_settings = {}
+        if project_file_exist?(VS_CODE_SETTINGS_FILE)
+          existing_settings = JSON.parse(read_project_file(VS_CODE_SETTINGS_FILE))
+        end
 
-    private
+        new_settings = existing_settings.merge(NEW_VS_CODE_SETTINGS)
+        write_project_file(VS_CODE_SETTINGS_FILE, JSON.pretty_generate(new_settings))
+      end
 
-    def merge_jsons(*file_contents)
-      result = file_contents.map { |f| JSON.parse(f) }.reduce(&:merge)
-      JSON.pretty_generate(result)
+      def update_ignore_files
+        IGNORE_FILES.each do |file_name|
+          update_ignore_file(file_name, add: [".annotate_solargraph_schema"])
+        end
+      end
     end
   end
 end

@@ -38,9 +38,9 @@ module Features
 
         erb("Gemfile", File.join(KnownTool::DIR, "Gemfile"), **use_tools, gems:)
 
-        if project_file_exist?(".bundle")
-          puts "Copy .bundle directory into .tools..."
-          run_command_in_project_dir("cp -r .bundle .tools")
+        if project_file_exist?(".bundle") && !project_file_exist?(".tools/.bundle")
+          puts "Create link .tools/.bundle -> .bundle..."
+          run_command_in_project_dir("ln -s --relative .bundle .tools/")
         end
       end
 
@@ -64,6 +64,9 @@ module Features
         raise "Cannot find 'GEM' section in Gemfile.lock" if result.empty?
 
         result.map! { |line| line[/\S+/] }
+        result << "rswag" if result.include?("rswag-specs")
+        result << "rspec" if result.include?("rspec-core")
+
         result.to_h { |item| [item, true] }
       end
     end

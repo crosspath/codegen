@@ -1,7 +1,5 @@
 # frozen_string_literal: true
 
-require_relative "../interrupt"
-
 module Questions
   class Base
     def initialize(definition, gopt, ropt)
