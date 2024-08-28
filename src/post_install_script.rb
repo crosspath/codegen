@@ -3,9 +3,10 @@
 require_relative "erb_eval"
 
 class PostInstallScript
-  POSTINSTALL_MESSAGE =
-    "You should run `bundle install` and then `bin/postinstall` within application directory " \
-      "before applying any other changes to project directory."
+  POSTINSTALL_MESSAGE = [
+    "You should run `bundle install` and then `bin/postinstall` within",
+    "project directory before applying any other changes to that directory.",
+  ].freeze
 
   class Step
     def initialize(app_path)
@@ -13,7 +14,7 @@ class PostInstallScript
     end
 
     def self.indent(code)
-      code.split("\n").map { |x| x.empty? ? x : "  #{x}" }.join("\n").rstrip
+      StringUtils.indent(code.split("\n")).join("\n").rstrip
     end
 
     private

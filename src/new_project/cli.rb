@@ -6,6 +6,7 @@ require_relative "configuration"
 require_relative "options"
 require_relative "../post_install_script"
 require_relative "../post_install_steps/remove_keeps"
+require_relative "../string_utils"
 
 module NewProject
   class CLI
@@ -97,7 +98,7 @@ module NewProject
         # Remove script if it succeeds.
         @postinstall.run && @postinstall.remove
       else
-        puts PostInstallScript::POSTINSTALL_MESSAGE
+        StringUtils.warning(PostInstallScript::POSTINSTALL_MESSAGE)
       end
     end
 

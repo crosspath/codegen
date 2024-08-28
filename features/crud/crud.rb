@@ -53,7 +53,7 @@ module Features
       last_line_with_end = lines.rindex { |line| line =~ RE_END }
       raise "Cannot find last `end` in `#{ROUTES_FILE}` file" unless last_line_with_end
 
-      lines.insert(last_line_with_end, *indent(EXAMPLE_ROUTE.split("\n")))
+      lines.insert(last_line_with_end, *StringUtils.indent(EXAMPLE_ROUTE.split("\n")))
       write_project_file(ROUTES_FILE, lines.join("\n"))
     end
 
@@ -63,7 +63,7 @@ module Features
       start_class_line = lines.index { |line| line =~ RE_CONTROLLER }
       raise "Cannot find class definition in `#{CONTROLLER_FILE}` file" unless start_class_line
 
-      lines.insert(start_class_line + 1, indent([MIXIN]))
+      lines.insert(start_class_line + 1, StringUtils.indent([MIXIN]))
       write_project_file(CONTROLLER_FILE, lines.join("\n"))
     end
 

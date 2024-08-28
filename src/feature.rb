@@ -21,23 +21,11 @@ class Feature
 
   private
 
-  # rubocop:disable Layout/ClassStructure Keep constants in private section to show that they're
-  # not intended to be used outside of this file.
   ROOT_DIR = File.dirname(__dir__).freeze
-  # rubocop:enable Layout/ClassStructure
+
+  private_constant :ROOT_DIR
 
   attr_reader :cli
-
-  def warning(text)
-    lines = text.split("\n")
-    length = lines.map(&:size).max
-
-    puts
-    puts("=" * length)
-    puts text
-    puts("-" * length)
-    puts
-  end
 
   def feature_dir
     @feature_dir ||= File.join(ROOT_DIR, "features", registry_item.hash_key)
@@ -107,10 +95,5 @@ class Feature
 
   def run_command_in_project_dir(cmd)
     system("cd #{cli.app_path} && #{cmd}")
-  end
-
-  def indent(lines, level = 1)
-    spaces = " " * (2 * level)
-    lines.map { |x| x.empty? ? x : "#{spaces}#{x}" }
   end
 end

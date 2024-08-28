@@ -4,6 +4,7 @@ require_relative "../ask"
 require_relative "../env"
 require_relative "../feature"
 require_relative "../post_install_script"
+require_relative "../string_utils"
 
 module ChangeProject
   class CLI
@@ -65,7 +66,7 @@ module ChangeProject
 
       @post_install_script.create
 
-      puts PostInstallScript::POSTINSTALL_MESSAGE
+      StringUtils.warning(PostInstallScript::POSTINSTALL_MESSAGE)
     end
   end
 end

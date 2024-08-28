@@ -51,7 +51,7 @@ module Features
       RUBY
 
       # Add 2 spaces.
-      modified_line = indent(modified_line.lines).join
+      modified_line = StringUtils.indent(modified_line.split("\n")).join("\n")
 
       if line_index_with_bundle_call
         file[line_index_with_bundle_call] = modified_line + file[line_index_with_bundle_call]

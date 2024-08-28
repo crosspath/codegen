@@ -42,8 +42,8 @@ module Features
 
       def update_bin_setup
         bin_setup = read_project_file(BIN_SETUP)
-        text_before = indent(BIN_SETUP_BEFORE.split("\n")).join("\n")
-        text_after = indent(BIN_SETUP_AFTER.split("\n")).join("\n")
+        text_before = StringUtils.indent(BIN_SETUP_BEFORE.split("\n")).join("\n")
+        text_after = StringUtils.indent(BIN_SETUP_AFTER.split("\n")).join("\n")
 
         bin_setup.sub!(text_before, text_after)
         write_project_file(BIN_SETUP, bin_setup)

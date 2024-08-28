@@ -72,7 +72,7 @@ module Features
         two_last_ends = file.rindex(RE_TWO_ENDS)
         raise "Cannot find two last `end`s in `#{CONFIG_APP_FILE}` file" unless two_last_ends
 
-        new_lines = indent(GENERATORS.split("\n"), 2)
+        new_lines = StringUtils.indent(GENERATORS.split("\n"), 2)
         file.insert(two_last_ends, "#{new_lines.join("\n")}\n")
         write_project_file(CONFIG_APP_FILE, file)
       end

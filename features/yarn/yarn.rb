@@ -53,7 +53,7 @@ module Features
       # Not recommended for projects with many dependencies.
       if use_zero_installs?
         yarnrc_yml_changes["enableGlobalCache"] = "false"
-        puts warning(WARN_CACHE)
+        StringUtils.warning(WARN_CACHE.split("\n"))
       end
 
       puts "Updating .yarnrc.yml file..."
