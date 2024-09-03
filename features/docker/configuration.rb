@@ -26,13 +26,15 @@ module Features
       def dockerfile_variables
         @dockerfile_variables ||=
           {
-            ruby_version: @ruby_version,
+            arg: build_args,
+            env: build_envs,
             bun_version: @bun_version,
             bundler_version: @bundler_version,
+            has_node_modules: project_file_exist?("node_modules"),
             includes_frontend: !@package_json.nil?,
             includes_bun: @includes_bun,
             includes_yarn: @includes_yarn,
-            includes_active_storage: @includes_active_storage,
+            required_dirs:,
             includes_sidekiq: @includes_sidekiq,
             bundle_config_ci: project_file_exist?(".bundle/config.ci"),
             bundle_config_dev: project_file_exist?(".bundle/config.development"),
@@ -85,12 +87,47 @@ module Features
         "sqlite3" => %w[sqlite],
       }.freeze
 
+      REQUIRED_DIRS = %w[.bundle log tmp/pids].freeze
+      REQUIRED_DIRS_FOR_STORAGE = %w[storage tmp/storage].freeze
+
       private_constant :CONFIG_APPLICATION_FILE, :DATABASE_YML, :GEMFILE_LOCK_FILE
       private_constant :PACKAGE_JSON_FILE, :RUBY_VERSION_FILE, :DBMS_IMAGES, :DBMS_PACKAGES
+      private_constant :REQUIRED_DIRS, :REQUIRED_DIRS_FOR_STORAGE
+
+      def build_args
+        {
+          RUBY_VERSION: @ruby_version, # Example: 3.3.4
+          RAILS_PORT: 3000,
+        }
+      end
+
+      def build_envs
+        {
+          initial: env_hash_to_array({
+            RAILS_ENV: "production",
+            **(@package_json.nil? ? {} : {NODE_ENV: "production"}),
+          }),
+          prebuild_ruby_gems: env_hash_to_array({
+            LD_PRELOAD: "libjemalloc.so.2",
+            MALLOC_CONF:
+              "background_thread:true,metadata_thp:auto,dirty_decay_ms:5000,muzzy_decay_ms:5000,narenas:2"
+          }),
+        }
+      end
+
+      def env_hash_to_array(hash)
+        hash.empty? ? nil : hash.map { |k, v| "    #{k}=#{v}" }
+      end
+
+      def required_dirs
+        res = REQUIRED_DIRS.dup
+        res += REQUIRED_DIRS_FOR_STORAGE if @includes_active_storage
+        res.sort
+      end
 
       def system_packages
         res = []
-        res << "nodejs" if @includes_yarn
+        res << "nodejs npm" if @includes_yarn
         res << "unzip" if @includes_bun
         res += DBMS_PACKAGES[@dbms_adapter] || [] if @dbms_adapter
         res << "vips" if @includes_active_storage
@@ -106,7 +143,7 @@ module Features
         #     libxrandr2 libxss1 libxtst6
         # end
 
-        res << "jemalloc"
+        res << "jemalloc" # Add icu-data-full ?
 
         res
       end

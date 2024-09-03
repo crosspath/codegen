@@ -2,107 +2,104 @@
 # Based on template: railties/lib/rails/generators/rails/app/templates/Dockerfile.tt
 # And on this guide: https://mailsnag.com/blog/optimized-ruby-dockerfile/
 
-# Example: 3.3.4
-ARG RUBY_VERSION=<%= ruby_version %>
+<% arg.each do |k, v| %><%= "ARG #{k}=#{v}\n" %><% end %>
 
 # @see https://github.com/docker-library/ruby/blob/master/Dockerfile.template
 FROM ruby:$RUBY_VERSION-alpine AS base
 
+# Install tools for building gems with extensions. It takes up to 2000 s (32 minutes).
+RUN set -eux; \
+	apk add --no-cache g++ make
+
 WORKDIR /rails
 
-ENV \
-<% if includes_frontend %>
-    NODE_ENV=production \
-<% end %>
-    RAILS_ENV=production \
-    RAILS_PORT=3000
-
+<%= "ENV \\\n#{env[:initial].join(" \\\n")}\n\n" if env[:initial] %>
 RUN addgroup -g 1000 app \
     && adduser -u 1000 -G app app -s /bin/sh -D -H
 
-RUN mkdir -p -m 0755 .bundle log tmp/pids vendor/bundle <% if includes_active_storage %>storage tmp/storage <% end %>\
+RUN mkdir -p -m 0755 <%= required_dirs.join(" ") %> \
     && chown -R app:app .
 
 # See documentation for CLI for APK:
 # https://git.alpinelinux.org/apk-tools/about/doc/apk.8.scd
 # https://wiki.alpinelinux.org/wiki/Alpine_Package_Keeper
 
+# Install specific packages for Rails application. It takes about 1000 s (16 minutes).
 RUN set -eux; \
 	apk add --no-cache <%= system_packages.join(" ") %>
 
 # Russian CAs
-RUN wget --quiet https://gu-st.ru/content/lending/russian_trusted_root_ca_pem.crt \
-    -O /usr/local/share/ca-certificates/russian_trusted_root_ca_pem.crt \
-    && /usr/sbin/update-ca-certificates
+ADD https://gu-st.ru/content/lending/russian_trusted_root_ca_pem.crt \
+    /usr/local/share/ca-certificates/russian_trusted_root_ca_pem.crt
+RUN /usr/sbin/update-ca-certificates
 
-<% if includes_yarn %>
-RUN --mount=type=cache,uid=1000,target=/rails \
-    npm install -g corepack \
-    && corepack enable
-<% end %>
-<% if includes_bun %>
-# Based on shell script: https://bun.sh/install
-ENV BUN_INSTALL=/usr/local/bin
-RUN wget --quiet \
-    https://github.com/oven-sh/bun/releases/download/bun-v<%= bun_version %>/bun-linux-x64.zip \
-    -O /tmp/bun.zip \
-    && unzip -qd /tmp/bun /tmp/bun.zip \
-    && chmod +x /tmp/bun/bun \
-    && mv /tmp/bun/bun $BUN_INSTALL/ \
-    && rm -rf /tmp/bun /tmp/bun.zip
-<% end %>
-
+<%= "ENV \\\n#{env[:prebuild_ruby_gems].join(" \\\n")}\n\n" if env[:prebuild_ruby_gems] %>
+# Install required Bundler version.
 RUN gem install bundler:<%= bundler_version %>
 
 #==================
-# Install gems and clean up
-FROM base AS gems
 
-<% if bundle_config_prod %>COPY .bundle/config.production .bundle/config<% end %>
+FROM base AS compilation
 
+<% if bundle_config_prod %>
+COPY .bundle/config.production .bundle/config
+<% end %>
 COPY Gemfile Gemfile.lock ./
 
+# Install gems for Rails application. It takes about 1000 s (16 minutes) or more.
 RUN bundle install \
-    <% if use_bootsnap %>&& bundle exec bootsnap precompile --gemfile \<% end %>
     && rm -rf /usr/local/bundle/cache/*
+<% if use_bootsnap %>
 
+RUN bundle exec bootsnap precompile --gemfile
+<% end %>
 <% if includes_frontend %>
-#==================
-# Install front-end packages
-FROM base AS front_end
-
 <% if includes_yarn %>
+
+# Force to download Yarn.
+RUN npm install -g corepack \
+    && corepack enable \
+    && corepack install
+
 COPY package.json yarn.lock .yarn ./
-RUN yarn install --frozen-lockfile \
-    && rm -rf .yarn/cache
+
+RUN yarn install --immutable
 <% end %>
 <% if includes_bun %>
+
+# Based on shell script: https://bun.sh/install
+ADD https://github.com/oven-sh/bun/releases/download/bun-v<%= bun_version %>/bun-linux-x64.zip \
+    /tmp/bun.zip
+RUN unzip -qd /tmp/bun /tmp/bun.zip \
+    && chmod +x /tmp/bun/bun \
+    && mv /tmp/bun/bun /usr/local/bin/ \
+    && rm -rf /tmp/bun /tmp/bun.zip
+
 COPY package.json bun.lockb ./
+
 RUN bun install --frozen-lockfile
 <% end %>
 <% end %>
 
 #==================
-# Application
+
 FROM base
 
 # Switching to dedicated user
 USER app
 
-ENV LD_PRELOAD="libjemalloc.so.2" \
-    MALLOC_CONF="background_thread:true,metadata_thp:auto,dirty_decay_ms:5000,muzzy_decay_ms:5000,narenas:2"
-
-COPY --chown=app:app --from=gems /usr/local/bundle/ /usr/local/bundle/
-COPY --chown=app:app --from=gems vendor/bundle/ vendor/bundle/
+COPY --from=compilation /usr/local/bundle/ /usr/local/bundle/
 <% if includes_yarn %>
-COPY --chown=app:app --from=front_end .yarn/ .yarn/
-<% if includes_frontend %>
+COPY --chown=app:app --from=compilation .yarn/ .yarn/
+<% if has_node_modules %>
 
 # WARNING: In general case this directory (node_modules) is not needed after assets compilation,
 # but some tools require files from this directory in runtime (i.e. in browser).
-COPY --chown=app:app --from=front_end node_modules .
+COPY --from=compilation node_modules ./
 <% end %>
 <% end %>
+
+COPY . .
 <% if use_bootsnap %>
 
 RUN bundle exec bootsnap precompile app/ lib/
@@ -113,8 +110,6 @@ RUN bundle exec bootsnap precompile app/ lib/
 #   RubyVM::YJIT.enable
 # @see https://docs.ruby-lang.org/en/master/yjit/yjit_md.html#label-Usage
 ENV RUBY_YJIT_ENABLE=1
-
-COPY --chown=app:app . .
 <% if includes_sidekiq %>
 
 RUN bin/rails sidekiq:merge_configs
@@ -123,8 +118,13 @@ RUN bin/rails sidekiq:merge_configs
 
 RUN echo "Pre-compiling assets with RAILS_ENV=$RAILS_ENV" \
     && SECRET_KEY_BASE_DUMMY=1 bin/rails assets:precompile --silent
+<% if includes_yarn %>
+
+RUN rm -rf .yarn/cache
+<% end %>
 <% end %>
 
+HEALTHCHECK --timeout=3s CMD wget http://localhost:${RAILS_PORT}/up
 ENTRYPOINT ["/rails/bin/docker-entrypoint"]
 EXPOSE $RAILS_PORT
-CMD bin/rails s -p $RAILS_PORT -b '0.0.0.0'
+CMD ["bin/rails", "s", "-p", "$RAILS_PORT", "-b", "0.0.0.0"]

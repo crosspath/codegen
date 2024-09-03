@@ -9,6 +9,8 @@ This script generates files for Docker:
 
 Also this script respects configuration from `bundle-config` & `yarn` features.
 
+Alpine Linux does not have time zone database, that's why this script adds `tzinfo-data` gem.
+
 No special actions required from other developers or PCs.
 
 ## Cheat-sheet for Docker (example commands)

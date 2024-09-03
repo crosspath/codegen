@@ -18,13 +18,22 @@ module Features
 
         puts "Creating file for Docker Compose..."
         create_compose_file(configuration)
+
+        puts "Add `tzinfo-data` gem..."
+        add_gem("tzinfo-data")
       end
 
       private
 
       # @see https://github.com/rails/rails/blob/main/railties/lib/rails/generators/rails/app/templates/dockerignore.tt
       IGNORE_FILE_ENTRIES = [
+        "/.annotate_solargraph_schema", # TODO: check file existance.
+        "/.build/",
+        "/.env*",
         "/.git/",
+        "/.git*",
+        "/.overcommit.yml", # TODO: check file existance.
+        "/.ruby-version",
         "/app/assets/builds/*",
         "/config/master.key",
         "/config/credentials/*.key",
@@ -33,6 +42,8 @@ module Features
       ].freeze
 
       IGNORE_FILE_ENTRIES_FOR_ASSETS = [
+        "/.pnp.*",
+        "/.yarn/cache/",
         "/node_modules/",
         "/public/assets",
       ].freeze
