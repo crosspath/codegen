@@ -87,23 +87,20 @@ RUN bun install --frozen-lockfile
 <% end %>
 
 COPY . .
-<% if use_bootsnap %>
 
-RUN bundle exec bootsnap precompile app/ lib/
+RUN echo "Last steps..." \
+<% if use_bootsnap %>
+    && bundle exec bootsnap precompile app/ lib/ \
 <% end %>
 <% if includes_frontend %>
-
-RUN echo "Pre-compiling assets with RAILS_ENV=$RAILS_ENV" \
-    && SECRET_KEY_BASE_DUMMY=1 bin/rails assets:precompile --silent
+    && SECRET_KEY_BASE_DUMMY=1 bin/rails assets:precompile --silent \
 <% if includes_yarn %>
-
 # WARNING: In general case directory "node_modules" is not needed after assets compilation,
 # but some tools require files from this directory in runtime (i.e. in browser).
-RUN rm -rf .yarn/cache .yarnrc.yml yarn.lock node_modules
+    && rm -rf .yarn/cache .yarnrc.yml yarn.lock node_modules \
 <% end %>
 <% end %>
-
-RUN rm -rf .bundle
+    && rm -rf .bundle
 
 #==================
 
@@ -113,7 +110,7 @@ FROM base
 USER app
 
 COPY --from=compilation /usr/local/bundle/ /usr/local/bundle/
-COPY --from=compilation . .
+COPY --from=compilation --chown=app:app /rails /rails
 
 # Enable YJIT everywhere.
 # Or call this at the end of application initialization (in Ruby code):
