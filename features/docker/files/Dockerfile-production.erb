@@ -7,9 +7,14 @@
 # @see https://github.com/docker-library/ruby/blob/master/Dockerfile.template
 FROM ruby:$RUBY_VERSION-alpine AS base
 
-# Install tools for building gems with extensions. It takes up to 2000 s (32 minutes).
+# Download package index (we use it to install packages). It takes 1 minute.
+# This index has size about 2.2 MB.
 RUN set -eux; \
-	apk add --no-cache g++ make
+	apk update
+
+# Install tools for building gems with extensions. It takes up to 1900 s (31 minutes).
+RUN set -eux; \
+	apk add g++ make
 
 WORKDIR /rails
 
@@ -24,9 +29,9 @@ RUN mkdir -p -m 0755 <%= required_dirs.join(" ") %> \
 # https://git.alpinelinux.org/apk-tools/about/doc/apk.8.scd
 # https://wiki.alpinelinux.org/wiki/Alpine_Package_Keeper
 
-# Install specific packages for Rails application. It takes about 1000 s (16 minutes).
+# Install specific packages for Rails application. It takes about 1100 s (18 minutes).
 RUN set -eux; \
-	apk add --no-cache <%= system_packages.join(" ") %>
+	apk add <%= system_packages.join(" ") %>
 
 # Russian CAs
 ADD https://gu-st.ru/content/lending/russian_trusted_root_ca_pem.crt \
@@ -81,38 +86,10 @@ RUN bun install --frozen-lockfile
 <% end %>
 <% end %>
 
-#==================
-
-FROM base
-
-# Switching to dedicated user
-USER app
-
-COPY --from=compilation /usr/local/bundle/ /usr/local/bundle/
-<% if includes_yarn %>
-COPY --chown=app:app --from=compilation .yarn/ .yarn/
-<% if has_node_modules %>
-
-# WARNING: In general case this directory (node_modules) is not needed after assets compilation,
-# but some tools require files from this directory in runtime (i.e. in browser).
-COPY --from=compilation node_modules ./
-<% end %>
-<% end %>
-
 COPY . .
 <% if use_bootsnap %>
 
 RUN bundle exec bootsnap precompile app/ lib/
-<% end %>
-
-# Enable YJIT everywhere.
-# Or call this at the end of application initialization (in Ruby code):
-#   RubyVM::YJIT.enable
-# @see https://docs.ruby-lang.org/en/master/yjit/yjit_md.html#label-Usage
-ENV RUBY_YJIT_ENABLE=1
-<% if includes_sidekiq %>
-
-RUN bin/rails sidekiq:merge_configs
 <% end %>
 <% if includes_frontend %>
 
@@ -120,11 +97,29 @@ RUN echo "Pre-compiling assets with RAILS_ENV=$RAILS_ENV" \
     && SECRET_KEY_BASE_DUMMY=1 bin/rails assets:precompile --silent
 <% if includes_yarn %>
 
-RUN rm -rf .yarn/cache .yarnrc.yml yarn.lock
+# WARNING: In general case directory "node_modules" is not needed after assets compilation,
+# but some tools require files from this directory in runtime (i.e. in browser).
+RUN rm -rf .yarn/cache .yarnrc.yml yarn.lock node_modules
 <% end %>
 <% end %>
 
 RUN rm -rf .bundle
+
+#==================
+
+FROM base
+
+# Switch to dedicated user.
+USER app
+
+COPY --from=compilation /usr/local/bundle/ /usr/local/bundle/
+COPY --from=compilation . .
+
+# Enable YJIT everywhere.
+# Or call this at the end of application initialization (in Ruby code):
+#   RubyVM::YJIT.enable
+# @see https://docs.ruby-lang.org/en/master/yjit/yjit_md.html#label-Usage
+ENV RUBY_YJIT_ENABLE=1
 
 HEALTHCHECK --timeout=3s CMD wget http://localhost:3000/up
 ENTRYPOINT ["/rails/bin/docker-entrypoint"]

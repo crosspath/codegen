@@ -39,7 +39,7 @@ module Features
         create_project_dir(".build")
 
         DOCKERFILE_ENV.each do |env|
-          erb(file_name, ".build/Dockerfile-#{env}", **locals)
+          erb("Dockerfile-#{env}", ".build/Dockerfile-#{env}", **locals)
           ignore.create_file_for(env)
         end
       end

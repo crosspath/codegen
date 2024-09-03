@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+require "json"
+
 module Features
   module Docker
     class Configuration < Feature
@@ -35,7 +37,6 @@ module Features
             includes_bun: @includes_bun,
             includes_yarn: @includes_yarn,
             required_dirs:,
-            includes_sidekiq: @includes_sidekiq,
             bundle_config_ci: project_file_exist?(".bundle/config.ci"),
             bundle_config_dev: project_file_exist?(".bundle/config.development"),
             bundle_config_prod: project_file_exist?(".bundle/config.production"),
