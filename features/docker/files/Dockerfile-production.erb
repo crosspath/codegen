@@ -120,11 +120,13 @@ RUN echo "Pre-compiling assets with RAILS_ENV=$RAILS_ENV" \
     && SECRET_KEY_BASE_DUMMY=1 bin/rails assets:precompile --silent
 <% if includes_yarn %>
 
-RUN rm -rf .yarn/cache
+RUN rm -rf .yarn/cache .yarnrc.yml yarn.lock
 <% end %>
 <% end %>
 
-HEALTHCHECK --timeout=3s CMD wget http://localhost:${RAILS_PORT}/up
+RUN rm -rf .bundle
+
+HEALTHCHECK --timeout=3s CMD wget http://localhost:3000/up
 ENTRYPOINT ["/rails/bin/docker-entrypoint"]
-EXPOSE $RAILS_PORT
-CMD ["bin/rails", "s", "-p", "$RAILS_PORT", "-b", "0.0.0.0"]
+EXPOSE 3000
+CMD ["bin/rails", "s", "-p", "3000", "-b", "0.0.0.0"]

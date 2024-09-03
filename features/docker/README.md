@@ -7,7 +7,7 @@ This script generates files for Docker:
    Rails 7.1+ application generator.
 2. File `compose.yaml` for development environment including Redis & Sidekiq.
 
-Also this script respects configuration from `bundle-config` & `yarn` features.
+Also this script respects configuration from `bundle-config`, `tools` & `yarn` features.
 
 Alpine Linux does not have time zone database, that's why this script adds `tzinfo-data` gem.
 

@@ -97,7 +97,6 @@ module Features
       def build_args
         {
           RUBY_VERSION: @ruby_version, # Example: 3.3.4
-          RAILS_PORT: 3000,
         }
       end
 
@@ -143,7 +142,7 @@ module Features
         #     libxrandr2 libxss1 libxtst6
         # end
 
-        res << "jemalloc" # Add icu-data-full ?
+        res << "jemalloc tzdata" # Add icu-data-full ?
 
         res
       end
