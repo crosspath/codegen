@@ -35,6 +35,8 @@ module Features::Tools
       end
 
       def update_vs_code_settings
+        create_project_dir(".vscode")
+
         existing_settings = {}
         if project_file_exist?(VS_CODE_SETTINGS_FILE)
           existing_settings = JSON.parse(read_project_file(VS_CODE_SETTINGS_FILE))

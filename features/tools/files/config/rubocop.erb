@@ -36,6 +36,12 @@ Naming/FileName:
   Exclude:
     - .tools/Gemfile
 
+<% if detected_features[:settings] %>
+Layout/RedundantLineBreak:
+  Exclude:
+    - config/initializers/settings.rb
+<% end %>
+
 Style/ClassAndModuleChildren:
   Exclude:
     - '.tools/**/*.rb'

@@ -22,11 +22,13 @@ module Features
 
     COMMENT = /^\s*#/
     COMMENTED_REQUIRE = /^\s*#\s(require|require_relative)\s/
+    FROZEN_STRING_LITERAL = /^\#\s*frozen_string_literal:/i
 
     GEM_REQUIREMENT = /^\s*#?\s*gem/
     GEM_REQUIREMENT_OR_END = /#{GEM_REQUIREMENT}|^\s*end/
 
-    private_constant :COMMENT, :COMMENTED_REQUIRE, :GEM_REQUIREMENT, :GEM_REQUIREMENT_OR_END
+    private_constant :COMMENT, :COMMENTED_REQUIRE, :FROZEN_STRING_LITERAL, :GEM_REQUIREMENT
+    private_constant :GEM_REQUIREMENT_OR_END
 
     def remove_comments_from_ruby_file(project_file_name, &)
       return unless project_file_exist?(project_file_name)
@@ -55,8 +57,13 @@ module Features
       if block_given?
         yield(line)
       else
-        # Оставить строку, если это не комментарий или если это закомментированный require.
-        !line.match?(COMMENT) || line.match?(COMMENTED_REQUIRE)
+        # Оставить строку, если:
+        # а) это не комментарий, или
+        # б) это закомментированный require, или
+        # в) это инструкция frozen_string_literal.
+        return true unless line.match?(COMMENT)
+
+        line.match?(COMMENTED_REQUIRE) || line.match?(FROZEN_STRING_LITERAL)
       end
     end
 

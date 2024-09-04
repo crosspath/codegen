@@ -54,8 +54,18 @@ Supported Rails versions: 7.2.
 ```shell
 change.rb project-directory bundle-config
 ```
-3. Run `bundle install`.
+3. Add some gems, if needed. Run `bundle install` and `bin/postinstall`, if needed.
 4. Apply changes from other features.
+5. Run `bundle install`.
+6. Run `cd .tools && bundle install && cd ..` if you added `tools` feature.
+7. Run `bin/postinstall`, if needed.
+8. Run this code if you use RuboCop:
+  ```shell
+  bin/rubocop -a # Apply "safe" corrections.
+  bin/rubocop --only Style/FrozenStringLiteralComment, \
+    Layout/EmptyLineAfterMagicComment,Style/GlobalStdStream,Style/MutableConstant -A
+  bin/rubocop # Fix manually all the rest issues.
+  ```
 
 ## Testing
 

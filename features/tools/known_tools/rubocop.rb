@@ -12,9 +12,17 @@ module Features::Tools
 
         gems = GEMS.to_h { |x| [x, @gems[x]] }
 
-        erb("config/rubocop", File.join(DIR_CONFIG, "rubocop.yml"), **gems)
+        erb("config/rubocop", File.join(DIR_CONFIG, "rubocop.yml"), detected_features:, **gems)
         copy_files_to_project("config/rubocop-in-templates.yml", DIR_CONFIG)
         copy_files_to_project("bin/rubocop", DIR_BIN)
+      end
+
+      private
+
+      def detected_features
+        {
+          settings: project_file_exist?("config/initializers/settings.rb")
+        }
       end
     end
   end

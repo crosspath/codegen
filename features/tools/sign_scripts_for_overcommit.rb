@@ -26,7 +26,7 @@ module Features
         puts "Sign scripts for Overcommit..."
         `bin/overcommit --sign`
         `bin/overcommit --sign pre-commit`
-        <%= "`bin/overcommit --sign post-checkout`" if options[:post_checkout] %>
+        <%= "`bin/overcommit --sign post-checkout`\n" if options[:post_checkout] %>
         <%= "`bin/overcommit --sign post-commit`" if options[:post_commit] %>
       ERB
 
