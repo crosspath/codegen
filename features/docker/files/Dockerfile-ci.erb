@@ -21,7 +21,7 @@ RUN set -eux; \
 
 # Install common packages for Rails application. It takes up to ? s (? minutes).
 RUN set -eux; \
-	apk add jemalloc tzdata
+    apk add jemalloc tzdata
 
 WORKDIR /rails
 <%= "\nENV \\\n#{env[:initial].join(" \\\n")}\n" if env[:initial] %>
@@ -38,7 +38,8 @@ RUN set -eux; \
 	apk add <%= system_packages.join(" ") %>
 <% end %>
 
-# Russian CAs
+# Russian CAs. You may remove these lines if you don't need testing with
+# Capybara, Selenium or similar tools.
 ADD https://gu-st.ru/content/lending/russian_trusted_root_ca_pem.crt \
     /usr/local/share/ca-certificates/russian_trusted_root_ca_pem.crt
 RUN /usr/sbin/update-ca-certificates
@@ -51,8 +52,8 @@ RUN gem install bundler:<%= bundler_version %>
 
 FROM base AS compilation
 
-<% if bundle_config_prod %>
-COPY .bundle/config.production .bundle/config
+<% if bundle_config_ci %>
+COPY .bundle/config.ci .bundle/config
 <% end %>
 COPY Gemfile Gemfile.lock ./
 
@@ -64,6 +65,9 @@ RUN bundle install \
 RUN bundle exec bootsnap precompile --gemfile
 <% end %>
 <% if includes_frontend %>
+
+# You may remove all lines for front-end development if you don't need testing with
+# Capybara, Selenium or similar tools.
 <% if includes_yarn %>
 
 # Force to download Yarn.

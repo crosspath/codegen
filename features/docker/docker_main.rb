@@ -21,13 +21,14 @@ module Features
 
         puts "Updating #{ENTRYPOINT}..."
         update_entrypoint
+
+        puts "Creating bin script for application in Docker running in development environment..."
+        create_docker_dev(configuration)
       end
 
       private
 
-      # DOCKERFILE_ENV = %w[ci development production].freeze
-      DOCKERFILE_ENV = %w[production].freeze
-
+      DOCKERFILE_ENV = %w[ci development production].freeze
       ENTRYPOINT = "bin/docker-entrypoint"
 
       private_constant :DOCKERFILE_ENV, :ENTRYPOINT
@@ -52,6 +53,10 @@ module Features
         file = read_project_file(ENTRYPOINT)
         file.sub!("#!/bin/bash -e", "#!/bin/sh -e")
         write_project_file(ENTRYPOINT, file)
+      end
+
+      def create_docker_dev(configuration)
+        erb("docker-dev", "bin/docker-dev", **configuration.dockerfile_variables)
       end
     end
   end

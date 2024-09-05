@@ -6,10 +6,11 @@ This script generates files for Docker:
    Alpine Linux). You may use them instead of default `Dockerfile` + `.dockerignore` files from
    Rails 7.1+ application generator.
 2. File `compose.yaml` for development environment including Redis & Sidekiq.
+3. Script `bin/docker-dev` for application in Docker running in development environment.
+   It installs gems & front-end packages required for your application. You may think of it as
+   an addition to standard script `bin/setup`.
 
 Also this script respects configuration from `bundle-config`, `tools` & `yarn` features.
-
-Alpine Linux does not have time zone database, that's why this script adds `tzinfo-data` gem.
 
 No special actions required from other developers or PCs.
 

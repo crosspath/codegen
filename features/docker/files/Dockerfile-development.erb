@@ -1,6 +1,14 @@
 # Based on template: railties/lib/rails/generators/rails/app/templates/Dockerfile.tt
 # And on this guide: https://mailsnag.com/blog/optimized-ruby-dockerfile/
 
+# Run this script with --mount option targeting to your application directory.
+# Application directory maps to "/rails" directory in container. Example:
+# docker run \
+#   --mount src=/srv/app,dst=/rails,type=volume \
+#   --mount src=bundler,dst=/usr/local/bundler,type=volume \
+#   -d project-tag
+# (replace "/srv/app" to application directory and "project-tag" to your project name).
+
 <% arg.each do |k, v| %><%= "ARG #{k}=#{v}\n" %><% end %>
 
 # @see https://github.com/docker-library/ruby/blob/master/Dockerfile.template
@@ -21,16 +29,11 @@ RUN set -eux; \
 
 # Install common packages for Rails application. It takes up to ? s (? minutes).
 RUN set -eux; \
-	apk add jemalloc tzdata
+    apk add jemalloc tzdata
 
 WORKDIR /rails
 <%= "\nENV \\\n#{env[:initial].join(" \\\n")}\n" if env[:initial] %>
 
-RUN addgroup -g 1000 app \
-    && adduser -u 1000 -G app app -s /bin/sh -D -H
-
-RUN mkdir -p -m 0755 <%= required_dirs.join(" ") %> \
-    && chown -R app:app .
 <% if !system_packages.empty? %>
 
 # Install specific packages for Rails application. It takes about 1100 s (18 minutes).
@@ -47,33 +50,15 @@ RUN /usr/sbin/update-ca-certificates
 # Install required Bundler version.
 RUN gem install bundler:<%= bundler_version %>
 
+<% if includes_yarn || includes_bun %>
 #==================
-
-FROM base AS compilation
-
-<% if bundle_config_prod %>
-COPY .bundle/config.production .bundle/config
 <% end %>
-COPY Gemfile Gemfile.lock ./
-
-# Install gems for Rails application. It takes about 1000 s (16 minutes) or more.
-RUN bundle install \
-    && rm -rf /usr/local/bundle/cache/*
-<% if use_bootsnap %>
-
-RUN bundle exec bootsnap precompile --gemfile
-<% end %>
-<% if includes_frontend %>
 <% if includes_yarn %>
 
 # Force to download Yarn.
 RUN npm install -g corepack \
     && corepack enable \
     && corepack install
-
-COPY package.json yarn.lock .yarn ./
-
-RUN yarn install --immutable
 <% end %>
 <% if includes_bun %>
 
@@ -84,38 +69,9 @@ RUN unzip -qd /tmp/bun /tmp/bun.zip \
     && chmod +x /tmp/bun/bun \
     && mv /tmp/bun/bun /usr/local/bin/ \
     && rm -rf /tmp/bun /tmp/bun.zip
-
-COPY package.json bun.lockb ./
-
-RUN bun install --frozen-lockfile
 <% end %>
-<% end %>
-
-COPY . .
-
-RUN echo "Last steps..." \
-<% if use_bootsnap %>
-    && bundle exec bootsnap precompile app/ lib/ \
-<% end %>
-<% if includes_frontend %>
-    && SECRET_KEY_BASE_DUMMY=1 bin/rails assets:precompile --silent \
-<% if includes_yarn %>
-# WARNING: In general case directory "node_modules" is not needed after assets compilation,
-# but some tools require files from this directory in runtime (i.e. in browser).
-    && rm -rf .yarn/cache .yarnrc.yml yarn.lock node_modules \
-<% end %>
-<% end %>
-    && rm -rf .bundle
 
 #==================
-
-FROM base
-
-# Switch to dedicated user.
-USER app
-
-COPY --from=compilation /usr/local/bundle/ /usr/local/bundle/
-COPY --from=compilation --chown=app:app /rails /rails
 
 # Enable YJIT everywhere.
 # Or call this at the end of application initialization (in Ruby code):

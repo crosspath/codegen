@@ -1,0 +1,32 @@
+#!/bin/sh -e
+
+# Run as: docker exec -it container-id bin/docker-dev
+# (replace "container-id" with real value).
+
+# -e: Exit immediately if a command exits with a non-zero status.
+# -u: Treat unset variables as an error when substituting.
+# -x: Print commands and their arguments as they are executed.
+set -eux
+
+mkdir -p -m 0755 <%= required_dirs.join(" ") %>
+
+# -n: do not overwrite
+cp -n .bundle/config.development .bundle/config
+
+# Install gems for Rails application. It takes about 1000 s (16 minutes) or more.
+bundle install
+
+<% if use_bootsnap %>
+bundle exec bootsnap precompile --gemfile
+<% end %>
+<% if includes_yarn %>
+yarn install
+<% end %>
+<% if includes_bun %>
+bun install
+<% end %>
+<% if use_bootsnap %>
+bundle exec bootsnap precompile app/ lib/
+<% end %>
+
+echo "Files have been updated."

@@ -143,7 +143,7 @@ module Features
         #     libxrandr2 libxss1 libxtst6
         # end
 
-        res << "jemalloc tzdata" # Add icu-data-full ?
+        # Add icu-data-full ?
 
         res
       end
