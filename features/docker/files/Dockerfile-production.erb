@@ -13,30 +13,29 @@ FROM ruby:$RUBY_VERSION-alpine AS base
 # Download package index (we use it to install packages). It takes 1 minute.
 # This index has size about 2.2 MB.
 RUN set -eux; \
-	apk update
+    apk update
 
 # Install tools for building gems with extensions. It takes up to 1900 s (31 minutes).
 RUN set -eux; \
-	apk add g++ make
+    apk add g++ make
 
 # Install common packages for Rails application. It takes up to ? s (? minutes).
 RUN set -eux; \
-	apk add jemalloc tzdata
+    apk add jemalloc tzdata
+<% if !system_packages.empty? %>
+
+# Install specific packages for Rails application. It takes about 1100 s (18 minutes).
+RUN set -eux; \
+    apk add <%= system_packages.join(" ") %>
+<% end %>
 
 WORKDIR /rails
-<%= "\nENV \\\n#{env[:initial].join(" \\\n")}\n" if env[:initial] %>
 
 RUN addgroup -g 1000 app \
     && adduser -u 1000 -G app app -s /bin/sh -D -H
 
 RUN mkdir -p -m 0755 <%= required_dirs.join(" ") %> \
     && chown -R app:app .
-<% if !system_packages.empty? %>
-
-# Install specific packages for Rails application. It takes about 1100 s (18 minutes).
-RUN set -eux; \
-	apk add <%= system_packages.join(" ") %>
-<% end %>
 
 # Russian CAs
 ADD https://gu-st.ru/content/lending/russian_trusted_root_ca_pem.crt \
@@ -116,6 +115,8 @@ USER app
 
 COPY --from=compilation /usr/local/bundle/ /usr/local/bundle/
 COPY --from=compilation --chown=app:app /rails /rails
+
+ENV RAILS_ENV=production<%= " \\\n    NODE_ENV=production" if includes_frontend %>
 
 # Enable YJIT everywhere.
 # Or call this at the end of application initialization (in Ruby code):

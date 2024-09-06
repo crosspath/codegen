@@ -103,10 +103,6 @@ module Features
 
       def build_envs
         {
-          initial: env_hash_to_array({
-            RAILS_ENV: "production",
-            **(@package_json.nil? ? {} : {NODE_ENV: "production"}),
-          }),
           prebuild_ruby_gems: env_hash_to_array({
             LD_PRELOAD: "libjemalloc.so.2",
             MALLOC_CONF:

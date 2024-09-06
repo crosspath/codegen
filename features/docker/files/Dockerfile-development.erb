@@ -4,7 +4,7 @@
 # Run this script with --mount option targeting to your application directory.
 # Application directory maps to "/rails" directory in container. Example:
 # docker run \
-#   --mount src=/srv/app,dst=/rails,type=volume \
+#   --mount src=/srv/app,dst=/rails,type=bind \
 #   --mount src=bundler,dst=/usr/local/bundler,type=volume \
 #   -d project-tag
 # (replace "/srv/app" to application directory and "project-tag" to your project name).
@@ -21,25 +21,23 @@ FROM ruby:$RUBY_VERSION-alpine AS base
 # Download package index (we use it to install packages). It takes 1 minute.
 # This index has size about 2.2 MB.
 RUN set -eux; \
-	apk update
+    apk update
 
 # Install tools for building gems with extensions. It takes up to 1900 s (31 minutes).
 RUN set -eux; \
-	apk add g++ make
+    apk add g++ make
 
 # Install common packages for Rails application. It takes up to ? s (? minutes).
 RUN set -eux; \
     apk add jemalloc tzdata
-
-WORKDIR /rails
-<%= "\nENV \\\n#{env[:initial].join(" \\\n")}\n" if env[:initial] %>
-
 <% if !system_packages.empty? %>
 
 # Install specific packages for Rails application. It takes about 1100 s (18 minutes).
 RUN set -eux; \
-	apk add <%= system_packages.join(" ") %>
+    apk add <%= system_packages.join(" ") %>
 <% end %>
+
+WORKDIR /rails
 
 # Russian CAs
 ADD https://gu-st.ru/content/lending/russian_trusted_root_ca_pem.crt \
@@ -72,6 +70,8 @@ RUN unzip -qd /tmp/bun /tmp/bun.zip \
 <% end %>
 
 #==================
+
+ENV RAILS_ENV=development<%= " \\\n    NODE_ENV=development" if includes_frontend %>
 
 # Enable YJIT everywhere.
 # Or call this at the end of application initialization (in Ruby code):
