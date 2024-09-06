@@ -10,11 +10,8 @@ set -eux
 
 mkdir -p -m 0755 <%= required_dirs.join(" ") %>
 
-# -n: do not overwrite
-cp -n .bundle/config.development .bundle/config
-
-# Install gems for Rails application. It takes about 1000 s (16 minutes) or more.
-bundle install
+# Install gems for Rails application & prepare database.
+bin/setup
 
 <% if use_bootsnap %>
 bundle exec bootsnap precompile --gemfile

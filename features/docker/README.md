@@ -29,55 +29,110 @@ docker build -t project-tag -f .build/Dockerfile-production .
 
 > File `.build/Dockerfile-CI` uses `.build/Dockerfile-CI.dockerignore` file, and so on.
 
-2. Run shell console within Docker image (placeholders: project-tag, container-id):
+2. Create and run container from image (placeholders: project-tag, container-id):
+
+* Run shell console (create container)
 
 ```shell
 docker run -it project-tag sh
+```
+
+* Run shell console (attach to existing container)
+
+```shell
 docker exec -it container-id sh
 docker exec -it $(docker container ls -alq --filter ancestor=project-tag) sh
 ```
 
-3. Start service (placeholders: project-tag):
+* Start service in background (create container)
 
 ```shell
 docker run -d -p 127.0.0.1:3000:3000 project-tag
 ```
 
-4. Show container IDs of specified image (placeholders: project-tag):
+* Start service in background (start existing container) when it has "exited" ("stopped") status
+
+```shell
+docker start container-id
+```
+
+* Start service & attach to it (start existing container) when it has "exited" ("stopped") status
+
+```shell
+docker start -ai container-id
+```
+
+* Easy way to start container if it does not repond to HTTP requests with "-p" argument
+
+```shell
+docker run -d --network host project-tag
+```
+
+3. Show container IDs of specified image (placeholders: project-tag):
 
 ```shell
 docker container ls -aq --filter ancestor=project-tag
 ```
 
-5. Stop service (placeholders: project-tag, container-id):
+4. Attach to running container (placeholders: container-id):
+
+```shell
+docker attach container-id
+```
+
+5. Stop & remove containers (placeholders: project-tag, container-id):
+
+* Stop container
 
 ```shell
 docker stop container-id
 docker stop $(docker container ls -aq --filter ancestor=project-tag)
 ```
 
-6. Remove stopped containers (placeholders: project-tag, container-id):
+* Remove stopped container
 
 ```shell
 docker container rm container-id
 docker container rm $(docker container ls -aq --filter ancestor=project-tag)
 ```
 
-7. Easy way to start container if it does not repond to HTTP requests when using commands above (placeholders: project-tag):
+6. Usage of `docker compose` feature:
 
-```shell
-docker run -d --network host project-tag
-```
-
-8. Start with `docker compose` feature:
+* Start containers
 
 ```shell
 alias compose-project="docker compose --project-directory . -f .build/compose.yaml"
 compose-project pull && compose-project build && compose-project up -d
 ```
 
-9. Stop with `docker compose` feature (see point 8):
+* Stop containers
 
 ```shell
 compose-project down
+```
+
+7. For `Dockerfile-dev` (placeholders: project-tag, container-id, /project/directory):
+
+* Run shell console
+
+```shell
+docker run \
+  --mount src=/project/directory,dst=/rails,type=bind \
+  --mount src=bundler,dst=/usr/local/bundler,type=volume \
+  -it project-tag sh
+```
+
+* Start service
+
+```shell
+docker run \
+  --mount src=/project/directory,dst=/rails,type=bind \
+  --mount src=bundler,dst=/usr/local/bundler,type=volume \
+  -d project-tag
+```
+
+* Install gems & front-end packages, initialize database
+
+```shell
+docker exec -it container-id bin/docker-dev
 ```

@@ -49,6 +49,10 @@ module Features
           ".annotate_solargraph_schema",
           ".overcommit.yml",
           ".vscode/",
+          "bin/docker-dev",
+        ].freeze,
+        development: [
+          "bin/docker-entrypoint",
         ].freeze,
         production: [
           ".annotate_solargraph_schema",
@@ -56,6 +60,7 @@ module Features
           ".rspec",
           ".tools/",
           ".vscode/",
+          "bin/docker-dev",
           "spec/",
           "test/",
         ].freeze
@@ -64,15 +69,15 @@ module Features
       private_constant :ADDITIONAL, :FOR_ALL, :FOR_ASSETS, :FOR_STORAGE, :WHEN_ENV
 
       def entries(env)
-        for_all_envs.concat(additional_entries(WHEN_ENV.fetch(env.to_sym, [])))
+        for_all_envs + additional_entries(WHEN_ENV.fetch(env.to_sym, []))
       end
 
       def for_all_envs
         @for_all_envs ||=
           begin
-            entries = FOR_ALL.dup
-            entries += FOR_ASSETS if @variables[:includes_frontend]
-            entries += FOR_STORAGE if @variables[:includes_active_storage]
+            entries = prefix_slash(FOR_ALL)
+            entries += prefix_slash(FOR_ASSETS) if @variables[:includes_frontend]
+            entries += prefix_slash(FOR_STORAGE) if @variables[:includes_active_storage]
             entries += additional_entries(ADDITIONAL)
 
             entries
@@ -92,11 +97,15 @@ module Features
           end
         end
 
-        entries
+        prefix_slash(entries)
       end
 
       def add_entry_if_file_exists(entries, file_entry, actual_path = file_entry)
-        entries << "/#{file_entry}" if project_file_exist?(actual_path)
+        entries << file_entry if project_file_exist?(actual_path)
+      end
+
+      def prefix_slash(entries)
+        entries.map { |x| "/#{x}" }
       end
     end
   end

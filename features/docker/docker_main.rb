@@ -57,6 +57,7 @@ module Features
 
       def create_docker_dev(configuration)
         erb("docker-dev", "bin/docker-dev", **configuration.dockerfile_variables)
+        run_command_in_project_dir("chmod +x bin/docker-dev")
       end
     end
   end
