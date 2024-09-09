@@ -37,6 +37,7 @@ module Features
         puts "Create Gemfile for directory `#{KnownTool::DIR}`..."
 
         erb("Gemfile", File.join(KnownTool::DIR, "Gemfile"), **use_tools, gems:)
+        write_project_file(File.join(KnownTool::DIR, "Gemfile.lock"), "")
 
         if project_file_exist?(".bundle") && !project_file_exist?(".tools/.bundle")
           puts "Create link .tools/.bundle -> .bundle..."

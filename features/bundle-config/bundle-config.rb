@@ -17,6 +17,8 @@ module Features
 
       puts "Updating bin/setup file..."
       update_bin_setup
+
+      reset_owner_of_gemfile_lock
     end
 
     private
@@ -29,6 +31,8 @@ module Features
       "/.bundle/*",
       "!/.bundle/config.*",
     ].freeze
+
+    GEMFILE_LOCK = "Gemfile.lock"
 
     def copy_configs
       create_project_dir(".bundle")
@@ -60,6 +64,26 @@ module Features
       end
 
       write_project_file("bin/setup", file.join("\n"))
+    end
+
+    def reset_owner_of_gemfile_lock
+      if project_file_exist?(GEMFILE_LOCK)
+        return if current_user_owns_gemfile_lock?
+
+        puts "Reset owner of #{GEMFILE_LOCK} to current user..."
+        change_owner_of_gemfile_lock
+      else
+        write_project_file(GEMFILE_LOCK, "")
+      end
+    end
+
+    def current_user_owns_gemfile_lock?
+      File.owned?(File.join(cli.app_path, GEMFILE_LOCK))
+    end
+
+    def change_owner_of_gemfile_lock
+      user = ENV["USER"]
+      run_command_in_project_dir("sudo chown #{user}:#{user} #{GEMFILE_LOCK}")
     end
   end
 end

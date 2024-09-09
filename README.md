@@ -59,13 +59,6 @@ change.rb project-directory bundle-config
 5. Run `bundle install`.
 6. Run `cd .tools && bundle install && cd ..` if you added `tools` feature.
 7. Run `bin/postinstall`, if needed.
-8. Run this code if you use RuboCop:
-  ```shell
-  bin/rubocop -a # Apply "safe" corrections.
-  bin/rubocop --only Style/FrozenStringLiteralComment, \
-    Layout/EmptyLineAfterMagicComment,Style/GlobalStdStream,Style/MutableConstant -A
-  bin/rubocop # Fix manually all the rest issues.
-  ```
 
 ## Testing
 
