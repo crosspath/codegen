@@ -36,18 +36,17 @@ Naming/FileName:
   Exclude:
     - .tools/Gemfile
 
-<% if detected_features[:settings] %>
+<% if detected_features[:settings] || factory_bot %>
 Layout/RedundantLineBreak:
   Exclude:
+<% if detected_features[:settings] %>
     - config/initializers/settings.rb
+<% end %>
+<% if factory_bot %>
+    - 'factories/**/*.rb'
+<% end %>
 <% end %>
 
 Style/ClassAndModuleChildren:
   Exclude:
     - '.tools/**/*.rb'
-
-<% if factory_bot %>
-Layout/RedundantLineBreak:
-  Exclude:
-    - 'factories/**/*.rb'
-<% end %>
