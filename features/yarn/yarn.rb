@@ -76,10 +76,12 @@ module Features
       # @see https://yarnpkg.com/getting-started/install
       # @see https://nodejs.org/api/corepack.html
       res = `corepack enable`
-      return unless res.include?("permission denied")
+      return if $?.exitstatus == 0
 
-      puts "Corepack (part of NPM) requires sudo privileges for creating symlinks."
-      return if system("sudo corepack enable")
+      if res.include?("permission denied")
+        puts "Corepack (part of NPM) requires sudo privileges for creating symlinks."
+        return if system("sudo corepack enable")
+      end
 
       raise "Cannot enable Corepack that is required for Yarn."
     end
