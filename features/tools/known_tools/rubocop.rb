@@ -15,6 +15,8 @@ module Features::Tools
         erb("config/rubocop", File.join(DIR_CONFIG, "rubocop.yml"), detected_features:, **gems)
         copy_files_to_project("config/rubocop-in-templates.yml", DIR_CONFIG)
         copy_files_to_project("bin/rubocop", DIR_BIN)
+
+        cli.post_install_script.add_steps(AutofixCode)
       end
 
       private
