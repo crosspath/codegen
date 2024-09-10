@@ -77,31 +77,12 @@ module Features
 
       # @return [Hash<String, Boolean>]
       def application_gems
-        result = read_gems_list_from_gemfile_lock
+        result = GemfileLock.new(cli.app_path).gems
 
         result << "rswag" if result.include?("rswag-specs")
         result << "rspec" if result.include?("rspec-core")
 
         result.to_h { |item| [item, true] }
-      end
-
-      # @return [Array<String>]
-      def read_gems_list_from_gemfile_lock
-        lines = read_project_file("Gemfile.lock").split("\n")
-        result = []
-
-        loop do
-          # +3 means "skip lines 'GEM', 'remote', 'specs'"
-          gem_list_index = lines.find_index { |line| line == "GEM" }&.+(3)
-          break unless gem_list_index
-
-          lines = lines[gem_list_index..]
-          result += lines.take_while { |line| !line.empty? }
-        end
-
-        raise "Cannot find 'GEM' section in Gemfile.lock" if result.empty?
-
-        result.map { |line| line[/\S+/] }
       end
     end
   end

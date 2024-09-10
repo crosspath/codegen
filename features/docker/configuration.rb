@@ -2,23 +2,23 @@
 
 require "json"
 
+require_relative "../../src/gemfile_lock"
+require_relative "../../src/package_json"
+
 module Features
   module Docker
     class Configuration < Feature
       def call
-        gemfile_lock = read_project_file(GEMFILE_LOCK_FILE).split("\n")
-        @package_json = read_package_json
+        @gemfile_lock = GemfileLock.new(cli.app_path)
+        @package_json = PackageJson.new(cli.app_path)
 
         @includes_active_storage = active_storage?
-        @bundler_version = read_bundler_version(gemfile_lock)
         @dbms_adapter = read_dbms_adapter(read_database_yml)
-        @includes_redis = !gemfile_lock.grep(/^\s*redis\s/).empty?
-        @includes_sidekiq = !gemfile_lock.grep(/^\s*sidekiq\s/).empty?
-        @includes_frontend = !@package_json.nil?
+        @includes_frontend = @package_json.exist?
 
         @includes_bun = @includes_frontend
         @includes_bun &&= project_file_exist?("bun.config.js") || project_file_exist?("bun.lockb")
-        @includes_yarn = @includes_frontend && @package_json["packageManager"] =~ /^yarn@/
+        @includes_yarn = @includes_frontend && @package_json.package_manager =~ /^yarn@/
       end
 
       def dockerfile_variables
@@ -27,7 +27,7 @@ module Features
             args: build_args,
             envs: build_envs,
             bun_version: "", # TODO
-            bundler_version: @bundler_version,
+            bundler_version: @gemfile_lock.bundler_version,
             has_node_modules: project_file_exist?("node_modules"),
             includes_frontend: @includes_frontend,
             includes_bun: @includes_bun,
@@ -36,15 +36,15 @@ module Features
             bundle_config_ci: project_file_exist?(".bundle/config.ci"),
             bundle_config_dev: project_file_exist?(".bundle/config.development"),
             bundle_config_prod: project_file_exist?(".bundle/config.production"),
-            use_bootsnap: !gemfile_lock.grep(/^\s*bootsnap\s/).empty?,
+            use_bootsnap: @gemfile_lock.includes?("bootsnap"),
             system_packages:,
           }
       end
 
       def compose_variables
         {
-          includes_redis: @includes_redis,
-          includes_sidekiq: @includes_sidekiq,
+          includes_redis: @gemfile_lock.includes?("redis"),
+          includes_sidekiq: @gemfile_lock.includes?("sidekiq"),
           database: DBMS_IMAGES[@dbms_adapter],
         }
       end
@@ -53,8 +53,6 @@ module Features
 
       CONFIG_APPLICATION_FILE = "config/application.rb"
       DATABASE_YML = "config/database.yml"
-      GEMFILE_LOCK_FILE = "Gemfile.lock"
-      PACKAGE_JSON_FILE = "package.json"
       RUBY_VERSION_FILE = ".ruby-version"
 
       DBMS_IMAGES = {
@@ -98,8 +96,8 @@ module Features
         ].join(",").freeze,
       }.freeze
 
-      private_constant :CONFIG_APPLICATION_FILE, :DATABASE_YML, :GEMFILE_LOCK_FILE
-      private_constant :PACKAGE_JSON_FILE, :RUBY_VERSION_FILE, :DBMS_IMAGES, :DBMS_PACKAGES
+      private_constant :CONFIG_APPLICATION_FILE, :DATABASE_YML
+      private_constant :RUBY_VERSION_FILE, :DBMS_IMAGES, :DBMS_PACKAGES
       private_constant :REQUIRED_DIRS, :REQUIRED_DIRS_FOR_STORAGE, :ENV_JEMALLOC
 
       def build_args
@@ -157,14 +155,6 @@ module Features
         )
       end
 
-      def read_bundler_version(gemfile_lock)
-        index = gemfile_lock.find_index("BUNDLED WITH")
-        return gemfile_lock[index + 1].strip if index
-
-        require "bundler"
-        Bundler::VERSION
-      end
-
       def read_database_yml
         project_file_exist?(DATABASE_YML) ? read_project_file(DATABASE_YML).lines : nil
       end
@@ -174,12 +164,6 @@ module Features
         return unless adapter_line
 
         adapter_line.split(":", 2).last.sub(/#.*/, "").strip
-      end
-
-      def read_package_json
-        return unless project_file_exist?(PACKAGE_JSON_FILE)
-
-        JSON.parse(read_project_file(PACKAGE_JSON_FILE))
       end
 
       def read_ruby_version
