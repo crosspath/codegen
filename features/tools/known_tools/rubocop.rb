@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+require_relative "../autofix_code"
+
 module Features::Tools
   module KnownTools
     class Rubocop < KnownTool

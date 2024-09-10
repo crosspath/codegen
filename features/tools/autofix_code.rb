@@ -10,6 +10,7 @@ module Features
       end
 
       STEP = <<~RUBY
+        puts 'Apply "safe" corrections from RuboCop...'
         RULES = %w[
           Layout/EmptyLineAfterMagicComment
           Style/FrozenStringLiteralComment
@@ -22,18 +23,12 @@ module Features
             output = `\#{command}`
             res =
               output.lines.reverse.find do |line|
-                lines.include?("files inspected") || lines.include?("file inspected")
+                line.include?("files inspected") || line.include?("file inspected")
               end
-            res ? puts(res) : puts(output)
+            puts(res || output)
           end
-        run_and_show_all =
-          ->(command) do
-            puts "+ \#{command}"
-            system(command)
-          end
-        run_and_show_stats.call("bin/rubocop -a") # Apply "safe" corrections.
-        run_and_show_stats.call("bin/rubocop --only \#{RULES.join(",")} -A")
-        run_and_show_all.call("bin/rubocop") # Fix manually all the rest issues.
+        run_and_show_stats.call("bin/rubocop -a")
+        run_and_show_stats.call("bin/rubocop -A --only \#{RULES.join(",")}")
       RUBY
 
       private_constant :STEP

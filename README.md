@@ -59,6 +59,8 @@ change.rb project-directory bundle-config
 5. Run `bundle install`.
 6. Run `cd .tools && bundle install && cd ..` if you added `tools` feature.
 7. Run `bin/postinstall`, if needed.
+8. Run `bin/rubocop` to fix manually issues from RuboCop (if you added it to your project).
+   Script bin/postinstall` applies "safe" corrections so you don't need to do it manually.
 
 ## Testing
 
