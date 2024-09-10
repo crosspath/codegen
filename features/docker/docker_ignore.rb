@@ -15,6 +15,7 @@ module Features
       private
 
       ADDITIONAL = [
+        ".devcontainer",
         ".dockerignore",
         "config/master.key",
         "Dockerfile",
@@ -96,8 +97,8 @@ module Features
       end
 
       def multi_file_entries(hash)
-        hash.each do |file_entry, actual_path|
-          single_file_entry(file_entry, actual_path)
+        hash.reduce([]) do |result, (file_entry, actual_path)|
+          result.concat(single_file_entry(file_entry, actual_path))
         end
       end
 

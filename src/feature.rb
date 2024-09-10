@@ -86,7 +86,7 @@ class Feature
   end
 
   def add_gem(*gems, group: nil)
-    # If `:test` then ", group: :test". If `[:test]` then ", group: [:test}".
+    # If `:test` then ", group: :test". If `[:test]` then ", group: [:test]".
     group = group ? ", group: #{group.inspect}" : ""
     new_gems = gems.map { |name| "gem \"#{name}\"#{group}" }.join("\n")
     gemfile = "#{read_project_file("Gemfile")}\n#{new_gems}\n"

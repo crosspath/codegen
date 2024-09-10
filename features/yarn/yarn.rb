@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-require "english" # $CHILD_STATUS
+require "English" # $CHILD_STATUS
 
 module Features
   class Yarn < Feature
