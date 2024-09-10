@@ -1,5 +1,4 @@
 def xhr_gems
-  $main.gem 'blueprinter'
   $main.gem 'railbus'
 end
 

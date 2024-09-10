@@ -2,17 +2,8 @@ require 'erubi'
 require 'json'
 require 'yaml'
 
-def cf(save_to, from)
-  $main.create_file(save_to, File.read(from))
-end
-
 def f(save_to, from)
   cf(save_to, File.join(__dir__, 'templates', from))
-end
-
-def af(save_to, from)
-  from = File.join(__dir__, 'templates', from)
-  $main.append_to_file(save_to, File.read(from))
 end
 
 def d(as, from, recursive: false)
@@ -40,17 +31,6 @@ def erb(save_to, read_from, **locals)
   result = b.eval(Erubi::Engine.new(File.read(file_name)).src)
 
   $main.create_file(save_to, result)
-end
-
-def yaml(save_to, read_from)
-  entries = File.exist?(save_to) ? YAML.load(save_to).to_ruby : {}
-  append  = File.read(File.join(__dir__, 'templates', read_from))
-
-  entries.deep_merge!(append)
-
-  result = YAML.dump(entries)
-
-  $main.create_file(save_to, result.slice(3, result.length))
 end
 
 def remove_strings(file, strings)
@@ -81,7 +61,6 @@ end
 
 $_bundle_commands = []
 $_npm_packages    = []
-$_npm_commands    = []
 
 def after_bundle_install(&block)
   # if ARGV[0] == 'app:template'
@@ -95,10 +74,6 @@ def add_npm_package(*names)
   $_npm_packages += names
 end
 
-def after_npm_install(&block)
-  $_npm_commands << block
-end
-
 at_exit do
   unless $_bundle_commands.empty?
     $main.send(:bundle_command, 'install', 'BUNDLE_IGNORE_MESSAGES' => '1')
@@ -107,8 +82,5 @@ at_exit do
 
   unless $_npm_packages.empty?
     $main.run "yarn add #{$_npm_packages.join(' ')}"
-  end
-  unless $_npm_commands.empty?
-    $_npm_commands.each(&:call)
   end
 end

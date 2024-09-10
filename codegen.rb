@@ -15,17 +15,6 @@ answers[:slim] = $main.yes?('Use Slim templates? (y/n)')
 
 # TODO: GraphQL or RESTful
 
-answers[:base] = $main.yes?('Add all base files? (y/n)')
-
-# Для разработчиков параметры доступа к базе данных (DATABASE_URL) будут
-# храниться в файлах .env.*.local.
-# Эти файлы не должны попасть в репозиторий.
-# Этот параметр можно также использовать на сервере.
-answers[:db] = $main.yes?('Use ENV[DATABASE_URL] for production? (y/n)')
-unless answers[:db]
-  answers[:db_name] = $main.ask('> Database name for production =')
-end
-
 answers[:product] = $main.yes?('Add README & docs? (y/n)')
 if answers[:product]
   answers[:product_name]  = $main.ask('> Product name (for Readme) =')
@@ -47,8 +36,6 @@ answers[:sorcery] = $main.yes?('Add Sorcery? (y/n)')
 
 answers[:sidekiq] = !$main.options[:skip_active_job] && $main.yes?('Add Sidekiq? (y/n)')
 answers[:redis]   = answers[:sidekiq] || $main.yes?('Add Redis? (y/n)')
-
-answers[:test] = $main.yes?('Add gems for testing? (y/n)')
 
 if answers[:webpack]
   answers[:turbolinks] = $main.yes?('Add Turbolinks? (y/n)')

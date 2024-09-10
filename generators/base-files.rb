@@ -108,14 +108,3 @@ def base_spring(answers)
     $main.run 'bundle exec spring binstub --all'
   end
 end
-
-def base_vendor
-  if empty_dir?('vendor')
-    $main.remove_dir('vendor')
-    text = <<~END
-      # Mark any vendored files as having been vendored.
-      vendor/* linguist-vendored
-    END
-    $main.gsub_file('.gitattributes', text, '')
-  end
-end

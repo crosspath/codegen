@@ -62,3 +62,12 @@ module Features
     end
   end
 end
+=begin
+sudo docker build -t api -f .build/Dockerfile-production .
+sudo docker run --rm -it api sh
+SECRET_KEY_BASE_DUMMY=1 bin/rails zeitwerk:check
+sudo docker run \
+  --mount src=/home/xpath/code/codegen/tmp/api_7,dst=/rails,type=bind \
+  --mount src=bundler,dst=/usr/local/bundler,type=volume \
+  -it api-development sh
+=end
