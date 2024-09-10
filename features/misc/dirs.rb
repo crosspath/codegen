@@ -6,12 +6,10 @@ module Features
       def call
         remove_app_helpers
         remove_maybe_empty_dirs
-        remove_app_channels if !project_file_exist?(APP_CHANNELS) || !use_web_sockets?
       end
 
       private
 
-      APP_CHANNELS = "app/channels"
       APP_HELPERS = "app/helpers"
 
       APPLICATION_HELPER = "application_helper.rb"
@@ -24,7 +22,7 @@ module Features
 
       DOT_KEEP = %r{^\.keep$|/\.keep$}
 
-      private_constant :APP_CHANNELS, :APP_HELPERS, :APPLICATION_HELPER, :APPLICATION_HELPER_TEXT
+      private_constant :APP_HELPERS, :APPLICATION_HELPER, :APPLICATION_HELPER_TEXT
       private_constant :MAYBE_EMPTY_DIRS, :DOT_KEEP
 
       def remove_app_helpers
@@ -47,19 +45,6 @@ module Features
           puts "Check #{dir}..."
           remove_project_dir(dir) if dir_exists?(dir) && dir_empty?(dir)
         end
-      end
-
-      def use_web_sockets?
-        cli.ask.question(
-          type: :boolean,
-          label: "Keep WebSockets support",
-          default: ->(_, _) { "n" }
-        )
-      end
-
-      def remove_app_channels
-        puts "Removing #{APP_CHANNELS} directory..."
-        remove_project_dir(APP_CHANNELS)
       end
 
       def dir_exists?(dir_name)

@@ -332,18 +332,6 @@ module NewProject
       #   default: ->(_, _) { false },
       #   apply: ->(_gopt, ropt, val) { ropt["skip-collision-check"] = !val },
       # },
-      # listen: {
-      #   label: "Add `listen` gem",
-      #   type: :boolean,
-      #   default: ->(_, _) { true },
-      #   apply: ->(_gopt, ropt, val) { ropt["skip-listen"] = !val },
-      # },
-      # puma: {
-      #   label: "Add Puma",
-      #   type: :boolean,
-      #   default: ->(_, _) { true },
-      #   apply: ->(_gopt, ropt, val) { ropt["skip-puma"] = !val },
-      # },
       # git: {
       #   label: "Create .gitignore",
       #   type: :boolean,
@@ -355,12 +343,6 @@ module NewProject
       #   type: :boolean,
       #   default: ->(_, _) { true },
       #   apply: ->(_gopt, ropt, val) { ropt["skip-docker"] = !val },
-      # },
-      # gemfile: {
-      #   label: "Add Gemfile",
-      #   type: :boolean,
-      #   default: ->(_, _) { true },
-      #   apply: ->(_gopt, ropt, val) { ropt["skip-gemfile"] = !val },
       # },
       # decrypted_diffs: {
       #   label: "Configure git to show decrypted diffs of encrypted credentials",
