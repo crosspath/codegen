@@ -20,8 +20,6 @@ module Features
         {}
       end
 
-      private
-
       STEP = <<~ERB
         puts "Sign scripts for Overcommit..."
         `bin/overcommit --sign`

@@ -26,7 +26,7 @@ module Features::Tools
       NEW_VS_CODE_SETTINGS = {"solargraph.commandPath" => "bin/solargraph"}.freeze
       VS_CODE_SETTINGS_FILE = ".vscode/settings.json"
 
-      private_constant :NEW_VS_CODE_SETTINGS, :VS_CODE_SETTINGS_FILE
+      private_constant :IGNORE_FILES, :NEW_VS_CODE_SETTINGS, :VS_CODE_SETTINGS_FILE
 
       def copy_files_for_solargraph
         copy_files_to_project("config/.solargraph.yml", DIR_CONFIG)

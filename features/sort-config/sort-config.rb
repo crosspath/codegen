@@ -20,7 +20,7 @@ module Features
 
     private_constant :RE_CONFIG, :RE_CONFIG_WITH_CAPTURE, :RE_FILE, :RE_SPACES
 
-    def extract_blocks(lines)
+    def extract_blocks(lines) # rubocop:disable Metrics/AbcSize, Metrics/MethodLength
       nested_block = false
       prev_has_config = true
       after_new_line = true

@@ -24,7 +24,7 @@ module Features
 
       DOT_KEEP = %r{^\.keep$|/\.keep$}
 
-      private_constant :APP_HELPERS, :APPLICATION_HELPER, :APPLICATION_HELPER_TEXT
+      private_constant :APP_CHANNELS, :APP_HELPERS, :APPLICATION_HELPER, :APPLICATION_HELPER_TEXT
       private_constant :MAYBE_EMPTY_DIRS, :DOT_KEEP
 
       def remove_app_helpers

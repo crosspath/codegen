@@ -9,8 +9,6 @@ module Features
         indent(STEP)
       end
 
-      private
-
       STEP = <<~RUBY
         RULES = %w[
           Layout/EmptyLineAfterMagicComment

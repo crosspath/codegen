@@ -23,7 +23,7 @@ module Features::Tools
 
       def detected_features
         {
-          settings: project_file_exist?("config/initializers/settings.rb")
+          settings: project_file_exist?("config/initializers/settings.rb"),
         }
       end
     end

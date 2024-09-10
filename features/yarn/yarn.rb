@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+require "english" # $CHILD_STATUS
+
 module Features
   class Yarn < Feature
     register_as "yarn", before: "docker"
@@ -76,7 +78,7 @@ module Features
       # @see https://yarnpkg.com/getting-started/install
       # @see https://nodejs.org/api/corepack.html
       res = `corepack enable`
-      return if $?.exitstatus == 0
+      return if $CHILD_STATUS.exitstatus == 0 # $CHILD_STATUS is $?
 
       if res.include?("permission denied")
         puts "Corepack (part of NPM) requires sudo privileges for creating symlinks."

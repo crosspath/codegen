@@ -1,12 +1,12 @@
 # frozen_string_literal: true
 
 require_relative "../env"
-require_relative "config_file"
-require_relative "configuration"
-require_relative "options"
 require_relative "../post_install_script"
 require_relative "../post_install_steps/remove_keeps"
 require_relative "../string_utils"
+require_relative "config_file"
+require_relative "configuration"
+require_relative "options"
 
 module NewProject
   class CLI

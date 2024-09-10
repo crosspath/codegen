@@ -1,7 +1,7 @@
 # Based on template: railties/lib/rails/generators/rails/app/templates/Dockerfile.tt
 # And on this guide: https://mailsnag.com/blog/optimized-ruby-dockerfile/
 
-<% arg.each do |k, v| %><%= "ARG #{k}=#{v}\n" %><% end %>
+<% args.each do |k, v| %><%= "ARG #{k}=#{v}\n" %><% end %>
 
 # @see https://github.com/docker-library/ruby/blob/master/Dockerfile.template
 FROM ruby:$RUBY_VERSION-alpine AS base
@@ -42,7 +42,7 @@ ADD https://gu-st.ru/content/lending/russian_trusted_root_ca_pem.crt \
     /usr/local/share/ca-certificates/russian_trusted_root_ca_pem.crt
 RUN /usr/sbin/update-ca-certificates
 
-<%= "ENV \\\n#{env[:prebuild_ruby_gems].join(" \\\n")}\n\n" if env[:prebuild_ruby_gems] %>
+<%= "ENV \\\n#{envs.join(" \\\n")}\n\n" %>
 # Install required Bundler version.
 RUN gem install bundler:<%= bundler_version %>
 

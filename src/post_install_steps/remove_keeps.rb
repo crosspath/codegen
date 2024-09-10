@@ -9,8 +9,6 @@ module PostInstallSteps
       indent(STEP)
     end
 
-    private
-
     STEP = <<~RUBY
       puts "Remove vendor/javascript/.keep..."
       File.unlink("vendor/javascript/.keep") if File.exist?("vendor/javascript/.keep")

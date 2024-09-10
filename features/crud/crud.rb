@@ -9,8 +9,7 @@ module Features
       add_gem("blueprinter")
 
       puts "Copy files..."
-      create_project_dir("app/controllers/concerns")
-      copy_files_to_project("crud_actions.rb", "app/controllers/concerns/")
+      copy_files_for_crud
 
       puts "Add example route..."
       update_config_routes
@@ -46,6 +45,11 @@ module Features
 
     private_constant :ROUTES_FILE, :RE_END, :EXAMPLE_ROUTE, :CONTROLLER_FILE, :RE_CONTROLLER, :MIXIN
     private_constant :INFLECTIONS_FILE, :INFLECTIONS_EXAMPLE
+
+    def copy_files_for_crud
+      create_project_dir("app/controllers/concerns")
+      copy_files_to_project("crud_actions.rb", "app/controllers/concerns/")
+    end
 
     def update_config_routes
       assert_file_exists(ROUTES_FILE)

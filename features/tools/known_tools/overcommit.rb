@@ -8,16 +8,31 @@ module Features::Tools
       register_as "Overcommit (it calls other tools via git hooks)"
 
       def call(use_tools)
+        options = {}
+
+        copy_bin_script
+        generate_config(use_tools)
+        copy_hooks(use_tools, options)
+
+        cli.post_install_script.add_steps(SignScriptsForOvercommit.with_options(options))
+      end
+
+      private
+
+      def copy_bin_script
         puts "Add Overcommit..."
 
-        options = {}
         copy_files_to_project("bin/overcommit", DIR_BIN)
+      end
 
+      def generate_config(use_tools)
         puts "Generate config file for Overcommit..."
 
         # This file should be stored in application root directory, not in `.tools`.
         erb(".overcommit", ".overcommit.yml", **use_tools)
+      end
 
+      def copy_hooks(use_tools, options)
         if use_tools["bundler_audit"] || use_tools["bundler_leak"]
           add_hook_for_update_gems_data(use_tools)
 
@@ -33,11 +48,7 @@ module Features::Tools
         end
 
         add_pre_commit_hook_for_yaml
-
-        cli.post_install_script.add_steps(SignScriptsForOvercommit.with_options(options))
       end
-
-      private
 
       def add_hook_for_update_gems_data(use_tools)
         puts "Add post-checkout git hook for updating gems data..."

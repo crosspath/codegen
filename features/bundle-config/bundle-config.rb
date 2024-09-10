@@ -34,6 +34,14 @@ module Features
 
     GEMFILE_LOCK = "Gemfile.lock"
 
+    COPY_CONFIG = <<~RUBY
+      if !File.exist?(".bundle/config") && File.exist?(".bundle/config.development")
+        `cp .bundle/config.development .bundle/config`
+      end
+    RUBY
+
+    private_constant :DO_NOT_IGNORE, :IGNORE_FILE_ENTRIES, :GEMFILE_LOCK, :COPY_CONFIG
+
     def copy_configs
       create_project_dir(".bundle")
 
@@ -48,22 +56,19 @@ module Features
       file = read_project_file("bin/setup").split("\n")
       line_index_with_bundle_call = file.find_index { |line| line.include?("bundle") }
 
-      modified_line = <<~RUBY
-        if !File.exist?(".bundle/config") && File.exist?(".bundle/config.development")
-          `cp .bundle/config.development .bundle/config`
-        end
-      RUBY
-
-      # Add 2 spaces.
-      modified_line = StringUtils.indent(modified_line.split("\n")).join("\n") + "\n"
-
-      if line_index_with_bundle_call
-        file[line_index_with_bundle_call] = modified_line + file[line_index_with_bundle_call]
-      else
-        file << modified_line
-      end
+      add_lines_to_bin_setup(file, line_index_with_bundle_call)
 
       write_project_file("bin/setup", file.join("\n"))
+    end
+
+    def add_lines_to_bin_setup(original, position)
+      new_lines = StringUtils.indent(COPY_CONFIG.split("\n")).join("\n")
+
+      if position
+        original.insert(position, new_lines)
+      else
+        original.concat(new_lines)
+      end
     end
 
     def reset_owner_of_gemfile_lock
@@ -82,7 +87,7 @@ module Features
     end
 
     def change_owner_of_gemfile_lock
-      user = ENV["USER"]
+      user = ENV.fetch("USER")
       run_command_in_project_dir("sudo chown #{user}:#{user} #{GEMFILE_LOCK}")
     end
   end

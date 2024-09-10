@@ -9,8 +9,6 @@ module Features
         indent(STEP)
       end
 
-      private
-
       STEP = <<~RUBY
         puts "Configurate YARD..."
         `bin/yard config --gem-install-yri`

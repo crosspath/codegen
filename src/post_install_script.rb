@@ -9,12 +9,12 @@ class PostInstallScript
   ].freeze
 
   class Step
-    def initialize(app_path)
-      @app_path = app_path
-    end
-
     def self.indent(code)
       StringUtils.indent(code.split("\n")).join("\n").rstrip
+    end
+
+    def initialize(app_path)
+      @app_path = app_path
     end
 
     private
@@ -53,8 +53,6 @@ class PostInstallScript
   def remove
     Dir.chdir(@app_path) { File.unlink(FILE_NAME) }
   end
-
-  private
 
   FILE_NAME = "bin/postinstall"
 

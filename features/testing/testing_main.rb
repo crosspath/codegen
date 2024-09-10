@@ -59,7 +59,11 @@ module Features
       end
 
       def add_rswag?
-        cli.ask.question(type: :boolean, label: "Add rswag (OpenAPI 3.0+)", default: ->(_, _) { "y" })
+        cli.ask.question(
+          type: :boolean,
+          label: "Add rswag (OpenAPI 3.0+)",
+          default: ->(_, _) { "y" }
+        )
       end
 
       def copy_spec_support

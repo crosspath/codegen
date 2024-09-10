@@ -18,8 +18,10 @@ module Features
         ".dockerignore",
         "config/master.key",
         "Dockerfile",
-        "app/assets/builds/*" => "app/assets",
-        "config/credentials/*.key" => "config/credentials",
+        {
+          "app/assets/builds/*" => "app/assets",
+          "config/credentials/*.key" => "config/credentials",
+        },
       ].freeze
 
       # @see https://github.com/rails/rails/blob/main/railties/lib/rails/generators/rails/app/templates/dockerignore.tt
@@ -63,7 +65,7 @@ module Features
           "bin/docker-dev",
           "spec/",
           "test/",
-        ].freeze
+        ].freeze,
       }.freeze
 
       private_constant :ADDITIONAL, :FOR_ALL, :FOR_ASSETS, :FOR_STORAGE, :WHEN_ENV
@@ -85,23 +87,22 @@ module Features
       end
 
       def additional_entries(items)
-        entries = []
-
-        items.each do |path|
-          if path.is_a?(Hash)
-            path.each do |file_entry, actual_path|
-              add_entry_if_file_exists(entries, file_entry, actual_path)
-            end
-          else
-            add_entry_if_file_exists(entries, path)
+        entries =
+          items.reduce([]) do |result, path|
+            result.concat(path.is_a?(Hash) ? multi_file_entries(path) : single_file_entry(path))
           end
-        end
 
         prefix_slash(entries)
       end
 
-      def add_entry_if_file_exists(entries, file_entry, actual_path = file_entry)
-        entries << file_entry if project_file_exist?(actual_path)
+      def multi_file_entries(hash)
+        hash.each do |file_entry, actual_path|
+          single_file_entry(file_entry, actual_path)
+        end
+      end
+
+      def single_file_entry(file_entry, actual_path = file_entry)
+        project_file_exist?(actual_path) ? [file_entry] : []
       end
 
       def prefix_slash(entries)

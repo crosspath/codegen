@@ -9,8 +9,6 @@ module Features
         indent(STEP)
       end
 
-      private
-
       STEP = <<~RUBY
         puts "Add RSwag..."
         `bin/rails g rswag:api:install`

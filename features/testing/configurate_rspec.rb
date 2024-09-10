@@ -9,8 +9,6 @@ module Features
         indent(STEP)
       end
 
-      private
-
       RAILS_HELPER_FILE = "spec/rails_helper.rb"
       RE_LINE_FOR_REQUIRES = /^$|^\s*RSpec\.configure\b/
 
@@ -20,7 +18,7 @@ module Features
       RUBY
       RE_END = /\A\s*end\b/
 
-      STEP = <<~RUBY
+      STEP = <<~RUBY.freeze
         puts "Add RSpec..."
         `bin/rails g rspec:install`
         lines = File.read("#{RAILS_HELPER_FILE}").split("\\n")
