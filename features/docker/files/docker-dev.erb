@@ -17,7 +17,7 @@ bin/setup
 bundle exec bootsnap precompile --gemfile
 <% end %>
 <% if includes_yarn %>
-yarn install
+corepack install && yarn install
 <% end %>
 <% if includes_bun %>
 bun install

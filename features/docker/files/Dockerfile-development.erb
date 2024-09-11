@@ -18,45 +18,53 @@ FROM ruby:$RUBY_VERSION-alpine AS base
 # https://git.alpinelinux.org/apk-tools/about/doc/apk.8.scd
 # https://wiki.alpinelinux.org/wiki/Alpine_Package_Keeper
 
-# Download package index (we use it to install packages). It takes 1 minute.
+# Download package index (we use it to install packages). It takes 4s.
 # This index has size about 2.2 MB.
 RUN set -eux; \
     apk update
 
-# Install tools for building gems with extensions. It takes up to 1900 s (31 minutes).
-RUN set -eux; \
-    apk add g++ make
-
-# Install common packages for Rails application. It takes up to ? s (? minutes).
+# Install common packages for Rails application. It takes about 3s.
 RUN set -eux; \
     apk add jemalloc tzdata
-<% if !system_packages.empty? %>
 
-# Install specific packages for Rails application. It takes about 1100 s (18 minutes).
+# Install tools for building gems with extensions. It takes about 15s.
 RUN set -eux; \
-    apk add <%= system_packages.join(" ") %>
+    apk add g++ make
+<% if !build_time_packages.empty? %>
+
+# Install specific packages for Rails application (required for build). It takes about 7s.
+RUN set -eux; \
+    apk add <%= build_time_packages.join(" ") %>
 <% end %>
 
-WORKDIR /rails
+# Install required Bundler version.
+RUN gem install bundler:<%= bundler_version %>
+
+#==================
+
+<% if !runtime_packages.empty? %>
+
+# Install specific packages for Rails application (required for runtime). It takes about 12s.
+RUN set -eux; \
+    apk add <%= runtime_packages.join(" ") %>
+<% end %>
 
 # Russian CAs
 ADD https://gu-st.ru/content/lending/russian_trusted_root_ca_pem.crt \
     /usr/local/share/ca-certificates/russian_trusted_root_ca_pem.crt
 RUN /usr/sbin/update-ca-certificates
 
-<%= "ENV \\\n#{envs.join(" \\\n")}\n\n" %>
-# Install required Bundler version.
-RUN gem install bundler:<%= bundler_version %>
+<%= "ENV \\\n#{envs.join(" \\\n")}\n" %>
+
+WORKDIR /rails
 
 <% if includes_yarn || includes_bun %>
 #==================
 <% end %>
 <% if includes_yarn %>
 
-# Force to download Yarn.
 RUN npm install -g corepack \
-    && corepack enable \
-    && corepack install
+    && corepack enable
 <% end %>
 <% if includes_bun %>
 

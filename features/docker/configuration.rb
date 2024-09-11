@@ -37,7 +37,8 @@ module Features
             bundle_config_dev: project_file_exist?(".bundle/config.development"),
             bundle_config_prod: project_file_exist?(".bundle/config.production"),
             use_bootsnap: @gemfile_lock.includes?("bootsnap"),
-            system_packages:,
+            runtime_packages:,
+            build_time_packages:,
           }
       end
 
@@ -77,9 +78,9 @@ module Features
 
       # For Alpine.
       DBMS_PACKAGES = {
-        "mysql" => %w[mysql-client],
-        "postgresql" => %w[postgresql16-client libpq-dev],
-        "sqlite3" => %w[sqlite],
+        "mysql" => {build: %w[mariadb-dev], runtime: %w[mariadb-client]},
+        "postgresql" => {build: %w[libpq-dev], runtime: %w[postgresql16-client]},
+        "sqlite3" => {build: %w[sqlite-dev], runtime: %w[sqlite]},
       }.freeze
 
       REQUIRED_DIRS = %w[.bundle log tmp/pids].freeze
@@ -116,11 +117,9 @@ module Features
         res.sort
       end
 
-      def system_packages
+      def runtime_packages
         res = []
-        res << "nodejs npm" if @includes_yarn
-        res << "unzip" if @includes_bun
-        res += DBMS_PACKAGES[@dbms_adapter] || [] if @dbms_adapter
+        res += DBMS_PACKAGES.dig(@dbms_adapter, :runtime) || [] if @dbms_adapter
         res << "vips" if @includes_active_storage
 
         # if add_chromium
@@ -136,6 +135,14 @@ module Features
 
         # Add icu-data-full ?
 
+        res
+      end
+
+      def build_time_packages
+        res = []
+        res += DBMS_PACKAGES.dig(@dbms_adapter, :build) || [] if @dbms_adapter
+        res << "nodejs npm" if @includes_yarn
+        res << "unzip" if @includes_bun
         res
       end
 

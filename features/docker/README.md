@@ -113,26 +113,11 @@ compose-project down
 
 7. For `Dockerfile-dev` (placeholders: project-tag, container-id, /project/directory):
 
-* Run shell console
+* Start container and install gems & front-end packages, initialize database
 
 ```shell
 docker run \
   --mount src=/project/directory,dst=/rails,type=bind \
   --mount src=bundler,dst=/usr/local/bundler,type=volume \
-  -it project-tag sh
-```
-
-* Start service
-
-```shell
-docker run \
-  --mount src=/project/directory,dst=/rails,type=bind \
-  --mount src=bundler,dst=/usr/local/bundler,type=volume \
-  -d project-tag
-```
-
-* Install gems & front-end packages, initialize database
-
-```shell
-docker exec -it container-id bin/docker-dev
+  -it project-tag bin/docker-dev
 ```

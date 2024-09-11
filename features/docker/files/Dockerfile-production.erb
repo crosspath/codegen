@@ -10,24 +10,17 @@ FROM ruby:$RUBY_VERSION-alpine AS base
 # https://git.alpinelinux.org/apk-tools/about/doc/apk.8.scd
 # https://wiki.alpinelinux.org/wiki/Alpine_Package_Keeper
 
-# Download package index (we use it to install packages). It takes 1 minute.
+# Download package index (we use it to install packages). It takes 4s.
 # This index has size about 2.2 MB.
 RUN set -eux; \
     apk update
 
-# Install tools for building gems with extensions. It takes up to 1900 s (31 minutes).
-RUN set -eux; \
-    apk add g++ make
-
-# Install common packages for Rails application. It takes up to ? s (? minutes).
+# Install common packages for Rails application. It takes about 3s.
 RUN set -eux; \
     apk add jemalloc tzdata
-<% if !system_packages.empty? %>
 
-# Install specific packages for Rails application. It takes about 1100 s (18 minutes).
-RUN set -eux; \
-    apk add <%= system_packages.join(" ") %>
-<% end %>
+# Install required Bundler version.
+RUN gem install bundler:<%= bundler_version %>
 
 WORKDIR /rails
 
@@ -37,25 +30,45 @@ RUN addgroup -g 1000 app \
 RUN mkdir -p -m 0755 <%= required_dirs.join(" ") %> \
     && chown -R app:app .
 
+#==================
+
+FROM base as runtime
+<% if !runtime_packages.empty? %>
+
+# Install specific packages for Rails application (required for runtime). It takes about 12s.
+RUN set -eux; \
+    apk add <%= runtime_packages.join(" ") %>
+<% end %>
+
 # Russian CAs
 ADD https://gu-st.ru/content/lending/russian_trusted_root_ca_pem.crt \
     /usr/local/share/ca-certificates/russian_trusted_root_ca_pem.crt
 RUN /usr/sbin/update-ca-certificates
 
-<%= "ENV \\\n#{envs.join(" \\\n")}\n\n" %>
-# Install required Bundler version.
-RUN gem install bundler:<%= bundler_version %>
+<%= "ENV \\\n#{envs.join(" \\\n")}\n" %>
 
 #==================
 
-FROM base AS compilation
+FROM base AS build
+
+# Install tools for building gems with extensions. It takes about 15s.
+RUN set -eux; \
+    apk add g++ make
+<% if !build_time_packages.empty? %>
+
+# Install specific packages for Rails application (required for build). It takes about 7s.
+RUN set -eux; \
+    apk add <%= build_time_packages.join(" ") %>
+<% end %>
+
+WORKDIR /rails
 
 <% if bundle_config_prod %>
 COPY .bundle/config.production .bundle/config
 <% end %>
 COPY Gemfile Gemfile.lock ./
 
-# Install gems for Rails application. It takes about 1000 s (16 minutes) or more.
+# Install gems for Rails application. It takes about 37s for new project.
 RUN bundle install \
     && rm -rf /usr/local/bundle/cache/*
 <% if use_bootsnap %>
@@ -65,12 +78,12 @@ RUN bundle exec bootsnap precompile --gemfile
 <% if includes_frontend %>
 <% if includes_yarn %>
 
+COPY package.json yarn.lock .yarn ./
+
 # Force to download Yarn.
 RUN npm install -g corepack \
     && corepack enable \
     && corepack install
-
-COPY package.json yarn.lock .yarn ./
 
 RUN yarn install --immutable
 <% end %>
@@ -92,29 +105,33 @@ RUN bun install --frozen-lockfile
 
 COPY . .
 
-RUN echo "Last steps..." \
+RUN <<SHELL
+    set -eux
 <% if use_bootsnap %>
-    && bundle exec bootsnap precompile app/ lib/ \
+    bundle exec bootsnap precompile app/ lib/
 <% end %>
 <% if includes_frontend %>
-    && SECRET_KEY_BASE_DUMMY=1 bin/rails assets:precompile --silent \
+    SECRET_KEY_BASE_DUMMY=1 bin/rails assets:precompile --silent
 <% if includes_yarn %>
-# WARNING: In general case directory "node_modules" is not needed after assets compilation,
-# but some tools require files from this directory in runtime (i.e. in browser).
-    && rm -rf .yarn/cache .yarnrc.yml yarn.lock node_modules \
+    # WARNING: In general case directory "node_modules" is not needed after assets compilation,
+    # but some tools require files from this directory in runtime (i.e. in browser).
+    rm -rf .yarn/cache .yarnrc.yml yarn.lock node_modules
 <% end %>
 <% end %>
-    && rm -rf .bundle
+    rm -rf .bundle
+SHELL
 
 #==================
 
-FROM base
+FROM runtime
+
+WORKDIR /rails
 
 # Switch to dedicated user.
 USER app
 
-COPY --from=compilation /usr/local/bundle/ /usr/local/bundle/
-COPY --from=compilation --chown=app:app /rails /rails
+COPY --from=build /usr/local/bundle/ /usr/local/bundle/
+COPY --from=build --chown=app:app /rails /rails
 
 ENV RAILS_ENV=production<%= " \\\n    NODE_ENV=production" if includes_frontend %>
 
