@@ -1,5 +1,6 @@
 # frozen_string_literal: true
 
+# Helper class fo reading `Gemfile.lock` file.
 class GemfileLock
   # @param dir [String]
   def initialize(dir)

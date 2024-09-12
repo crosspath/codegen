@@ -4,6 +4,7 @@ require_relative "registry"
 
 # Singleton-like registry for features list.
 class FeatureRegistry < Registry
+  # Element of {FeatureRegistry}.
   RegistryItem = Struct.new(:klass, :name, :hash_key)
 
   @instance = new
@@ -19,6 +20,7 @@ class FeatureRegistry < Registry
     item
   end
 
+  # (see Registry.all)
   def self.all
     @instance.all
   end

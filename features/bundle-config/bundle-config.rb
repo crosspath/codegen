@@ -87,7 +87,7 @@ module Features
     end
 
     def change_owner_of_gemfile_lock
-      user = ENV.fetch("USER")
+      user = Env.user
       run_command_in_project_dir("sudo chown #{user}:#{user} #{GEMFILE_LOCK}")
     end
   end

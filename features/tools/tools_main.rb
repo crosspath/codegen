@@ -26,7 +26,7 @@ module Features
 
       private
 
-      # @return [nil]
+      # @return [void]
       def require_tools
         Dir.glob("known_tools/*.rb", base: __dir__, sort: true).each { |x| require_relative x }
       end
@@ -46,7 +46,7 @@ module Features
         link_bundle_dir
       end
 
-      # @return [nil]
+      # @return [void]
       def create_dirs_for_tools(registry, use_tools)
         add_configs = registry.any? { |_key, item| item.selected && item.adds_config }
 
@@ -59,7 +59,7 @@ module Features
         use_tools.each { |key, selected| tools[key].call(use_tools) if selected }
       end
 
-      # @return [nil]
+      # @return [void]
       def create_gemfile(gems, use_tools)
         puts "Create Gemfile for directory `#{KnownTool::DIR}`..."
 
@@ -67,7 +67,7 @@ module Features
         write_project_file(File.join(KnownTool::DIR, "Gemfile.lock"), "")
       end
 
-      # @return [nil]
+      # @return [void]
       def link_bundle_dir
         return if !project_file_exist?(".bundle") || project_file_exist?(".tools/.bundle")
 

@@ -1,8 +1,11 @@
 # frozen_string_literal: true
 
+# Useful methods for strings.
 module StringUtils
   extend self
 
+  # @param lines [Array<String>]
+  # @return [void]
   def warning(lines)
     length = lines.map(&:size).max
 
@@ -13,6 +16,9 @@ module StringUtils
     puts
   end
 
+  # @param lines [Array<String>]
+  # @param level [Integer]
+  # @return [Array<String>]
   def indent(lines, level = 1)
     spaces = " " * (2 * level)
     lines.map { |x| x.empty? ? x : "#{spaces}#{x}" }

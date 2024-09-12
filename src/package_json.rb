@@ -1,5 +1,6 @@
 # frozen_string_literal: true
 
+# Helper class for reading `package.json` file.
 class PackageJson
   # @param dir [String]
   def initialize(dir)
