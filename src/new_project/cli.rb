@@ -50,14 +50,17 @@ module NewProject
       return yield unless Env.system_ruby?
 
       paths = GEM_PATHS.join(" ")
+      rubygems_uses_flock = Gem::Version.new(Gem::VERSION) > Gem::Version.new("3.5.14")
 
       begin
         puts "Your Ruby installation requires sudo privileges for installing gems."
 
         allow_access_to_gem_dirs(paths)
+        create_rails_lock_file if rubygems_uses_flock
 
         yield
       ensure
+        remove_rails_lock_file if rubygems_uses_flock
         deny_access_to_gem_dirs(paths)
       end
     end
@@ -164,6 +167,14 @@ module NewProject
 
     def load_rails_files(railties_path)
       require "#{railties_path}/lib/rails/command"
+    end
+
+    def create_rails_lock_file
+      system("sudo touch /usr/bin/rails.lock && sudo chmod 0777 /usr/bin/rails.lock")
+    end
+
+    def remove_rails_lock_file
+      system("sudo rm -f /usr/bin/rails.lock")
     end
   end
 end
