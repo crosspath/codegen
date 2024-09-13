@@ -58,7 +58,7 @@ module NewProject
           "minimal" => "Minimal (Ruby on Rails + front-end)",
           "api-only" => "API-only (no app/assets, app/helpers)",
         },
-        default: ->(_, _) { "full-stack" },
+        default: ->(_gopt, _ropt) { "full-stack" },
         apply: ->(_gopt, ropt, val) do
           case val
           when "full-stack" then next
@@ -70,7 +70,7 @@ module NewProject
       active_record: {
         label: "Add Active Record - Rails ORM",
         type: :boolean,
-        default: ->(_, _) { true },
+        default: ->(_gopt, _ropt) { true },
         apply: ->(_gopt, ropt, val) { ropt["skip-active-record"] = !val },
       },
       db: {
@@ -83,7 +83,7 @@ module NewProject
           "sqlite3" => "SQLite3",
           "other" => "... other", # Required: gem name.
         },
-        default: ->(_, _) { "postgresql" },
+        default: ->(_gopt, _ropt) { "postgresql" },
         apply: ->(_gopt, ropt, val) { ropt["database"] = val if val != "other" },
         skip_if: ->(_gopt, ropt) { ropt["skip-active-record"] },
       },
@@ -103,14 +103,14 @@ module NewProject
       dev_gems: {
         label: "Add gems for development - web-console, rack-mini-profiler",
         type: :boolean,
-        default: ->(_gopt, ropt) { !ropt["minimal"] },
+        default: ->(_gopt, _ropt) { false },
         apply: ->(_gopt, ropt, val) { ropt["skip-dev-gems"] = !val },
         skip_if: ->(_gopt, ropt) { ropt["api"] },
       },
       keeps: {
         label: "Files .keep in directories: */concerns, lib/tasks, log, tmp",
         type: :boolean,
-        default: ->(_, _) { false },
+        default: ->(_gopt, _ropt) { false },
         apply: ->(_gopt, ropt, val) { ropt["skip-keeps"] = !val },
       },
       mailer: {
@@ -128,7 +128,7 @@ module NewProject
       mailbox: {
         label: "Add Action Mailbox - receive emails",
         type: :boolean,
-        default: ->(_gopt, ropt) { !ropt["minimal"] },
+        default: ->(_gopt, _ropt) { false },
         apply: ->(_gopt, ropt, val) do
           if ropt["minimal"]
             ropt["no-skip-action-mailbox"] = true if val
@@ -177,7 +177,7 @@ module NewProject
       action_cable: {
         label: "Add Action Cable - WebSockets support",
         type: :boolean,
-        default: ->(_gopt, ropt) { !ropt["minimal"] },
+        default: ->(_gopt, _ropt) { false },
         apply: ->(_gopt, ropt, val) do
           if ropt["minimal"]
             ropt["no-skip-action-cable"] = true if val
@@ -189,7 +189,7 @@ module NewProject
       assets: {
         label: "Add asset pipeline - if you reject it, you still may add bundler for JavaScript",
         type: :boolean,
-        default: ->(_, _) { true },
+        default: ->(_gopt, _ropt) { true },
         apply: ->(_gopt, ropt, val) { ropt["skip-asset-pipeline"] = !val },
         skip_if: ->(_gopt, ropt) { ropt["api"] },
       },
@@ -200,14 +200,14 @@ module NewProject
           "sprockets" => "Sprockets",
           "propshaft" => "Propshaft",
         },
-        default: ->(_, _) { "sprockets" },
+        default: ->(_gopt, _ropt) { "sprockets" },
         apply: ->(_gopt, ropt, val) { ropt["asset-pipeline"] = val },
         skip_if: ->(_gopt, ropt) { ropt["api"] || ropt["skip-asset-pipeline"] },
       },
       hotwire: {
         label: "Add Hotwire",
         type: :boolean,
-        default: ->(_gopt, ropt) { !ropt["minimal"] },
+        default: ->(_gopt, _ropt) { false },
         apply: ->(_gopt, ropt, val) do
           if ropt["minimal"]
             ropt["no-skip-hotwire"] = true if val
@@ -228,7 +228,7 @@ module NewProject
           "rollup" => "Rollup",
           "webpack" => "Webpack",
         },
-        default: ->(_, _) { "importmap" },
+        default: ->(_gopt, _ropt) { "importmap" },
         apply: ->(_gopt, ropt, val) { ropt["javascript"] = val },
         skip_if: ->(_gopt, ropt) { ropt["api"] || ropt["skip-javascript"] },
       },
@@ -243,14 +243,14 @@ module NewProject
           "sass" => "Sass",
           "tailwind" => "Tailwind",
         },
-        default: ->(_, _) { "none" },
+        default: ->(_gopt, _ropt) { "none" },
         apply: ->(_gopt, ropt, val) { ropt["css"] = val if val != "none" },
         skip_if: ->(gopt, ropt) { ropt["api"] || !gopt[:assets] },
       },
       jbuilder: {
         label: "Add jbuilder",
         type: :boolean,
-        default: ->(_gopt, ropt) { !ropt["minimal"] },
+        default: ->(_gopt, _ropt) { false },
         apply: ->(_gopt, ropt, val) do
           if ropt["minimal"]
             ropt["no-skip-jbuilder"] = true if val
@@ -262,7 +262,7 @@ module NewProject
       bootsnap: {
         label: "Add Bootsnap",
         type: :boolean,
-        default: ->(_gopt, ropt) { !ropt["minimal"] },
+        default: ->(_gopt, _ropt) { true },
         apply: ->(_gopt, ropt, val) do
           if ropt["minimal"]
             ropt["no-skip-bootsnap"] = true if val
@@ -274,7 +274,7 @@ module NewProject
       tests: {
         label: "Add tests - Minitest",
         type: :boolean,
-        default: ->(_gopt, ropt) { !ropt["minimal"] },
+        default: ->(_gopt, _ropt) { false },
         apply: ->(_gopt, ropt, val) do
           if ropt["minimal"]
             ropt["no-skip-test"] = true if val
@@ -286,7 +286,7 @@ module NewProject
       system_tests: {
         label: "Add system tests - Capybara, Selenium",
         type: :boolean,
-        default: ->(_gopt, ropt) { !ropt["minimal"] },
+        default: ->(_gopt, _ropt) { false },
         apply: ->(_gopt, ropt, val) do
           if ropt["minimal"]
             ropt["no-skip-system-test"] = true if val
@@ -317,55 +317,55 @@ module NewProject
       bundle_install: {
         label: "Run `bundle install` at the end of this process",
         type: :boolean,
-        default: ->(_, _) { false },
+        default: ->(_gopt, _ropt) { false },
         apply: ->(_gopt, ropt, val) { ropt["skip-bundle"] = !val },
       },
       # namespace: {
       #   label: "Skip namespace",
       #   type: :boolean,
-      #   default: ->(_, _) { false },
+      #   default: ->(_gopt, _ropt) { false },
       #   apply: ->(_gopt, ropt, val) { ropt["skip-namespace"] = !val },
       # },
       # collision_check: {
       #   label: "Skip collision check",
       #   type: :boolean,
-      #   default: ->(_, _) { false },
+      #   default: ->(_gopt, _ropt) { false },
       #   apply: ->(_gopt, ropt, val) { ropt["skip-collision-check"] = !val },
       # },
       # git: {
       #   label: "Create .gitignore",
       #   type: :boolean,
-      #   default: ->(_, _) { true },
+      #   default: ->(_gopt, _ropt) { true },
       #   apply: ->(_gopt, ropt, val) { ropt["skip-git"] = !val },
       # },
       # docker: {
       #   label: "Create files for Docker",
       #   type: :boolean,
-      #   default: ->(_, _) { true },
+      #   default: ->(_gopt, _ropt) { true },
       #   apply: ->(_gopt, ropt, val) { ropt["skip-docker"] = !val },
       # },
       # decrypted_diffs: {
       #   label: "Configure git to show decrypted diffs of encrypted credentials",
       #   type: :boolean,
-      #   default: ->(_, _) { true },
+      #   default: ->(_gopt, _ropt) { true },
       #   apply: ->(_gopt, ropt, val) { ropt["skip-decrypted-diffs"] = !val },
       # },
       # ruby: {
       #   label: "Path to the Ruby binary",
       #   type: :text,
-      #   default: ->(_, _) { `which ruby`.strip },
+      #   default: ->(_gopt, _ropt) { `which ruby`.strip },
       #   apply: ->(_gopt, ropt, val) { ropt["ruby"] = val },
       # },
       # template: {
       #   label: "Path to some application template (can be a filesystem path or URL)",
       #   type: :text,
-      #   default: ->(_, _) { "" },
+      #   default: ->(_gopt, _ropt) { "" },
       #   apply: ->(_gopt, ropt, val) { ropt["template"] = val },
       # },
       # devcontainer: {
       #   label: "Add .devcontainer files",
       #   type: :boolean,
-      #   default: ->(_, _) { false },
+      #   default: ->(_gopt, _ropt) { false },
       #   apply: ->(_gopt, ropt, val) { ropt["devcontainer"] = val },
       # },
     }.freeze
