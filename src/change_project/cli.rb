@@ -56,7 +56,7 @@ module ChangeProject
     def apply_selected_features
       # Sort by `FeatureRegistry.all`.
       (@known_features.keys & @features).each do |feature_key|
-        puts "", "Using #{@known_features[feature_key].name}..."
+        StringUtils.section("Using #{@known_features[feature_key].name}...")
         @known_features[feature_key].klass.new(self).call
       end
     end

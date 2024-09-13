@@ -3,6 +3,15 @@
 module StringUtils
   extend self
 
+  def section(name)
+    length = name.size
+
+    puts
+    puts name
+    puts("-" * length)
+    puts
+  end
+
   def warning(lines)
     length = lines.map(&:size).max
 

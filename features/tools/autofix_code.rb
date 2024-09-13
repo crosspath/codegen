@@ -10,7 +10,7 @@ module Features
       end
 
       STEP = <<~RUBY
-        puts 'Apply "safe" corrections from RuboCop...'
+        section.call('Apply "safe" corrections from RuboCop...')
         RULES = %w[
           Layout/EmptyLineAfterMagicComment
           Style/FrozenStringLiteralComment

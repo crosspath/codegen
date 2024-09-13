@@ -10,7 +10,7 @@ module Features
       end
 
       STEP = <<~RUBY
-        puts "Configurate YARD..."
+        section.call("Configurate YARD...")
         `bin/yard config --gem-install-yri`
       RUBY
 

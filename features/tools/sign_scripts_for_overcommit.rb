@@ -1,6 +1,5 @@
 # frozen_string_literal: true
 
-require_relative "../../src/erb_eval"
 require_relative "../../src/post_install_script"
 
 module Features
@@ -13,22 +12,22 @@ module Features
       end
 
       def call
-        indent(ErbEval.call(STEP, options:))
+        steps = [
+          "bin/overcommit --sign",
+          "bin/overcommit --sign pre-commit",
+        ]
+        steps << "bin/overcommit --sign post-checkout" if options[:post_checkout]
+        steps << "bin/overcommit --sign post-commit" if options[:post_commit]
+
+        text = 'section.call("Sign scripts for Overcommit...")'.dup
+        text << "\n#{steps.map { |x| "`#{x}`\n" }.join}"
+
+        indent(text)
       end
 
       def options
         {}
       end
-
-      STEP = <<~ERB
-        puts "Sign scripts for Overcommit..."
-        `bin/overcommit --sign`
-        `bin/overcommit --sign pre-commit`
-        <%= "`bin/overcommit --sign post-checkout`\n" if options[:post_checkout] %>
-        <%= "`bin/overcommit --sign post-commit`" if options[:post_commit] %>
-      ERB
-
-      private_constant :STEP
     end
   end
 end

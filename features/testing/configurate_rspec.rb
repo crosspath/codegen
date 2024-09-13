@@ -19,7 +19,7 @@ module Features
       RE_END = /\A\s*end\b/
 
       STEP = <<~RUBY.freeze
-        puts "Add RSpec..."
+        section.call("Add RSpec...")
         `bin/rails g rspec:install`
         lines = File.read("#{RAILS_HELPER_FILE}").split("\\n")
         # Get first line that meets any one of these criterions:

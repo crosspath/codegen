@@ -68,6 +68,8 @@ class PostInstallScript
         raise "You should run `cd .tools && bundle install && cd ..` and then `bin/postinstall`"
       end
 
+      section = ->(name) { puts("", name, "-" * name.size, "") }
+
     <%= steps.join("\n\n") %>
     end
 

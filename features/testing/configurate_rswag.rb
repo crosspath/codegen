@@ -10,7 +10,7 @@ module Features
       end
 
       STEP = <<~RUBY
-        puts "Add RSwag..."
+        section.call("Add RSwag...")
         `bin/rails g rswag:api:install`
         `bin/rails g rswag:ui:install`
         rswag_ui_file = "config/initializers/rswag_ui.rb"

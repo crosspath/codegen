@@ -10,7 +10,7 @@ module PostInstallSteps
     end
 
     STEP = <<~RUBY
-      puts "Remove vendor/javascript/.keep..."
+      section.call("Remove vendor/javascript/.keep...")
       File.unlink("vendor/javascript/.keep") if File.exist?("vendor/javascript/.keep")
       if Dir.empty?("vendor/javascript")
         Dir.delete("vendor/javascript")
