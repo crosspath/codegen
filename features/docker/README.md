@@ -22,7 +22,7 @@ No special actions required from other developers or PCs.
 1. Build Docker image (placeholders: project-tag):
 
 ```shell
-docker build -t project-tag -f .build/Dockerfile-CI .
+docker build -t project-tag -f .build/Dockerfile-ci .
 docker build -t project-tag -f .build/Dockerfile-development .
 docker build -t project-tag -f .build/Dockerfile-production .
 ```

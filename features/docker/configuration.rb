@@ -30,6 +30,8 @@ module Features
             bundler_version: @gemfile_lock.bundler_version,
             has_node_modules: project_file_exist?("node_modules"),
             includes_frontend: @includes_frontend,
+            includes_propshaft: @gemfile_lock.includes?("propshaft"),
+            includes_sprockets: @gemfile_lock.includes?("sprockets"),
             includes_bun: @includes_bun,
             includes_yarn: @includes_yarn,
             required_dirs:,
