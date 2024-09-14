@@ -4,6 +4,17 @@
 module StringUtils
   extend self
 
+  # @param name [String]
+  # @return [void]
+  def section(name)
+    length = name.size
+
+    puts
+    puts name
+    puts("-" * length)
+    puts
+  end
+
   # @param lines [Array<String>]
   # @return [void]
   def warning(lines)

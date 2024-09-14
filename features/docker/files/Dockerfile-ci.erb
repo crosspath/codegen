@@ -114,13 +114,13 @@ RUN <<SHELL
 <% if use_bootsnap %>
     bundle exec bootsnap precompile app/ lib/
 <% end %>
-<% if includes_frontend %>
+<% if includes_sprockets || includes_propshaft %>
     SECRET_KEY_BASE_DUMMY=1 bin/rails assets:precompile --silent
+<% end %>
 <% if includes_yarn %>
     # WARNING: In general case directory "node_modules" is not needed after assets compilation,
     # but some tools require files from this directory in runtime (i.e. in browser).
     rm -rf .yarn/cache .yarnrc.yml yarn.lock node_modules
-<% end %>
 <% end %>
     rm -rf .bundle
 SHELL

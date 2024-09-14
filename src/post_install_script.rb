@@ -76,6 +76,15 @@ class PostInstallScript
     # frozen_string_literal: true
 
     Dir.chdir(File.dirname(__dir__)) do
+      unless system("bundle check")
+        raise "You should run `bundle install` and then `bin/postinstall`"
+      end
+      if Dir.exist?(".tools") && !system("cd .tools && bundle check")
+        raise "You should run `cd .tools && bundle install && cd ..` and then `bin/postinstall`"
+      end
+
+      section = ->(name) { puts("", name, "-" * name.size, "") }
+
     <%= steps.join("\n\n") %>
     end
 
