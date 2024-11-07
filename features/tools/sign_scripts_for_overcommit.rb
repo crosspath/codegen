@@ -13,6 +13,7 @@ module Features
 
       def call
         steps = [
+          "bin/overcommit --install",
           "bin/overcommit --sign",
           "bin/overcommit --sign pre-commit",
         ]

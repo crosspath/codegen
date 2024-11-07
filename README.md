@@ -15,19 +15,19 @@ Minimal supported versions:
 
 To create project:
 
-- run `./new.rb` and choose options in interactive mode;
-- run `./new.rb file-name-with-options`, where `file-name-with-options` is the file path to your
+- run `./new-rails-project.rb` and choose options in interactive mode;
+- run `./new-rails-project.rb file-name-with-options`, where `file-name-with-options` is the file path to your
   file with options (this script asks to create this file before running `rails new` command).
 
 To apply changes to existing project:
 
-- run `./change.rb` and choose options in interactive mode;
-- run `./change.rb project-directory`, where `project-directory` is path to the directory of your
+- run `./change-rails-project.rb` and choose options in interactive mode;
+- run `./change-rails-project.rb project-directory`, where `project-directory` is path to the directory of your
   project;
-- run `./change.rb project-directory feature-name`, where `feature-name` is name of desired feature
+- run `./change-rails-project.rb project-directory feature-name`, where `feature-name` is name of desired feature
   (see list of features below). You may pass several feature names separated by space.
 
-Supported Rails versions: 7.2.
+Supported Rails versions: 7.2, 8.0-rc.
 
 ## Features
 
@@ -48,11 +48,11 @@ Supported Rails versions: 7.2.
 
 ## Suggested workflow
 
-1. Create new project directory with `new.rb` (with `bundle_install: false`).
+1. Create new project directory with `new-rails-project.rb` (with `bundle_install: false`).
 2. Go to project directory and apply changes from `bundle-config` (replace "project-directory" to
    actual path):
 ```shell
-change.rb project-directory bundle-config
+change-rails-project.rb project-directory bundle-config
 ```
 3. Add some gems, if needed. Run `bundle install` and `bin/postinstall`, if needed.
 4. Apply changes from other features.

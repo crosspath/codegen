@@ -2,6 +2,7 @@
 
 require_relative "../env"
 require_relative "../post_install_script"
+require_relative "../post_install_steps/add_default_gems"
 require_relative "../post_install_steps/remove_keeps"
 require_relative "../string_utils"
 require_relative "config_file"
@@ -87,6 +88,7 @@ module NewProject
 
     def add_postinstall_steps
       @postinstall = PostInstallScript.new(app_path)
+      @postinstall.add_steps(PostInstallSteps::AddDefaultGems)
       @postinstall.add_steps(PostInstallSteps::RemoveKeeps) if @generator_option_values[:keeps]
     end
 
