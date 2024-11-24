@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 require_relative "../env"
+require_relative "../gem_version"
 require_relative "../post_install_script"
 require_relative "../post_install_steps/add_default_gems"
 require_relative "../post_install_steps/remove_keeps"
@@ -26,6 +27,10 @@ module NewProject
 
     def initialize(argv)
       @generator_option_values = {}
+
+      # Uncomment line below after dropping support for Rails 7.
+      # @generator_option_values[:rails_version] = "8" # Minimal supported version.
+
       @rails_option_values = {}
       @ask = Ask.new(@generator_option_values, @rails_option_values)
       @configuration = init_configuration(argv[0])
@@ -33,7 +38,7 @@ module NewProject
 
     def call
       @configuration.fill_values
-      return if Env.no_save?
+      return if Env.testing?
 
       results = ConfigFile.generate(@generator_option_values)
 
@@ -66,9 +71,16 @@ module NewProject
       end
     end
 
-    def install_railties
-      @rails_version = Gem::Requirement.new("~> #{Env::MIN_RAILS_VERSION}")
+    def railties_installed?
+      @rails_version = Gem::Requirement.new("~> #{@generator_option_values[:rails_version]}")
 
+      # Latest version of "railties" gem for specified release.
+      latest_version = GemVersion.latest("railties", @rails_version)
+
+      Gem::Specification.any? { |s| s.name == "railties" && s.version == latest_version }
+    end
+
+    def install_railties
       # Example: gem install -N --backtrace --version '~> 7' railties
       Gem.install("railties", @rails_version, document: [])
     end

@@ -1,6 +1,6 @@
-rails_version: 7
-app_path: tmp/minimal_7
-name: minimal_7
+rails_version: 8
+app_path: tmp/minimal_8
+name: minimal_8
 mode: minimal
 active_record: true
 db: postgresql
@@ -13,7 +13,6 @@ active_job: false
 active_storage: false
 action_cable: false
 assets: true
-assets_lib: sprockets
 css_lib: none
 jbuilder: false
 bootsnap: false
@@ -22,4 +21,7 @@ system_tests: false
 rubocop_omakase: false
 brakeman: false
 github_actions: true
+thruster: true
+kamal: true
+solid: false
 bundle_install: false

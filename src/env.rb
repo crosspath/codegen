@@ -4,11 +4,9 @@
 module Env
   extend self
 
-  MIN_RAILS_VERSION = "7.2"
-
   # @return [Boolean]
-  def no_save?
-    ENV.fetch("NO_SAVE", "0") != "0"
+  def testing?
+    ENV.fetch("TESTING", "0") != "0"
   end
 
   # @return [Boolean]

@@ -13,6 +13,8 @@ Minimal supported versions:
 - Svelte 4
 - Docker 26
 
+Supported Rails versions: 7.2, 8.0.
+
 To create project:
 
 - run `./new-rails-project.rb` and choose options in interactive mode;
@@ -26,8 +28,6 @@ To apply changes to existing project:
   project;
 - run `./change-rails-project.rb project-directory feature-name`, where `feature-name` is name of desired feature
   (see list of features below). You may pass several feature names separated by space.
-
-Supported Rails versions: 7.2, 8.0-rc.
 
 ## Features
 

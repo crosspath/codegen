@@ -19,6 +19,16 @@ module NewProject
     # }
     # typeof OPTIONS == Hash(Symbol, OptionDefinition)
     OPTIONS = {
+      # Comment this block after dropping support for Rails 7 (do not delete it).
+      rails_version: {
+        label: "Rails version",
+        type: :one_of,
+        variants: {
+          "7" => "Rails 7",
+          "8" => "Rails 8",
+        },
+        default: ->(_, _) { "8" },
+      },
       app_path: {
         label: "Application path",
         type: :text,
@@ -73,7 +83,7 @@ module NewProject
         default: ->(_gopt, _ropt) { true },
         apply: ->(_gopt, ropt, val) { ropt["skip-active-record"] = !val },
       },
-      db: {
+      db_7: {
         label: "Database",
         type: :one_of,
         variants: {
@@ -85,7 +95,23 @@ module NewProject
         },
         default: ->(_gopt, _ropt) { "postgresql" },
         apply: ->(_gopt, ropt, val) { ropt["database"] = val if val != "other" },
-        skip_if: ->(_gopt, ropt) { ropt["skip-active-record"] },
+        skip_if: ->(gopt, ropt) { gopt[:rails_version] == "8" || ropt["skip-active-record"] },
+      },
+      db_8: {
+        label: "Database",
+        type: :one_of,
+        variants: {
+          "mariadb-mysql" => "MariaDB (gem mysql2)",
+          "mariadb-trilogy" => "MariaDB (gem trilogy)",
+          "mysql" => "MySQL (gem mysql2)",
+          "trilogy" => "MySQL (gem trilogy)",
+          "postgresql" => "PostgreSQL",
+          "sqlite3" => "SQLite3",
+          "other" => "... other", # Required: gem name.
+        },
+        default: ->(_gopt, _ropt) { "postgresql" },
+        apply: ->(_gopt, ropt, val) { ropt["database"] = val if val != "other" },
+        skip_if: ->(gopt, ropt) { gopt[:rails_version] == "7" || ropt["skip-active-record"] },
       },
       db_gem: {
         label: "Gem name for database",
@@ -202,7 +228,9 @@ module NewProject
         },
         default: ->(_gopt, _ropt) { "sprockets" },
         apply: ->(_gopt, ropt, val) { ropt["asset-pipeline"] = val },
-        skip_if: ->(_gopt, ropt) { ropt["api"] || ropt["skip-asset-pipeline"] },
+        skip_if: ->(gopt, ropt) do
+          gopt[:rails_version] == "8" || ropt["api"] || ropt["skip-asset-pipeline"]
+        end,
       },
       hotwire: {
         label: "Add Hotwire",
@@ -313,6 +341,33 @@ module NewProject
         type: :boolean,
         default: ->(_gopt, _ropt) { true },
         apply: ->(_gopt, ropt, val) { ropt["skip-ci"] = !val },
+      },
+      # @see https://github.com/basecamp/thruster
+      thruster: {
+        label: "Add Thruster - HTTP/2 proxy (light-weight replacement for Nginx)",
+        type: :boolean,
+        default: ->(_gopt, _ropt) { true },
+        apply: ->(_gopt, ropt, val) { ropt["skip-thruster"] = !val },
+        skip_if: ->(gopt, _ropt) { gopt[:rails_version] == "7" },
+      },
+      # @see https://github.com/basecamp/kamal
+      kamal: {
+        label: "Add Kamal - tool for deployments",
+        type: :boolean,
+        default: ->(_gopt, _ropt) { true },
+        apply: ->(_gopt, ropt, val) { ropt["skip-kamal"] = !val },
+        skip_if: ->(gopt, _ropt) { gopt[:rails_version] == "7" },
+      },
+      # @see https://github.com/rails/solid_cable
+      # @see https://github.com/rails/solid_cache
+      # @see https://github.com/rails/solid_queue
+      solid: {
+        label: "Add Solid pack - Cable, Cache, Queue (Solid Cable won't install if you disabled " +
+          "Action Cable)",
+        type: :boolean,
+        default: ->(_gopt, _ropt) { false },
+        apply: ->(_gopt, ropt, val) { ropt["skip-solid"] = !val },
+        skip_if: ->(gopt, _ropt) { gopt[:rails_version] == "7" },
       },
       bundle_install: {
         label: "Run `bundle install` at the end of this process",

@@ -1,6 +1,6 @@
-rails_version: 7
-app_path: tmp/full_7
-name: full_7
+rails_version: 8
+app_path: tmp/full_8
+name: full_8
 mode: full-stack
 active_record: true
 db: postgresql
@@ -14,7 +14,6 @@ active_job: true
 active_storage: true
 action_cable: true
 assets: true
-assets_lib: sprockets
 hotwire: true
 js_bundler: importmap
 css_lib: none
@@ -24,4 +23,7 @@ tests: true
 rubocop_omakase: false
 brakeman: false
 github_actions: true
+thruster: true
+kamal: true
+solid: true
 bundle_install: false

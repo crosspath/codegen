@@ -13,6 +13,8 @@ module NewProject
       Options::OPTIONS.each do |key, definition|
         next if definition.key?(:skip_if) && definition[:skip_if].call(@gopt, @ropt)
 
+        key = :db if DB_KEYS.include?(key)
+
         @gopt[key] = generator_option_value(key, definition)
 
         definition[:apply]&.call(@gopt, @ropt, @gopt[key])
@@ -22,7 +24,9 @@ module NewProject
     private
 
     BOOLEANS = {"true" => true, "false" => false}.freeze
-    private_constant :BOOLEANS
+    DB_KEYS = %i[db_7 db_8].freeze
+
+    private_constant :BOOLEANS, :DB_KEYS
 
     def generator_option_value(key, definition)
       if key == :bundle_install && Env.system_ruby?
@@ -31,6 +35,10 @@ module NewProject
         false
       elsif @fopt.key?(key)
         convert_string_value(@fopt[key], definition[:type])
+      elsif Env.testing?
+        message = "Unable to ask question in testing mode: #{key}"
+        puts message
+        raise message
       else
         puts
         @ask.question(definition)

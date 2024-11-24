@@ -16,8 +16,10 @@ begin
   cli.call
 
   cli.ensure_gem_path_is_writable do
-    puts "Installing railties gem..."
-    cli.install_railties
+    unless cli.railties_installed?
+      puts "Installing railties gem..."
+      cli.install_railties
+    end
 
     puts "Generating application..."
     cli.generate_app

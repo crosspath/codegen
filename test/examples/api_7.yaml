@@ -1,3 +1,4 @@
+rails_version: 7
 app_path: tmp/api_7
 name: api_7
 mode: api-only
@@ -9,7 +10,7 @@ mailbox: true
 active_job: true
 active_storage: true
 action_cable: true
-jbuilder: true
+jbuilder: false
 bootsnap: true
 tests: true
 rubocop_omakase: false

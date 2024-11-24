@@ -4,42 +4,35 @@ require "minitest/autorun"
 
 # @see https://github.com/excid3/jumpstart/blob/master/test/template_test.rb
 class TemplateTest < Minitest::Test
-  TEST_DIRS = %w[
+  ITEMS = %w[
     api_7
+    api_8
     full_7
+    full_8
     minimal_7
+    minimal_8
   ].freeze
 
   def setup
-    TEST_DIRS.each do |dir|
-      system("[ -d tmp/#{dir} ] && rm -rf tmp/#{dir}")
-    end
+    ITEMS.each { |dir| system("[ -d tmp/#{dir} ] && rm -rf tmp/#{dir}") }
   end
 
   def teardown
     setup
   end
 
-  def test_api_7
-    run_generator("api_7", "Done!")
-  end
-
-  def test_minimal_7
-    run_generator("minimal_7", "Done!")
-  end
-
-  def test_full_7
-    run_generator("full_7", "Pin all controllers") # Message from TurboRails
+  ITEMS.each do |name|
+    define_method(:"test_#{name}") { run_generator(name) }
   end
 
   protected
 
-  def run_generator(name, message)
+  def run_generator(name)
     puts "", "Generating #{name}..."
     file_name = "test/examples/#{name}.yaml"
 
-    output, _err = capture_subprocess_io { system("NO_SAVE=1 ./new.rb #{file_name}") }
+    output, _err = capture_subprocess_io { system("TESTING=1 ./new-rails-project.rb #{file_name}") }
 
-    assert_includes(output, message)
+    assert_includes(output, "Done!")
   end
 end
