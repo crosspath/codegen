@@ -78,7 +78,7 @@ module NewProject
       railties_path = railties_bin_path.delete_suffix("/exe/rails")
 
       # Fix for error "uninitialized constant Bundler::SharedHelpers"
-      require "bundler/setup"
+      require "bundler/shared_helpers"
 
       add_items_to_load_path(railties_path)
       load_rails_files(railties_path)
