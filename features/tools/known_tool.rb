@@ -42,9 +42,9 @@ module Features
         @feature_dir ||= File.join(ROOT_DIR, "features", "tools")
       end
 
-      def add_gem_for_development(name)
+      def add_gem_for_development(name, **kwargs)
         puts "Add gem #{name}..."
-        add_gem(name, group: :development)
+        add_gem(name, group: :development, **kwargs)
       end
     end
   end

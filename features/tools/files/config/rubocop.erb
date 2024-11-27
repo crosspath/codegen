@@ -32,10 +32,6 @@ inherit_gem:
 AllCops:
   TargetRubyVersion: <%= Gem.ruby_version.segments[0..1].join(".") %>
 
-Naming/FileName:
-  Exclude:
-    - .tools/Gemfile
-
 <% if detected_features[:settings] || factory_bot %>
 Layout/RedundantLineBreak:
   Exclude:
@@ -46,6 +42,18 @@ Layout/RedundantLineBreak:
     - 'factories/**/*.rb'
 <% end %>
 <% end %>
+
+Metrics/BlockLength:
+  Exclude:
+    - config/routes.rb
+    - "db/migrate/*.rb"
+<% if factory_bot %>
+    - 'factories/**/*.rb'
+<% end %>
+
+Naming/FileName:
+  Exclude:
+    - .tools/Gemfile
 
 Style/ClassAndModuleChildren:
   Exclude:

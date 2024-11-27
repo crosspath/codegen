@@ -11,7 +11,10 @@ module Features::Tools
 
         puts "Update settings for integration between Solargraph and VS Code..."
         update_vs_code_settings
-        add_gem_for_development("rails-annotate-solargraph")
+        add_gem_for_development(
+          "rails-annotate-solargraph",
+          github: "crosspath/rails-annotate-solargraph"
+        )
 
         puts "Add documentation schema file to .gitignore & .dockerignore files..."
         update_ignore_files

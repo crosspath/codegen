@@ -121,6 +121,7 @@ module NewProject
 
     private
 
+    # @return [String]
     def app_path
       @app_path ||= File.expand_path(@generator_option_values[:app_path], Dir.pwd)
     end

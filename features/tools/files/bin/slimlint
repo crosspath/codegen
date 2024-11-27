@@ -8,6 +8,8 @@ ENV["SLIM_LINT_RUBOCOP_CONF"] =
 require "rubygems"
 require "bundler/setup"
 
+ARGV.push("app/views") if ARGV.empty?
+
 unless ARGV.include?("-c")
   file_path = File.expand_path("../.tools/config/.slim-lint.yml", __dir__)
   ARGV.unshift("-c", file_path)
