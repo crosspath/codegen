@@ -1,0 +1,20 @@
+inherit_gem:
+  rubocop-configs:
+    - _all_cops.yml
+    - _ruby.yml
+    - gemspec.yml
+    - performance.yml
+
+AllCops:
+  TargetRubyVersion: <%= ruby_version %>
+
+Gemspec/DevelopmentDependencies:
+  Enabled: false
+
+Lint/Debugger:
+  DebuggerMethods:
+    # Exclude "puts" from this list.
+    Kernel: [warn, binding.irb, p, Kernel.binding.irb]
+
+Style/ClassAndModuleChildren:
+  Enabled: false

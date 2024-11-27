@@ -1,0 +1,25 @@
+#!/usr/bin/env ruby
+# frozen_string_literal: true
+
+# CLI example:
+# ./new-gem
+
+require_relative "src/ask"
+require_relative "src/new_gem/cli"
+
+begin
+  cli = NewGem::CLI.new(ARGV)
+
+  puts "Press Ctrl+C to stop anytime."
+  cli.call
+
+  puts "Creating gem from templates..."
+  cli.create_files
+
+  puts "Done!"
+rescue Interrupt
+  exit(2)
+rescue StandardError => e
+  warn "Current dir: #{Dir.pwd}", e.message, e.backtrace.grep_v(/ruby|bundle|gems/)
+  exit(1)
+end

@@ -2,10 +2,10 @@
 # frozen_string_literal: true
 
 # CLI example:
-# ./change.rb
-# ./change.rb project-directory
-# ./change.rb project-directory feature-name
-# ./change.rb project-directory feature-1 feature-2 feature-3 ...
+# ./change-rails-project
+# ./change-rails-project project-directory
+# ./change-rails-project project-directory feature-name
+# ./change-rails-project project-directory feature-1 feature-2 feature-3 ...
 
 require_relative "src/change_project/cli"
 

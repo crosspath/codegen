@@ -1,0 +1,12 @@
+#!/usr/bin/env ruby
+# frozen_string_literal: true
+
+require_relative "../lib/<%= gem_base_file_name %>/version"
+
+version = <%= gem_class_name %>::VERSION
+file = "<%= gem_base_file_name %>-#{version}.gem"
+warn "File #{file} doesn't exist" unless File.exist?(file) # rubocop:disable Lint/Debugger
+
+if system("gem push #{file}")
+  system("git tag 'v#{version}' && git push origin 'v#{version}' && git push")
+end

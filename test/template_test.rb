@@ -31,7 +31,7 @@ class TemplateTest < Minitest::Test
     puts "", "Generating #{name}..."
     file_name = "test/examples/#{name}.yaml"
 
-    output, _err = capture_subprocess_io { system("TESTING=1 ./new-rails-project.rb #{file_name}") }
+    output, _err = capture_subprocess_io { system("TESTING=1 ./new-rails-project #{file_name}") }
 
     assert_includes(output, "Done!")
   end

@@ -1,0 +1,31 @@
+# frozen_string_literal: true
+
+require_relative "lib/<%= gem_base_file_name %>/version"
+
+Gem::Specification.new do |spec|
+  spec.name = "<%= gem_base_file_name %>"
+  spec.version = <%= gem_class_name %>::VERSION
+  spec.summary = ""
+  # spec.description = ""
+  spec.authors = [<%= gem_author.inspect %>]
+  # spec.homepage = "https://..."
+  # spec.license = "MIT"
+
+  spec.required_ruby_version = Gem::Requirement.new(">= <%= ruby_version %>")
+
+  spec.add_development_dependency("rspec-core", "~> 3.13")
+  spec.add_development_dependency("rspec-expectations", "~> 3.13")
+  spec.add_development_dependency("rubocop", "~> 1.66")
+  spec.add_development_dependency("rubocop-performance", "~> 1.22")
+  spec.add_development_dependency("yard", "~> 0.9")
+
+  spec.metadata["homepage_uri"] = spec.homepage
+  # spec.metadata["source_code_uri"] = spec.homepage
+
+  spec.files =
+    %w[Gemfile <%= gem_base_file_name %>.gemspec] + Dir.glob("{exe,lib}/**/*", base: __dir__)
+
+  spec.bindir = "exe"
+  spec.executables = spec.files.grep(%r{^exe/}) { |f| File.basename(f) }
+  spec.require_paths = ["lib"]
+end

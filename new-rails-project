@@ -2,9 +2,9 @@
 # frozen_string_literal: true
 
 # CLI example:
-# ./new.rb
-# ./new.rb file-name-with-options
-# NO_SAVE=1 ./new.rb file-name-with-options
+# ./new-rails-project
+# ./new-rails-project file-name-with-options
+# TESTING=1 ./new-rails-project file-name-with-options
 
 require_relative "src/ask"
 require_relative "src/new_project/cli"

@@ -1,0 +1,31 @@
+# <%= name %>
+
+*Here goes gem description...*
+
+## Development
+
+Do it once — authorize on [RubyGems](https://rubygems.org/) and then:
+
+```shell
+gem signin
+```
+
+Before release — apply suggestions from RuboCop, review them and commit or reject:
+
+```shell
+bin/rubocop --autofix
+```
+
+Build `*.gem` file:
+
+```shell
+bin/build
+```
+
+Try your gem locally, then commit changes in local repository.
+
+Push gem file to rubygems registry and then send new version to remote repository:
+
+```shell
+bin/release
+```

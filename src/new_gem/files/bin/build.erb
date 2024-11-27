@@ -1,0 +1,10 @@
+#!/usr/bin/env ruby
+# frozen_string_literal: true
+
+require_relative "../lib/<%= gem_base_file_name %>/version"
+
+if system("gem build <%= gem_base_file_name %>")
+  need_sudo = !File.writable?(Gem.paths.home)
+  file_name = "<%= gem_base_file_name %>-#{<%= gem_class_name %>::VERSION}.gem"
+  system("#{need_sudo ? "sudo" : ""} gem install #{file_name}")
+end
