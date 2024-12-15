@@ -121,12 +121,13 @@ class Feature
   end
 
   # @param gems [Array<String>]
-  # @param group [String, Symbol, Array<String>, Array<Symbol>, nil]
+  # @param kwargs [Hash<Symbol, Object>]
+  # @option :group [String, Symbol, Array<String | Symbol>]
+  #   If `:test` then ", group: :test". If `[:test]` then ", group: [:test]".
   # @return [void]
-  def add_gem(*gems, group: nil)
-    # If `:test` then ", group: :test". If `[:test]` then ", group: [:test]".
-    group = group ? ", group: #{group.inspect}" : ""
-    new_gems = gems.map { |name| "gem \"#{name}\"#{group}" }.join("\n")
+  def add_gem(*gems, **kwargs)
+    gem_params = kwargs.map { |k, v| ", #{k}: #{v.inspect}" }.join
+    new_gems = gems.map { |name| "gem \"#{name}\"#{gem_params}" }.join("\n")
     gemfile = "#{read_project_file("Gemfile")}\n#{new_gems}\n"
     write_project_file("Gemfile", gemfile)
   end
