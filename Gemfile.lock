@@ -1,48 +1,46 @@
 GIT
   remote: https://github.com/crosspath/rubocop-configs.git
-  revision: 013a5ec078d212485f8f85949d21db4e9c2ddb2a
+  revision: 41f8f9d05662f9359c204a9fd46d547b7442f20a
   specs:
-    rubocop-configs (0.16.1)
+    rubocop-configs (0.21.1)
       rake (>= 13.0)
 
 GEM
   remote: https://rubygems.org/
   specs:
     ast (2.4.2)
-    json (2.7.2)
+    json (2.9.1)
     language_server-protocol (3.17.0.3)
     parallel (1.26.3)
-    parser (3.3.4.2)
+    parser (3.3.6.0)
       ast (~> 2.4.1)
       racc
-    prism (0.30.0)
+    prism (1.3.0)
     racc (1.8.1)
     rainbow (3.1.1)
     rake (13.2.1)
-    regexp_parser (2.9.2)
-    rexml (3.3.5)
-      strscan
-    rubocop (1.65.1)
+    regexp_parser (2.9.3)
+    rubocop (1.69.2)
       json (~> 2.3)
       language_server-protocol (>= 3.17.0)
       parallel (~> 1.10)
       parser (>= 3.3.0.2)
       rainbow (>= 2.2.2, < 4.0)
-      regexp_parser (>= 2.4, < 3.0)
-      rexml (>= 3.2.5, < 4.0)
-      rubocop-ast (>= 1.31.1, < 2.0)
+      regexp_parser (>= 2.9.3, < 3.0)
+      rubocop-ast (>= 1.36.2, < 2.0)
       ruby-progressbar (~> 1.7)
-      unicode-display_width (>= 2.4.0, < 3.0)
-    rubocop-ast (1.32.1)
+      unicode-display_width (>= 2.4.0, < 4.0)
+    rubocop-ast (1.37.0)
       parser (>= 3.3.1.0)
-    rubocop-performance (1.21.1)
+    rubocop-performance (1.23.0)
       rubocop (>= 1.48.1, < 2.0)
       rubocop-ast (>= 1.31.1, < 2.0)
     rubocop-rake (0.6.0)
       rubocop (~> 1.0)
     ruby-progressbar (1.13.0)
-    strscan (3.1.0)
-    unicode-display_width (2.5.0)
+    unicode-display_width (3.1.2)
+      unicode-emoji (~> 4.0, >= 4.0.4)
+    unicode-emoji (4.0.4)
 
 PLATFORMS
   ruby
@@ -50,10 +48,10 @@ PLATFORMS
 
 DEPENDENCIES
   prism
-  rubocop (~> 1.65)
-  rubocop-configs (= 0.16.1)!
-  rubocop-performance (~> 1.21)
+  rubocop (~> 1.68)
+  rubocop-configs!
+  rubocop-performance (~> 1.23)
   rubocop-rake (= 0.6.0)
 
 BUNDLED WITH
-   2.5.17
+   2.6.2
