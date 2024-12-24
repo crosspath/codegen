@@ -67,7 +67,11 @@ RemoveTrailingWhitespaceCheck: { }
 
 # Options and default values:
 #   except_methods: [], Array[String]
-RemoveUnusedMethodsInControllersCheck: { except_methods: [] }
+# WARN: Disable this check at all since it's broken.
+RemoveUnusedMethodsInControllersCheck:
+  except_methods: []
+  ignored_files:
+    - app/controllers/
 
 RemoveUnusedMethodsInHelpersCheck: { except_methods: [] }
 
