@@ -66,7 +66,7 @@ module StringUtils
   # @param str [String]
   # @return [Boolean]
   def with_capitalize?(str)
-    ('A'..'Z').cover?(str[0])
+    ("A".."Z").cover?(str[0])
   end
 
   # @param str [String]

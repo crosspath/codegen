@@ -7,7 +7,7 @@ require_relative "options"
 
 module NewGem
   class CLI
-    def initialize(argv)
+    def initialize(_argv)
       @generator_option_values = {}
       @ask = Ask.new(@generator_option_values, nil)
     end

@@ -9,7 +9,7 @@ module Features
         indent(STEP)
       end
 
-      STEP = <<~RUBY.freeze
+      STEP = <<~RUBY
         section.call("Add RSpec...")
         SPEC_FILE = <<~RUBY1
           # frozen_string_literal: true
