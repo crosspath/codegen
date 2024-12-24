@@ -47,12 +47,12 @@ module Features
 
       def copy_configuration_files(use_rswag)
         cli.post_install_script.add_steps(ConfigurateRspec)
+        copy_files_to_project("bin", "")
 
         if use_rswag
-          copy_files_to_project("bin", "")
+          copy_files_to_project("rswag/bin", "")
+          copy_files_to_project("rswag/support", "spec/")
           cli.post_install_script.add_steps(ConfigurateRswag)
-        else
-          copy_files_to_project("bin/rspec", "bin/rspec")
         end
 
         copy_spec_support
@@ -67,8 +67,8 @@ module Features
       end
 
       def copy_spec_support
-        create_project_dir("spec/support")
-        copy_files_to_project("custom_test_methods.rb", "spec/support/")
+        create_project_dir("spec")
+        copy_files_to_project("support", "spec/")
       end
 
       def update_config_application

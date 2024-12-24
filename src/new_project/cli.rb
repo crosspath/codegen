@@ -100,7 +100,8 @@ module NewProject
 
     def add_postinstall_steps
       @postinstall = PostInstallScript.new(app_path)
-      @postinstall.add_steps(PostInstallSteps::AddDefaultGems)
+      # Temporary disabled, since Rails have already added these gems.
+      # @postinstall.add_steps(PostInstallSteps::AddDefaultGems)
       @postinstall.add_steps(PostInstallSteps::RemoveKeeps) if @generator_option_values[:keeps]
     end
 

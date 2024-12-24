@@ -9,35 +9,30 @@ module Features
         indent(STEP)
       end
 
-      RAILS_HELPER_FILE = "spec/rails_helper.rb"
-      RE_LINE_FOR_REQUIRES = /^$|^\s*RSpec\.configure\b/
-
-      INCLUDES = <<~RUBY
-        config.include(FactoryBot::Syntax::Methods)
-        config.include(CustomTestMethods)
-      RUBY
-      RE_END = /\A\s*end\b/
-
       STEP = <<~RUBY.freeze
         section.call("Add RSpec...")
+        SPEC_FILE = <<~RUBY1
+          # frozen_string_literal: true
+
+          ENV["RAILS_ENV"] ||= "test"
+
+          require File.expand_path("../../config/environment", __FILE__)
+          return unless Rails.env.test?
+
+          Dir[File.join(__dir__, "support/*.rb")].each { |f| require f }
+        RUBY1
         `bin/rails g rspec:install`
-        lines = File.read("#{RAILS_HELPER_FILE}").split("\\n")
-        # Get first line that meets any one of these criterions:
-        # a) Empty line
-        # b) `RSpec.configure`
-        index = lines.index { |line| line =~ /#{RE_LINE_FOR_REQUIRES}/ }
-        unless index
-          raise "Cannot find empty line nor `RSpec.configure` block in `#{RAILS_HELPER_FILE}` file"
-        end
-        lines.insert(index, %(require_relative "support/custom_test_methods"\\n))
-        # Find last `end` - it should match `RSpec.configure` block.
-        last_line_with_end = lines.rindex { |line| line =~ /#{RE_END}/ }
-        raise "Cannot find last `end` in `#{RAILS_HELPER_FILE}` file" unless last_line_with_end
-        lines.insert(last_line_with_end, "", #{indent(INCLUDES).inspect})
-        File.write("#{RAILS_HELPER_FILE}", lines.join("\\n"))
+        File.rename("spec/spec_helper.rb", "spec/support/core.rb")
+        File.rename("spec/rails_helper.rb", "spec/support/rails.rb")
+        rails_helper =
+          File.readlines("spec/support/rails.rb").drop_while do |line|
+            !line.match?(%r@^require ['"]rspec/rails['"]@)
+          end
+        File.write("spec/support/rails.rb", rails_helper.join)
+        File.write("spec/spec_helper.rb", SPEC_FILE)
       RUBY
 
-      private_constant :RAILS_HELPER_FILE, :RE_LINE_FOR_REQUIRES, :INCLUDES, :RE_END, :STEP
+      private_constant :STEP
     end
   end
 end

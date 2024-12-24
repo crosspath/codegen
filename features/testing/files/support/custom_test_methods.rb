@@ -13,3 +13,5 @@ module CustomTestMethods
     @spec_class ||= spec.metadata[:described_class] || spec.metadata[:description].constantize
   end
 end
+
+RSpec.configure { |config| config.include(CustomTestMethods) }
