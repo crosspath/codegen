@@ -16,7 +16,7 @@ module Features
 
           ENV["RAILS_ENV"] ||= "test"
 
-          require File.expand_path("../../config/environment", __FILE__)
+          require File.expand_path("../config/environment", __dir__)
           return unless Rails.env.test?
 
           Dir[File.join(__dir__, "support/*.rb")].each { |f| require f }
