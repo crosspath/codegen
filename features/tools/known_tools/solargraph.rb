@@ -51,6 +51,8 @@ module Features::Tools
 
       def update_ignore_files
         IGNORE_FILES.each do |file_name|
+          next unless project_file_exist?(file_name)
+
           update_ignore_file(file_name, add: [".annotate_solargraph_schema"])
         end
       end

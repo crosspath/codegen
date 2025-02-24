@@ -4,6 +4,7 @@
 require "rubygems"
 require "bundler/setup"
 
+# rubocop:disable Layout/LineLength
 if ARGV == ["--autofix"]
   system("bin/rubocop -A --only Style/FrozenStringLiteralComment,Layout/EmptyLineAfterMagicComment")
   system("bin/rubocop -a --except Layout/RedundantLineBreak,Style/BlockDelimiters,Style/SingleLineDoEndBlock")
@@ -11,5 +12,6 @@ if ARGV == ["--autofix"]
   system("bin/rubocop -a")
   exit
 end
+# rubocop:enable Layout/LineLength
 
 load(Gem.bin_path("rubocop", "rubocop"))

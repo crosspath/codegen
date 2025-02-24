@@ -17,7 +17,9 @@ DryBundlerInCapistranoCheck: { }
 
 # HashSyntaxCheck: { }
 
-IsolateSeedDataCheck: { }
+IsolateSeedDataCheck:
+  ignored_files:
+    - db/migrate/
 
 KeepFindersOnTheirOwnModelCheck: { }
 

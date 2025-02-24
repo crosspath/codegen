@@ -62,7 +62,7 @@ module NewGem
       erb("lib/gem.rb", "lib/#{gem_base_file_name}.rb", gem_base_file_name:, gem_class_name:)
       erb("lib/gem/version.rb", "lib/#{gem_base_file_name}/version.rb", gem_class_name:)
 
-      `chmod +x #{gem_path}/exe/#{gem_base_file_name}`
+      `chmod +x #{gem_path}/exe/#{gem_base_file_name} #{gem_path}/bin/*`
     end
 
     private
