@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-module CustomTestMethods
+module RSpecMethods
   def json
     @json ||= JSON.parse(response.body, symbolize_names: true)
   end
@@ -14,4 +14,4 @@ module CustomTestMethods
   end
 end
 
-RSpec.configure { |config| config.include(CustomTestMethods) }
+RSpec.configure { |config| config.include(RSpecMethods) }
