@@ -13,7 +13,7 @@ module Features
       IGNORE_FILES = %w[.gitignore .dockerignore].freeze
 
       IGNORE_FILE_ENTRIES = [
-        "*.local",
+        "/db/schema_cache.yml",
       ].freeze
 
       private_constant :IGNORE_FILES, :IGNORE_FILE_ENTRIES

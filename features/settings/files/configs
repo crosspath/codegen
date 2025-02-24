@@ -1,0 +1,26 @@
+#!/usr/bin/env ruby
+# frozen_string_literal: true
+
+require "fileutils"
+
+# path to your application root.
+APP_ROOT = File.expand_path("..", __dir__).freeze
+
+files = %w[
+  config/settings/development.local.yml
+  config/settings/test.local.yml
+]
+
+template = <<~YAML
+  active_record:
+    url: postgres://myuser:mypass@localhost/somedatabase
+YAML
+
+FileUtils.chdir(APP_ROOT) do
+  files.each do |file|
+    unless File.exist?(file)
+      puts "\n== Creating file #{file} =="
+      File.write(file, template)
+    end
+  end
+end
