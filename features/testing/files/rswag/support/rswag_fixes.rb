@@ -1,6 +1,14 @@
 # frozen_string_literal: true
 
-module RswagFixes # rubocop:disable Style/ClassAndModuleChildren
+module RswagFixes
+  module ExampleGroupHelpers
+    def description(value = nil)
+      return super() if value.nil?
+
+      metadata[:operation][:description] = value.rstrip
+    end
+  end
+
   module RequestFactory
     # Rswag unable to generate correct OpenAPI schema for parameters in FormData.
     # This fix replaces behaviour of Rswag parser to the same as of body parameter.
@@ -11,4 +19,5 @@ module RswagFixes # rubocop:disable Style/ClassAndModuleChildren
   end
 end
 
+Rswag::Specs::ExampleGroupHelpers.prepend(RswagFixes::ExampleGroupHelpers)
 Rswag::Specs::RequestFactory.prepend(RswagFixes::RequestFactory)

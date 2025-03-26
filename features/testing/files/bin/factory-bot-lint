@@ -1,0 +1,14 @@
+#!/usr/bin/env ruby
+# frozen_string_literal: true
+
+require_relative File.join(__dir__, "../spec/spec_helper.rb")
+
+# Example:
+# factories = FactoryBot.factories.select { |factory| factory.name == :users_account }
+factories = FactoryBot.factories
+
+# Example:
+# args = {verbose: true}
+args = {}
+
+FactoryBot.lint(factories, **args)
