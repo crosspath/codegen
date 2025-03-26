@@ -42,6 +42,7 @@ To create gem (it may be not related to Rails):
 * `misc`: miscellaneous tasks for changing and removing files and directories within
   Rails application
 * `remove-comments`: remove unnecessary comments from project files
+* `sessions`: configuration for gem [multi-sessions](https://github.com/crosspath/multi-sessions)
 * `settings`: store project configuration in YAML or JSON format
 * `sort-config`: sort configuration lines in `config/environments/*.rb`
 * `testing`: add gems and default configuration for testing
