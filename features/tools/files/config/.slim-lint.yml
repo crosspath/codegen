@@ -1,4 +1,4 @@
-# Config for Slim Lint, v0.24.0
+# Config for Slim Lint, v0.32.0
 # Run in console:
 #   bin/slimlint app/views
 
@@ -45,12 +45,26 @@ linters:
     # enabled: false
     # max: 300
 
+  InstanceVariables:
+    enabled: true
+    # include: ["domains/*/mailers/*/_*.html.slim"]
+    # Default values:
+    # enabled: false
+    # include: ["app/views/**/_*.html.slim"]
+
   LineLength:
     enabled: true
     max: 120
     # Default values:
     # enabled: true
     # max: 80
+
+  QuoteConsistency:
+    enabled: true
+    enforced_style: double_quotes
+    # Default values:
+    # enabled: false
+    # enforced_style: single_quotes
 
   RedundantDiv:
     enabled: true
@@ -59,44 +73,7 @@ linters:
 
   RuboCop:
     enabled: true
-    ignored_cops:
-      - Layout/ArgumentAlignment
-      - Layout/ArrayAlignment
-      - Layout/BlockAlignment
-      - Layout/ClosingParenthesisIndentation
-      - Layout/EmptyLineAfterGuardClause
-      - Layout/EndAlignment
-      - Layout/FirstArgumentIndentation
-      - Layout/FirstArrayElementIndentation
-      - Layout/FirstHashElementIndentation
-      - Layout/FirstParameterIndentation
-      - Layout/HashAlignment
-      - Layout/IndentationConsistency
-      - Layout/IndentationWidth
-      - Layout/InitialIndentation
-      - Layout/LineEndStringConcatenationIndentation
-      - Layout/LineLength
-      - Layout/MultilineArrayBraceLayout
-      - Layout/MultilineAssignmentLayout
-      - Layout/MultilineHashBraceLayout
-      - Layout/MultilineMethodCallBraceLayout
-      - Layout/MultilineMethodCallIndentation
-      - Layout/MultilineMethodDefinitionBraceLayout
-      - Layout/MultilineOperationIndentation
-      - Layout/ParameterAlignment
-      - Layout/TrailingEmptyLines
-      - Layout/TrailingWhitespace
-      - Lint/Void
-      - Metrics/BlockLength
-      - Metrics/BlockNesting
-      - Naming/FileName
-      - Style/FrozenStringLiteralComment
-      - Style/IdenticalConditionalBranches
-      - Style/IfUnlessModifier
-      - Style/Next
-      - Style/RedundantLineContinuation
-      - Style/WhileUntilDo
-      - Style/WhileUntilModifier
+    ignored_cops: []
     # Default values:
     # enabled: true
     # ignored_cops:
@@ -137,10 +114,28 @@ linters:
     #   - Style/WhileUntilDo
     #   - Style/WhileUntilModifier
 
+  StrictLocalsMissing:
+    enabled: false
+    # Default values:
+    # enabled: false
+    # include: ["app/views/**/_*.html.slim"]
+
   Tab:
     enabled: true
     # Default values:
     # enabled: true
+
+  Tag:
+    enabled: true
+    # Default values:
+    # enabled: false
+    # forbidden_tags: []
+
+  TagAttribute:
+    enabled: true
+    # Default values:
+    # enabled: false
+    # forbidden_attributes: []
 
   TagCase:
     enabled: true

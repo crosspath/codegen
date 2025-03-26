@@ -11,7 +11,7 @@ module Features
       puts "Copy example files..."
       copy_example_files
 
-      puts "Inject into #{CONFIG_APPLICATION}..."
+      puts "Update application configs..."
       inject_into_config
 
       puts "Updating .gitignore file..."
@@ -23,10 +23,9 @@ module Features
 
     private
 
-    CONFIG_APPLICATION = "config/application.rb"
     IGNORE_FILE_ENTRIES = ["/config/settings/*.local.*"].freeze
 
-    private_constant :CONFIG_APPLICATION, :IGNORE_FILE_ENTRIES
+    private_constant :IGNORE_FILE_ENTRIES
 
     def copy_example_files
       copy_files_to_project("configs", "bin/configs")
@@ -37,9 +36,7 @@ module Features
     end
 
     def inject_into_config
-      config = read_project_file(CONFIG_APPLICATION)
-      config.sub!(/^module /, "require_relative \"settings\"\n\nmodule ")
-      write_project_file(CONFIG_APPLICATION, config)
+      ConfigApplication.new(cli.app_path).append_to_requires(['require_relative "settings"'])
     end
   end
 end

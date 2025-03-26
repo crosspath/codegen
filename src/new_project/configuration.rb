@@ -29,13 +29,13 @@ module NewProject
     private_constant :BOOLEANS, :DB_KEYS
 
     def generator_option_value(key, definition)
-      if key == :bundle_install && Env.system_ruby?
-        # Disable calling `bundle install` at the end of `rails new` process, because this process
-        # tries to install gems into system directories without explicit permissions.
-        false
-      elsif @fopt.key?(key)
-        convert_string_value(@fopt[key], definition[:type])
-      elsif Env.testing?
+      # Disable calling `bundle install` at the end of `rails new` process, because this process
+      # tries to install gems into system directories without explicit permissions.
+      return false if key == :bundle_install && Env.system_ruby?
+
+      return convert_string_value(@fopt[key], definition[:type]) if @fopt.key?(key)
+
+      if Env.testing?
         message = "Unable to ask question in testing mode: #{key}"
         puts message
         raise message

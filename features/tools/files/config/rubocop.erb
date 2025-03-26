@@ -43,11 +43,9 @@ Layout/RedundantLineBreak:
 <% end %>
 <% end %>
 
+<% if factory_bot %>
 Metrics/BlockLength:
   Exclude:
-    - config/routes.rb
-    - "db/migrate/*.rb"
-<% if factory_bot %>
     - 'factories/**/*.rb'
 <% end %>
 

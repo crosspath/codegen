@@ -36,25 +36,25 @@ module RswagMethods
   # @return [void]
   def request(verb, app_path, summary, *args, &block)
     add_jwt = args.include?(:jwt) || metadata[:jwt]
-    tag = metadata[:tags]
+    tags = metadata[:tags]
 
     summary_options = add_jwt ? "JWT" : ""
     summary = "[#{summary_options}] #{summary}" if !summary_options.empty?
 
     describe(app_path, {path_item: {template: app_path}}) do
       describe(verb, {operation: {verb:, summary:}}) do
-        request_body_definition(verb, add_jwt, tag, &block)
+        request_body_definition(verb, add_jwt, tags, &block)
       end
     end
   end
 
   private
 
-  def request_body_definition(verb, add_jwt, tag, &)
+  def request_body_definition(verb, add_jwt, tag_list, &)
     consumes("application/json") if %i[post patch put].include?(verb)
     produces("application/json")
     security([digest: []]) if add_jwt
-    tags([tag]) if tag.present?
+    tags(*tag_list) if tag_list.present?
 
     instance_eval(&)
   end

@@ -73,7 +73,7 @@ RemoveTrailingWhitespaceCheck: { }
 RemoveUnusedMethodsInControllersCheck:
   except_methods: []
   ignored_files:
-    - app/controllers/
+    - "app/controllers/**/*"
 
 RemoveUnusedMethodsInHelpersCheck: { except_methods: [] }
 

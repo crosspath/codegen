@@ -25,16 +25,13 @@ module Features
 
       GROUP_DEV_TEST = %i[development test].freeze
 
-      CONFIG_APP_FILE = "config/application.rb"
-      RE_TWO_ENDS = /^\s*end\b.*?\s*end\b/m
-
       GENERATORS = <<~RUBY
         config.generators do |g|
           g.factory_bot(dir: "factories", filename_proc: ->(t) { t.singularize })
         end
       RUBY
 
-      private_constant :GROUP_DEV_TEST, :CONFIG_APP_FILE, :RE_TWO_ENDS, :GENERATORS
+      private_constant :GROUP_DEV_TEST, :GENERATORS
 
       def add_gems_for_testing(use_rswag)
         if use_rswag
@@ -72,13 +69,7 @@ module Features
       end
 
       def update_config_application
-        file = read_project_file(CONFIG_APP_FILE)
-        two_last_ends = file.rindex(RE_TWO_ENDS)
-        raise "Cannot find two last `end`s in `#{CONFIG_APP_FILE}` file" unless two_last_ends
-
-        new_lines = StringUtils.indent(GENERATORS.split("\n"), 2)
-        file.insert(two_last_ends, "#{new_lines.join("\n")}\n")
-        write_project_file(CONFIG_APP_FILE, file)
+        ConfigApplication.new(cli.app_path).append_to_body(GENERATORS.split("\n"))
       end
     end
   end

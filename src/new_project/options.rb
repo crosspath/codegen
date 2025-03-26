@@ -362,7 +362,7 @@ module NewProject
       # @see https://github.com/rails/solid_cache
       # @see https://github.com/rails/solid_queue
       solid: {
-        label: "Add Solid pack - Cable, Cache, Queue (Solid Cable won't install if you disabled " +
+        label: "Add Solid pack - Cable, Cache, Queue (Solid Cable won't install if you disabled " \
           "Action Cable)",
         type: :boolean,
         default: ->(_gopt, _ropt) { false },

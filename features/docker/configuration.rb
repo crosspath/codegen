@@ -54,7 +54,6 @@ module Features
 
       private
 
-      CONFIG_APPLICATION_FILE = "config/application.rb"
       DATABASE_YML = "config/database.yml"
       RUBY_VERSION_FILE = ".ruby-version"
 
@@ -99,8 +98,7 @@ module Features
         ].join(",").freeze,
       }.freeze
 
-      private_constant :CONFIG_APPLICATION_FILE, :DATABASE_YML
-      private_constant :RUBY_VERSION_FILE, :DBMS_IMAGES, :DBMS_PACKAGES
+      private_constant :DATABASE_YML, :RUBY_VERSION_FILE, :DBMS_IMAGES, :DBMS_PACKAGES
       private_constant :REQUIRED_DIRS, :REQUIRED_DIRS_FOR_STORAGE, :ENV_JEMALLOC
 
       def build_args
@@ -149,9 +147,7 @@ module Features
       end
 
       def active_storage?
-        config_application_rb = read_project_file(CONFIG_APPLICATION_FILE).split("\n")
-
-        config_application_rb.any? do |line|
+        ConfigApplication.new(cli.app_path).lines.any? do |line|
           line.start_with?('require "rails/all"', 'require "active_storage/engine"')
         end
       end

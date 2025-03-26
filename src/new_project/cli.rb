@@ -9,22 +9,10 @@ require_relative "../string_utils"
 require_relative "config_file"
 require_relative "configuration"
 require_relative "options"
+require_relative "system_ruby_support"
 
 module NewProject
   class CLI
-    BASE_RUBY_VERSION = RUBY_VERSION.split(".").then { |x| (x[-1] = 0) && x }.join(".").freeze
-    GEM_HOME = Gem.paths.home.freeze
-
-    GEM_PATHS = [
-      GEM_HOME,
-      "#{GEM_HOME}/bundler/gems",
-      "#{GEM_HOME}/cache",
-      *Dir["#{GEM_HOME}/extensions/*/#{BASE_RUBY_VERSION}"],
-      "#{GEM_HOME}/gems",
-      "#{GEM_HOME}/plugins",
-      "#{GEM_HOME}/specifications",
-    ].freeze
-
     def initialize(argv)
       @generator_option_values = {}
 
@@ -52,23 +40,10 @@ module NewProject
 
     # Fix for "system" version of Ruby. It's installed with root permissions, therefore we have to
     # change permissions for gem directories temporarily.
-    def ensure_gem_path_is_writable
+    def ensure_gem_path_is_writable(&)
       return yield unless Env.system_ruby?
 
-      paths = GEM_PATHS.join(" ")
-      rubygems_uses_flock = Gem::Version.new(Gem::VERSION) > Gem::Version.new("3.5.14")
-
-      begin
-        puts "Your Ruby installation requires sudo privileges for installing gems."
-
-        allow_access_to_gem_dirs(paths)
-        create_rails_lock_file if rubygems_uses_flock
-
-        yield
-      ensure
-        remove_rails_lock_file if rubygems_uses_flock
-        deny_access_to_gem_dirs(paths)
-      end
+      SystemRubySupport.change_permissions_for_block(&)
     end
 
     def railties_installed?
@@ -153,18 +128,6 @@ module NewProject
       )
     end
 
-    def allow_access_to_gem_dirs(paths)
-      user = Env.user
-
-      system("sudo chmod 0777 /usr/bin /usr/local/bin")
-      system("sudo chown #{user}:#{user} #{paths}")
-    end
-
-    def deny_access_to_gem_dirs(paths)
-      system("sudo chown root:root #{paths}")
-      system("sudo chmod 0755 /usr/bin /usr/local/bin")
-    end
-
     def add_items_to_load_path(railties_path)
       # Fixes for "(LoadError) cannot load such file".
       # First item has higher priority than the last one.
@@ -178,19 +141,11 @@ module NewProject
     end
 
     def latest_installed_gem_version(gem_name)
-      Dir["#{GEM_HOME}/gems/#{gem_name}-*", sort: true].last
+      Dir["#{SystemRubySupport::GEM_HOME}/gems/#{gem_name}-*", sort: true].last
     end
 
     def load_rails_files(railties_path)
       require "#{railties_path}/lib/rails/command"
-    end
-
-    def create_rails_lock_file
-      system("sudo touch /usr/bin/rails.lock && sudo chmod 0777 /usr/bin/rails.lock")
-    end
-
-    def remove_rails_lock_file
-      system("sudo rm -f /usr/bin/rails.lock")
     end
   end
 end

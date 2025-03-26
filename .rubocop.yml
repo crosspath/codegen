@@ -66,3 +66,4 @@ Style/MutableConstant:
 Style/RequireOrder:
   Exclude:
     - "features/**/files/bin/*"
+    - "src/**/files/bin/*"

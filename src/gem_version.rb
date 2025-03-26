@@ -16,10 +16,14 @@ module GemVersion
       .map { |hash| Gem::Version.new(hash[:number]) }
       .sort
       .reverse
-      .find { |version| requirement.satisfied_by?(version) }
+      .find { |actual_version| requirement.satisfied_by?(actual_version) }
   end
 
   private
+
+  ATTEMPTS = 3
+
+  private_constant :ATTEMPTS
 
   def connection(&)
     Net::HTTP.start("rubygems.org", use_ssl: true, &)
@@ -39,19 +43,16 @@ module GemVersion
   end
 
   def request(http, req, error_message)
-    @counter ||= 0
-    res = http.request(req)
+    ATTEMPTS.times do |counter|
+      res = http.request(req)
+      return res.body if res.code.to_i < 400
 
-    if res.code.to_i >= 400
-      @counter += 1
-      warn "#{error_message} (#{counter}/3)"
-      raise "Request count exceeded" if counter == 3
+      warn "#{error_message} (#{counter + 1}/#{ATTEMPTS})"
 
-      # rubygems.org limits quest count: 15 requests per second (we should wait 0.067 sec).
-      sleep(0.1)
-      request(http, req, error_message)
-    else
-      res.body
+      # rubygems.org limits request count: 15 requests per second (we should wait 0.067 sec).
+      sleep(0.1) if counter < ATTEMPTS - 1
     end
+
+    raise "Request count exceeded"
   end
 end
