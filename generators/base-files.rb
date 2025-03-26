@@ -94,17 +94,3 @@ def base_data_migrations
 
   f('app/middlewares/check_data_migration.rb', 'data-migrations/check_data_migration.rb')
 end
-
-def base_spring(answers)
-  $main.gem_group :development, :test do
-    $main.gem 'spring' if answers[:spring]
-  end
-
-  $main.environment(nil, env: 'test') do
-    'config.cache_classes = false'
-  end
-
-  after_bundle_install do
-    $main.run 'bundle exec spring binstub --all'
-  end
-end
