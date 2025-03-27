@@ -37,7 +37,7 @@ module CrudActions
   # @yield Use block for destroying object
   # @yieldreturn [Boolean]
   def destroy
-    if block_given? ? yield : object.destroy # rubocop:disable Rails/SaveBang False detection
+    if block_given? ? yield : object.destroy # rubocop:disable Rails/SaveBang -- False detection
       return render_object(object)
     end
 

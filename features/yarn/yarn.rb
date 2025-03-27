@@ -25,14 +25,13 @@ module Features
 
     private
 
-    # rubocop:disable Layout/ClassStructure Keep constants in private section to show that they're
-    # not intended to be used outside of this file.
     WARN_CACHE =
       <<~TEXT
         You may be interested in using git submodule for .yarn/cache directory. See more:
         https://github.com/yarnpkg/berry/discussions/4845#discussioncomment-3637094
       TEXT
-    # rubocop:enable Layout/ClassStructure
+
+    private_constant :WARN_CACHE
 
     def enable_yarn_in_project(use_plug_and_play)
       add_yarn_to_project
